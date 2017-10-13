@@ -39,6 +39,12 @@ ${GLIDELOCK}: ${SRCDIR} ${GLIDEYAML}
 .PHONY: init
 init: ${SRCDIR} ${GLIDEYAML}
 
+.PHONY: dev-init
+dev-init: init
+	echo 'make test || exit $?' > .git/hooks/pre-push
+	chmod +x .git/hooks/pre-push
+
+
 .PHONY: update
 update: ${SRCDIR}
 	${GLIDE} update
