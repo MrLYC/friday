@@ -1,4 +1,5 @@
 package: .
 ignore:
-  - friday
-import: []
+- friday
+import:
+- package: gopkg.in/yaml.v2
