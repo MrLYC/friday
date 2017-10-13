@@ -7,7 +7,6 @@ import (
 
 func main() {
 	factory := command.Factory{
-		HelpFlag: "h",
 		Commands: map[string]command.ICommand{
 			"version": &config.VersionCommand{},
 		},

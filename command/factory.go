@@ -43,7 +43,12 @@ func (f *Factory) Run() error {
 
 // Init : init factory
 func (f *Factory) Init() {
-	f.Name = "usage"
+	if f.Name == "" {
+		f.Name = "usage"
+	}
+	if f.HelpFlag == "" {
+		f.HelpFlag = "h"
+	}
 	flag.BoolVar(&f.Help, f.HelpFlag, false, f.GetDescription())
 }
 

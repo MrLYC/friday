@@ -45,3 +45,7 @@ update: ${SRCDIR}
 
 .PHONY: install
 install: ${GLIDELOCK}
+
+.PHONY: test
+test:
+	find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -exec dirname {} \; | uniq | xargs go test
