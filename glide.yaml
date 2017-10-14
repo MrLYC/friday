@@ -1,5 +1,0 @@
-package: .
-ignore:
-- friday
-import:
-- package: gopkg.in/yaml.v2

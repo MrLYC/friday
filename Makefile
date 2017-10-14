@@ -7,10 +7,6 @@ TARGET := bin/friday
 GOENV := GOPATH=${ROOTDIR}:${GOPATH} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
-GLIDE := ${GOENV} glide
-
-GLIDEYAML := ${ROOTDIR}/glide.yaml
-GLIDELOCK := ${ROOTDIR}/glide.lock
 
 LDFLAGS := -X ${APPDIR}/config.Version=${VERSION}
 DEBUGLDFLAGS := ${LDFLAGS} -X ${APPDIR}/config.Mode=debug
@@ -29,28 +25,19 @@ ${SRCDIR}:
 	mkdir -p src
 	ln -s ${ROOTDIR} src/
 
-${GLIDEYAML}:
-	${GLIDE} init
-
-${GLIDELOCK}: ${SRCDIR} ${GLIDEYAML}
-	${GLIDE} install
-	touch ${GLIDELOCK}
-
 .PHONY: init
-init: ${SRCDIR} ${GLIDEYAML}
+init: ${SRCDIR}
 
 .PHONY: dev-init
 dev-init: init
 	echo 'make test || exit $?' > .git/hooks/pre-push
 	chmod +x .git/hooks/pre-push
 
-
 .PHONY: update
 update: ${SRCDIR}
-	${GLIDE} update
 
 .PHONY: install
-install: ${GLIDELOCK}
+install:
 
 .PHONY: test
 test:
