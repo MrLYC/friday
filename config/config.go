@@ -16,6 +16,7 @@ type IConfiguration interface {
 type ConfigurationType struct {
 	Version   string
 	EventMETA EventMETA `yaml:"event_meta"`
+	Logging   Logging   `yaml:"logging"`
 }
 
 // Init : init ConfigurationType
@@ -23,6 +24,7 @@ func (c *ConfigurationType) Init() {
 	c.Version = ConfVersion
 
 	c.EventMETA.Init()
+	c.Logging.Init()
 }
 
 // ReadFrom : read configuration from path

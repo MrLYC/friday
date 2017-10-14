@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"friday/command"
 	"friday/config"
+	"friday/logging"
 	"math/rand"
 	"os"
 	"time"
@@ -33,6 +34,6 @@ func main() {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
-
+	logging.Init()
 	command.Run()
 }

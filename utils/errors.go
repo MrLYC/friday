@@ -41,6 +41,14 @@ func (f *RunTimeStackFrame) Init(index int, file string, line int, addr uintptr)
 	f.Name = name
 }
 
+// InitWithSkip : init with skip
+func (f *RunTimeStackFrame) InitWithSkip(skip int) {
+	addr, file, line, ok := runtime.Caller(skip)
+	if ok {
+		f.Init(-skip, file, line, addr)
+	}
+}
+
 // RunTimeStack :
 type RunTimeStack struct {
 	Frames *list.List
