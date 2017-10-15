@@ -22,7 +22,7 @@ func (s *TestSenderType) Start() error {
 	return s.Error
 }
 
-func TestMakeChannels(t *testing.T) {
+func TestSentryMakeChannels(t *testing.T) {
 	s := sentry.Sentry{}
 	s.Init([]string{"test"})
 	_, ok := s.Channels["test"]
@@ -31,7 +31,7 @@ func TestMakeChannels(t *testing.T) {
 	}
 }
 
-func TestStart(t *testing.T) {
+func TestSentryStart(t *testing.T) {
 	s := sentry.Sentry{}
 	sender := &TestSenderType{}
 	s.Init([]string{})
@@ -45,7 +45,7 @@ func TestStart(t *testing.T) {
 	}
 }
 
-func TestStartError(t *testing.T) {
+func TestSentryStartError(t *testing.T) {
 	serr := fmt.Errorf("test")
 	s := sentry.Sentry{}
 	sender := &TestSenderType{
@@ -64,8 +64,9 @@ func TestTestSenderType(t *testing.T) {
 		sender  = "sender"
 		name    = "name"
 		channel = "channel"
+		s       sentry.ISender
 	)
-	s := TestSenderType{
+	s = &TestSenderType{
 		Name: sender,
 	}
 	s.Init(nil)
