@@ -6,6 +6,7 @@ import (
 	"friday/command"
 	"friday/config"
 	"friday/logging"
+	"friday/sentry"
 	"math/rand"
 	"os"
 	"time"
@@ -39,10 +40,10 @@ func postParseCommand() {
 
 func preCommandRun(commandInfo *command.CommandInfo) {
 	logging.Init()
+	sentry.Init()
 }
 
 func postCommandRun(commandInfo *command.CommandInfo) {
-
 }
 
 func main() {

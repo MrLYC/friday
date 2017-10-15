@@ -45,3 +45,7 @@ func (c *ConfigurationType) ReadFrom(path string) error {
 
 // Configuration : global configuration
 var Configuration = ConfigurationType{}
+
+func init() {
+	Configuration.Init()
+}
