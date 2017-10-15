@@ -4,7 +4,7 @@ APPDIR := friday
 SRCDIR := src/friday
 TARGET := bin/friday
 
-GOENV := GOPATH=${ROOTDIR}:${GOPATH} GO15VENDOREXPERIMENT=1
+GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
 
@@ -39,7 +39,7 @@ update: ${SRCDIR}
 
 .PHONY: test
 test:
-	${GOENV} find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -exec dirname {} \; | uniq | xargs go test
+	find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -exec dirname {} \; | uniq | xargs env ${GOENV} go test
 
 .PHONY: lint
 lint:
