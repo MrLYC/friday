@@ -17,6 +17,7 @@ type ConfigurationType struct {
 	Version   string
 	EventMETA EventMETA `yaml:"event_meta"`
 	Logging   Logging   `yaml:"logging"`
+	Sentry    Sentry    `yaml:"sentry"`
 }
 
 // Init : init ConfigurationType
@@ -25,6 +26,7 @@ func (c *ConfigurationType) Init() {
 
 	c.EventMETA.Init()
 	c.Logging.Init()
+	c.Sentry.Init()
 }
 
 // ReadFrom : read configuration from path
