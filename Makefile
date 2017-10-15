@@ -35,8 +35,12 @@ dev-init: init
 
 .PHONY: update
 update: ${SRCDIR}
-	cd ${SRCDIR} && godep save ${APPDIR}
+	cd ${SRCDIR} && ${GOENV} godep save ${APPDIR}
 
 .PHONY: test
 test:
-	find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -exec dirname {} \; | uniq | xargs go test
+	${GOENV} find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -exec dirname {} \; | uniq | xargs go test
+
+.PHONY: lint
+lint:
+	${GOENV} find . -type f -name "*.go" -not -path "./vendor/*" -not -path "./src/*" -exec golint {} \;
