@@ -35,9 +35,7 @@ dev-init: init
 
 .PHONY: update
 update: ${SRCDIR}
-
-.PHONY: install
-install:
+	cd ${SRCDIR} && godep save ${APPDIR}
 
 .PHONY: test
 test:
