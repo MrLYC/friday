@@ -8,7 +8,9 @@ import (
 // Event : type for event
 type Event struct {
 	ID        string
+	Channel   string
 	Name      string
+	Sender    string
 	Type      string
 	Payload   string
 	RelatedTo string
@@ -26,7 +28,9 @@ func (e *Event) RefreshID() {
 func (e *Event) Copy() *Event {
 	return &Event{
 		ID:        e.ID,
+		Channel:   e.Channel,
 		Name:      e.Name,
+		Sender:    e.Sender,
 		Type:      e.Type,
 		Payload:   e.Payload,
 		RelatedTo: e.RelatedTo,
