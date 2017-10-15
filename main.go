@@ -11,11 +11,7 @@ import (
 	"time"
 )
 
-func main() {
-	var (
-		configPath string
-		err        error
-	)
+func parseCommand() *command.CommandInfo {
 	factory := command.Factory{
 		Commands: map[string]command.ICommand{
 			"version":  &config.VersionCommand{},
@@ -23,17 +19,45 @@ func main() {
 		},
 	}
 	factory.Init()
+	return factory.ParseCommand()
+}
 
-	rand.Seed(time.Now().Unix())
-
-	flag.StringVar(&configPath, "c", "friday.yaml", "Configuration file")
-	command := factory.ParseCommand()
-
+func initConfiguration(configPath string) {
 	config.Configuration.Init()
-	err = config.Configuration.ReadFrom(configPath)
+	err := config.Configuration.ReadFrom(configPath)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
+}
+
+func preParseCommand() {
+	rand.Seed(time.Now().Unix())
+}
+
+func postParseCommand() {
+}
+
+func preCommandRun(commandInfo *command.CommandInfo) {
 	logging.Init()
-	command.Run()
+}
+
+func postCommandRun(commandInfo *command.CommandInfo) {
+
+}
+
+func main() {
+	var (
+		configPath string
+	)
+	flag.StringVar(&configPath, "c", "friday.yaml", "Configuration file")
+
+	preParseCommand()
+	commandInfo := parseCommand()
+	postParseCommand()
+
+	initConfiguration(configPath)
+
+	preCommandRun(commandInfo)
+	commandInfo.Command.Run()
+	postCommandRun(commandInfo)
 }

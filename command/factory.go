@@ -6,6 +6,12 @@ import (
 	"os"
 )
 
+// CommandInfo : info form factory parse
+type CommandInfo struct {
+	Command     ICommand
+	CommandName string
+}
+
 // Factory : factory to get command
 type Factory struct {
 	Name        string
@@ -53,7 +59,7 @@ func (f *Factory) Init() {
 }
 
 // ParseCommand : parse from command line arguments and get command
-func (f *Factory) ParseCommand() ICommand {
+func (f *Factory) ParseCommand() *CommandInfo {
 	var (
 		argv        = len(os.Args)
 		commandArgs []string
@@ -82,5 +88,8 @@ func (f *Factory) ParseCommand() ICommand {
 	if f.Help {
 		f.Run()
 	}
-	return command
+	return &CommandInfo{
+		Command:     command,
+		CommandName: f.CommandName,
+	}
 }
