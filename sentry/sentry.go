@@ -39,7 +39,7 @@ type IReceiver interface {
 	Init(*Sentry)
 	GetName() string
 	Start() error
-	Handle(*Event) error
+	Handle(*Event)
 }
 
 // Sentry :
