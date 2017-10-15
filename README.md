@@ -1,4 +1,5 @@
 # friday
+[![Build Status](https://travis-ci.org/MrLYC/friday.svg?branch=master)](https://travis-ci.org/MrLYC/friday)
 
 A Golang project.
 
