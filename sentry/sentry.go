@@ -5,14 +5,6 @@ import (
 	"friday/config"
 )
 
-// ISender : sender interface
-type ISender interface {
-	Init(*Sentry)
-	GetName() string
-	NewEvent(name string, channel string) *Event
-	Start() error
-}
-
 // BaseSender : base sender type
 type BaseSender struct {
 	Sentry        *Sentry
@@ -40,6 +32,14 @@ type IReceiver interface {
 	GetName() string
 	Start() error
 	Handle(*Event)
+}
+
+// ISender : sender interface
+type ISender interface {
+	Init(*Sentry)
+	GetName() string
+	NewEvent(name string, channel string) *Event
+	Start() error
 }
 
 // Sentry :

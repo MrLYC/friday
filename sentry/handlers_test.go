@@ -46,8 +46,10 @@ func TestHandlerHandle(t *testing.T) {
 		}
 	)
 	ihandler.Init(nil)
+	ihandler.Ready()
 	ihandler.Handle(event1)
 	event2 := <-handler.Channel
+	ihandler.Terminate()
 	if event1.ID != event2.Name || event1.Name != event2.ID {
 		t.Errorf("handle error")
 	}

@@ -4,15 +4,15 @@ import "friday/config"
 
 // ITrigger : trigger interface
 type ITrigger interface {
+	IController
 	Init(*Sentry)
-	GetName() string
 	GetChannel() chan *Event
 	Run()
-	Start()
 }
 
 // BaseTrigger :
 type BaseTrigger struct {
+	BaseController
 	Channel       chan *Event
 	Name          string
 	Sentry        *Sentry
@@ -36,11 +36,6 @@ func (t *BaseTrigger) GetName() string {
 // GetChannel :
 func (t *BaseTrigger) GetChannel() chan *Event {
 	return t.Channel
-}
-
-// Start :
-func (t *BaseTrigger) Start() {
-
 }
 
 // NewEvent :

@@ -56,13 +56,19 @@ func TestBaseTriggerNewEvent(t *testing.T) {
 }
 
 func TestBaseTriggerRun(t *testing.T) {
-	trigger := TestingTrigger{}
-	trigger.Init(nil)
+	var (
+		trigger                  = TestingTrigger{}
+		itrigger sentry.ITrigger = &trigger
+	)
+
+	itrigger.Init(nil)
+	itrigger.Ready()
 	channel := trigger.GetChannel()
 	event1 := trigger.NewEvent("mrlyc")
 	channel <- event1
-	trigger.Run()
+	itrigger.Run()
 	event2 := <-channel
+	itrigger.Terminate()
 	if event1.ID != event2.Name || event1.Name != event2.ID {
 		t.Errorf("trigger run error")
 	}

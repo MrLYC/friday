@@ -2,14 +2,14 @@ package sentry
 
 // IHandler : trigger interface
 type IHandler interface {
+	IController
 	Init(*Sentry)
-	GetName() string
 	Handle(Event)
-	Start()
 }
 
 // BaseHandler :
 type BaseHandler struct {
+	BaseController
 	Sentry *Sentry
 	Name   string
 }
@@ -22,9 +22,4 @@ func (h *BaseHandler) Init(sentry *Sentry) {
 // GetName :
 func (h *BaseHandler) GetName() string {
 	return h.Name
-}
-
-// Start :
-func (h *BaseHandler) Start() {
-
 }
