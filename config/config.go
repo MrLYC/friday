@@ -14,17 +14,17 @@ type IConfiguration interface {
 
 // ConfigurationType : configuration type
 type ConfigurationType struct {
-	Version   string
-	EventMETA EventMETA `yaml:"event_meta"`
-	Logging   Logging   `yaml:"logging"`
-	Sentry    Sentry    `yaml:"sentry"`
+	Version string
+	Event   Event   `yaml:"event"`
+	Logging Logging `yaml:"logging"`
+	Sentry  Sentry  `yaml:"sentry"`
 }
 
 // Init : init ConfigurationType
 func (c *ConfigurationType) Init() {
 	c.Version = ConfVersion
 
-	c.EventMETA.Init()
+	c.Event.Init()
 	c.Logging.Init()
 	c.Sentry.Init()
 }

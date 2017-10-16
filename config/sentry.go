@@ -7,5 +7,5 @@ type Sentry struct {
 
 // Init : init Sentry
 func (e *Sentry) Init() {
-	e.ChannelBuffer = 3
+	e.ChannelBuffer = 10
 }

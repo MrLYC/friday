@@ -1,13 +1,13 @@
 package config
 
-// EventMETA : event meta configuration
-type EventMETA struct {
+// Event : event meta configuration
+type Event struct {
 	IDLength  uint   `yaml:"id_length"`
 	EventType string `yaml:"event_type"`
 }
 
-// Init : init EventMETA
-func (e *EventMETA) Init() {
+// Init : init Event
+func (e *Event) Init() {
 	e.IDLength = 32
 	e.EventType = "json"
 }

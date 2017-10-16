@@ -77,9 +77,6 @@ func TestTestSenderType(t *testing.T) {
 
 	event := s.NewEvent(name, channel)
 
-	if event.Sender != "" {
-		t.Errorf("event sender error")
-	}
 	if event.Name != name {
 		t.Errorf("event name error")
 	}

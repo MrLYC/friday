@@ -10,7 +10,6 @@ type Event struct {
 	ID        string
 	Channel   string
 	Name      string
-	Sender    string
 	Type      string
 	Payload   string
 	RelatedTo string
@@ -18,7 +17,7 @@ type Event struct {
 
 // RefreshID : generate a new event id
 func (e *Event) RefreshID() {
-	configuration := config.Configuration.EventMETA
+	configuration := config.Configuration.Event
 	idBuf := make([]byte, configuration.IDLength)
 	rand.Read(idBuf)
 	e.ID = string(idBuf)
@@ -30,7 +29,6 @@ func (e *Event) Copy() *Event {
 		ID:        e.ID,
 		Channel:   e.Channel,
 		Name:      e.Name,
-		Sender:    e.Sender,
 		Type:      e.Type,
 		Payload:   e.Payload,
 		RelatedTo: e.RelatedTo,

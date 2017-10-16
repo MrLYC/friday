@@ -6,7 +6,7 @@ import (
 
 // Init : init sentry
 func Init() {
-	conf := config.Configuration.EventMETA
+	conf := config.Configuration.Event
 	EventTemplate = Event{
 		Type: conf.EventType,
 	}
