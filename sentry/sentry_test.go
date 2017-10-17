@@ -1,86 +1,21 @@
 package sentry_test
 
 import (
-	"fmt"
 	"friday/sentry"
 	"testing"
 )
 
-type TestSenderType struct {
-	sentry.BaseSender
-	Name   string
-	Number int
-	Error  error
-}
-
-func (s *TestSenderType) GetName() string {
-	return s.Name
-}
-
-func (s *TestSenderType) Start() error {
-	s.Number += 1
-	return s.Error
-}
-
-func TestSentryMakeChannels(t *testing.T) {
-	s := sentry.Sentry{}
-	s.Init([]string{"test"})
-	_, ok := s.Channels["test"]
-	if !ok {
-		t.Errorf("channel init failded")
-	}
-}
-
-func TestSentryStart(t *testing.T) {
-	s := sentry.Sentry{}
-	sender := &TestSenderType{}
-	s.Init([]string{})
-	s.AddSender(sender)
-	err := s.Start()
-	if err != nil {
-		t.Errorf("error: %v", err)
-	}
-	if sender.Number != 1 {
-		t.Errorf("sender start error")
-	}
-}
-
-func TestSentryStartError(t *testing.T) {
-	serr := fmt.Errorf("test")
-	s := sentry.Sentry{}
-	sender := &TestSenderType{
-		Error: serr,
-	}
-	s.Init([]string{})
-	s.AddSender(sender)
-	err := s.Start()
-	if err != serr {
-		t.Errorf("error: %v", err)
-	}
-}
-
-func TestTestSenderType(t *testing.T) {
+func TestSentryInit(t *testing.T) {
 	var (
-		sender  = "sender"
-		name    = "name"
-		channel = "channel"
-		s       sentry.ISender
+		s       = &sentry.Sentry{}
+		trigger = &TestingTrigger{}
+		handler = &TestingHandler{}
 	)
-	s = &TestSenderType{
-		Name: sender,
+	s.Init([]sentry.ITrigger{trigger}, []sentry.IHandler{handler})
+	if trigger.Sentry != s || s.Triggers[trigger.GetName()] != trigger {
+		t.Errorf("Trigger init error")
 	}
-	s.Init(nil)
-
-	if sender != s.GetName() {
-		t.Errorf("sender name error")
-	}
-
-	event := s.NewEvent(name, channel)
-
-	if event.Name != name {
-		t.Errorf("event name error")
-	}
-	if event.Channel != channel {
-		t.Errorf("event channel error")
+	if handler.Sentry != s || s.Handlers[handler.GetName()] != handler {
+		t.Errorf("Handler init error")
 	}
 }
