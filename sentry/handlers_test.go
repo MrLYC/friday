@@ -8,6 +8,7 @@ import (
 type TestingHandler struct {
 	sentry.BaseHandler
 	Channel chan sentry.Event
+	Counter int
 }
 
 // Init :
@@ -17,7 +18,8 @@ func (h *TestingHandler) Init(s *sentry.Sentry) {
 	h.BaseHandler.Init(s)
 }
 
-func (h *TestingHandler) Handle(event sentry.Event) {
+func (h *TestingHandler) Handle(event *sentry.Event) {
+	h.Counter += 1
 	ev := event.Copy()
 	ev.ID = event.Name
 	ev.Name = event.ID
@@ -40,7 +42,7 @@ func TestHandlerHandle(t *testing.T) {
 	var (
 		handler                  = TestingHandler{}
 		ihandler sentry.IHandler = &handler
-		event1                   = sentry.Event{
+		event1                   = &sentry.Event{
 			ID:   "1",
 			Name: "2",
 		}

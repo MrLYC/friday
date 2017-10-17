@@ -7,19 +7,23 @@ import (
 
 type TestingTrigger struct {
 	sentry.BaseTrigger
+	Channel2 chan *sentry.Event
+	Counter  int
 }
 
-func (t *TestingTrigger) Init(sentry *sentry.Sentry) {
-	t.BaseTrigger.Name = "testing"
-	t.BaseTrigger.Init(sentry)
+func (t *TestingTrigger) Init(s *sentry.Sentry) {
+	t.Name = "testing"
+	t.Channel2 = make(chan *sentry.Event, 10)
+	t.BaseTrigger.Init(s)
 }
 
 func (t *TestingTrigger) Run() {
-	event1 := <-t.BaseTrigger.Channel
+	event1 := <-t.Channel2
+	t.Counter += 1
 	event2 := event1.Copy()
 	event2.ID = event1.Name
 	event2.Name = event1.ID
-	t.BaseTrigger.Channel <- event2
+	t.Channel <- event2
 }
 
 func TestBaseTriggerInit(t *testing.T) {
@@ -33,7 +37,7 @@ func TestBaseTriggerInit(t *testing.T) {
 		t.Errorf("name error")
 	}
 
-	if itrigger.GetChannel() != trigger.BaseTrigger.Channel {
+	if itrigger.GetChannel() != trigger.Channel {
 		t.Errorf("channel error")
 	}
 }
@@ -65,7 +69,7 @@ func TestBaseTriggerRun(t *testing.T) {
 	itrigger.Ready()
 	channel := trigger.GetChannel()
 	event1 := trigger.NewEvent("mrlyc")
-	channel <- event1
+	trigger.Channel2 <- event1
 	itrigger.Run()
 	event2 := <-channel
 	itrigger.Terminate()

@@ -15,7 +15,9 @@ func TestSentryInit(t *testing.T) {
 	if trigger.Sentry != s || s.Triggers[trigger.GetName()] != trigger {
 		t.Errorf("Trigger init error")
 	}
-	if handler.Sentry != s || s.Handlers[handler.GetName()] != handler {
+	handlers := s.Handlers[handler.GetName()]
+	hdr := handlers.Front().Value.(*TestingHandler)
+	if handler.Sentry != s || hdr != handler {
 		t.Errorf("Handler init error")
 	}
 }
@@ -61,5 +63,33 @@ func TestSentryFlow(t *testing.T) {
 	s.Kill()
 	if s.Status != sentry.StatusControllerKilled {
 		t.Errorf("sentry error")
+	}
+}
+
+func TestSentryRun(t *testing.T) {
+	var (
+		s       = &sentry.Sentry{}
+		trigger = &TestingTrigger{}
+		handler = &TestingHandler{}
+	)
+	s.Init([]sentry.ITrigger{trigger}, []sentry.IHandler{handler})
+	err := s.Run()
+	if err == nil {
+		t.Errorf("run error")
+	}
+	s.Ready()
+	name := "test"
+	event1 := trigger.NewEvent(name)
+	trigger.Channel2 <- event1
+	go s.Run()
+	event2 := <-handler.Channel
+	if event1.Name != event2.Name || event1.ID != event2.ID {
+		t.Errorf("sentry run error")
+	}
+	if trigger.Counter != 1 {
+		t.Errorf("trigger run error")
+	}
+	if handler.Counter != 1 {
+		t.Errorf("handler run error")
 	}
 }

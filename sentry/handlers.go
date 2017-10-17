@@ -4,7 +4,7 @@ package sentry
 type IHandler interface {
 	IController
 	Init(*Sentry)
-	Handle(Event)
+	Handle(*Event)
 }
 
 // BaseHandler :
