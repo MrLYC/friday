@@ -66,3 +66,7 @@ func Errorf(format string, args ...interface{}) {
 func Fatalf(format string, args ...interface{}) {
 	GlobalLogger.WithFields(GetErrorLogFields(skipStackCount)).Fatalf(format, args...)
 }
+
+func init() {
+	Init()
+}

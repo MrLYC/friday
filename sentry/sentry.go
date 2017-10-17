@@ -5,11 +5,13 @@ import (
 	"friday/logging"
 	"friday/utils"
 	"reflect"
+	"time"
 )
 
 // Sentry :
 type Sentry struct {
 	BaseController
+	RunAt    time.Time
 	Triggers map[string]ITrigger
 	Handlers map[string]*list.List
 }
@@ -89,6 +91,8 @@ func (s *Sentry) Run() error {
 		return ErrNotReady
 	}
 	s.Status = StatusControllerRuning
+	s.RunAt = time.Now()
+	logging.Infof("Sentry run at: %s", s.RunAt.String())
 
 	triggers := s.Triggers
 	cases := make([]reflect.SelectCase, len(s.Triggers))
@@ -116,7 +120,7 @@ func (s *Sentry) Run() error {
 					break
 				}
 			}
-			logging.Warningf("channel[%v] error", name)
+			logging.Warningf("Channel[%v] error", name)
 			continue
 		}
 		event := value.Interface().(*Event)
@@ -128,7 +132,7 @@ func (s *Sentry) Run() error {
 			handler := i.Value.(IHandler)
 			go func(ev *Event) {
 				utils.ErrorRecoverCall(func(err *utils.TraceableError) {
-					logging.Errorf("handler[%v] error: %v", handler.GetName(), err)
+					logging.Errorf("Handler[%v] error: %v", handler.GetName(), err)
 				})
 				handler.Handle(ev)
 			}(event.Copy())
