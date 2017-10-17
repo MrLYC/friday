@@ -9,6 +9,7 @@ type TestingHandler struct {
 	sentry.BaseHandler
 	Channel chan sentry.Event
 	Counter int
+	Error   error
 }
 
 // Init :
@@ -24,6 +25,9 @@ func (h *TestingHandler) Handle(event *sentry.Event) {
 	ev.ID = event.Name
 	ev.Name = event.ID
 	h.Channel <- *ev
+	if h.Error != nil {
+		panic(h.Error)
+	}
 }
 
 func TestHandlerInit(t *testing.T) {

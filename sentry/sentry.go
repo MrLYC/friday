@@ -131,8 +131,8 @@ func (s *Sentry) Run() error {
 		for i := handlers.Front(); i != nil; i = i.Next() {
 			handler := i.Value.(IHandler)
 			go func(ev *Event) {
-				utils.ErrorRecoverCall(func(err *utils.TraceableError) {
-					logging.Errorf("Handler[%v] error: %v", handler.GetName(), err)
+				defer utils.ErrorRecoverCall(func(err *utils.TraceableError) {
+					logging.Errorf("Handler[%v] error: %s", handler.GetName(), err)
 				})
 				handler.Handle(ev)
 			}(event.Copy())
