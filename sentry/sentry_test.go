@@ -80,6 +80,7 @@ func TestSentryRun(t *testing.T) {
 	s.Ready()
 	name := "test"
 	event1 := trigger.NewEvent(name)
+	event1.Payload = "123"
 	trigger.Channel2 <- event1
 	go s.Run()
 	event2 := <-handler.Channel
@@ -91,5 +92,8 @@ func TestSentryRun(t *testing.T) {
 	}
 	if handler.Counter != 1 {
 		t.Errorf("handler run error")
+	}
+	if event1.Channel != event2.Channel || event1.Payload != event2.Payload {
+		t.Errorf("event error")
 	}
 }
