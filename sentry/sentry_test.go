@@ -108,8 +108,8 @@ func TestSentryRun(t *testing.T) {
 	if trigger.Counter != 1 {
 		t.Errorf("trigger run error")
 	}
-	if handler1.Counter != 1 {
-		t.Errorf("handler1 run error")
+	if handler2.Counter != 1 {
+		t.Errorf("handler2 run error")
 	}
 	if event1.Channel != event3.Channel || event1.Payload != event3.Payload {
 		t.Errorf("event error")
