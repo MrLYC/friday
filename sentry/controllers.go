@@ -13,12 +13,12 @@ type ControllerStatus int
 
 // Controller status constant
 const (
-	ControllerInitStatus        ControllerStatus = iota // 0
-	ControllerReadyStatus       ControllerStatus = iota
-	ControllerRuningStatus      ControllerStatus = iota
-	ControllerTerminatingStatus ControllerStatus = iota
-	ControllerTerminatedStatus  ControllerStatus = iota
-	ControllerKilledStatus      ControllerStatus = iota
+	StatusControllerInit        ControllerStatus = iota // 0
+	StatusControllerReady       ControllerStatus = iota
+	StatusControllerRuning      ControllerStatus = iota
+	StatusControllerTerminating ControllerStatus = iota
+	StatusControllerTerminated  ControllerStatus = iota
+	StatusControllerKilled      ControllerStatus = iota
 )
 
 // BaseController :
@@ -28,15 +28,15 @@ type BaseController struct {
 
 // Ready :
 func (c *BaseController) Ready() {
-	c.Status = ControllerReadyStatus
+	c.Status = StatusControllerReady
 }
 
 // Terminate :
 func (c *BaseController) Terminate() {
-	c.Status = ControllerTerminatedStatus
+	c.Status = StatusControllerTerminated
 }
 
 // Kill :
 func (c *BaseController) Kill() {
-	c.Status = ControllerTerminatedStatus
+	c.Status = StatusControllerTerminated
 }

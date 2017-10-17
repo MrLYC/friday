@@ -21,7 +21,7 @@ func TestTestingControllerInit(t *testing.T) {
 	if icontroller.GetName() != "test" {
 		t.Errorf("name error")
 	}
-	if controller.Status != sentry.ControllerInitStatus {
+	if controller.Status != sentry.StatusControllerInit {
 		t.Errorf("init status error")
 	}
 }
@@ -31,22 +31,22 @@ func TestTestingControllerFlow(t *testing.T) {
 		controller                     = TestingController{}
 		icontroller sentry.IController = &controller
 	)
-	if controller.Status != sentry.ControllerInitStatus {
+	if controller.Status != sentry.StatusControllerInit {
 		t.Errorf("init status error")
 	}
 
 	icontroller.Ready()
-	if controller.Status != sentry.ControllerReadyStatus {
+	if controller.Status != sentry.StatusControllerReady {
 		t.Errorf("ready status error")
 	}
 
 	icontroller.Terminate()
-	if controller.Status != sentry.ControllerTerminatedStatus {
+	if controller.Status != sentry.StatusControllerTerminated {
 		t.Errorf("terminate status error")
 	}
 
 	icontroller.Kill()
-	if controller.Status != sentry.ControllerTerminatedStatus {
+	if controller.Status != sentry.StatusControllerTerminated {
 		t.Errorf("kill status error")
 	}
 }
