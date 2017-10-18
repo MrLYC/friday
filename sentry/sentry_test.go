@@ -1,7 +1,6 @@
 package sentry_test
 
 import (
-	"errors"
 	"friday/sentry"
 	"testing"
 )
@@ -11,15 +10,35 @@ func TestSentryInit(t *testing.T) {
 		s       = &sentry.Sentry{}
 		trigger = &TestingTrigger{}
 		handler = &TestingHandler{}
+		ok      bool
 	)
 	s.Init([]sentry.ITrigger{trigger}, []sentry.IHandler{handler})
-	if trigger.Sentry != s || s.Triggers[trigger.GetName()] != trigger {
+	if trigger.Sentry != s {
 		t.Errorf("Trigger init error")
 	}
-	handlers := s.Handlers[handler.GetName()]
-	hdr := handlers.Front().Value.(*TestingHandler)
-	if handler.Sentry != s || hdr != handler {
+	triggers := s.Triggers[trigger.GetName()]
+	ok = false
+	for _, tgr := range triggers {
+		if tgr == trigger {
+			ok = true
+		}
+	}
+	if !ok {
+		t.Errorf("trigger error")
+	}
+
+	if handler.Sentry != s {
 		t.Errorf("Handler init error")
+	}
+	handlers := s.Handlers[handler.GetName()]
+	ok = false
+	for _, hdr := range handlers {
+		if hdr == handler {
+			ok = true
+		}
+	}
+	if !ok {
+		t.Errorf("handler error")
 	}
 }
 
@@ -73,7 +92,7 @@ func TestSentryRun(t *testing.T) {
 		trigger  = &TestingTrigger{}
 		handler1 = &TestingHandler{}
 		handler2 = &TestingHandler{
-			Error: errors.New("test"),
+			WillPanic: true,
 		}
 	)
 	s.Init([]sentry.ITrigger{trigger}, []sentry.IHandler{handler1, handler2})
@@ -86,7 +105,12 @@ func TestSentryRun(t *testing.T) {
 	event1 := trigger.NewEvent(name)
 	event1.Payload = "123"
 	trigger.Channel2 <- event1
-	go s.Run()
+	go func() {
+		err := s.Run()
+		if err != nil {
+			panic(err)
+		}
+	}()
 	event2 := <-handler1.Channel
 	if event1.Name != event2.Name || event1.ID != event2.ID {
 		t.Errorf("sentry run error")

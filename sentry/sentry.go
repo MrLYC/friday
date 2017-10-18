@@ -1,7 +1,7 @@
 package sentry
 
 import (
-	"container/list"
+	"friday/config"
 	"friday/logging"
 	"friday/utils"
 	"reflect"
@@ -12,8 +12,9 @@ import (
 type Sentry struct {
 	BaseController
 	RunAt    time.Time
-	Triggers map[string]ITrigger
-	Handlers map[string]*list.List
+	Channels map[string]chan *Event
+	Triggers map[string][]ITrigger
+	Handlers map[string][]IHandler
 }
 
 // GetName :
@@ -23,63 +24,87 @@ func (s *Sentry) GetName() string {
 
 // Init :
 func (s *Sentry) Init(triggers []ITrigger, handlers []IHandler) {
-	s.Triggers = make(map[string]ITrigger, len(triggers))
+	conf := config.Configuration.Sentry
+	s.Channels = make(map[string]chan *Event)
+	s.Triggers = make(map[string][]ITrigger)
 	for _, trigger := range triggers {
 		trigger.Init(s)
-		s.Triggers[trigger.GetName()] = trigger
+		name := trigger.GetName()
+
+		channel, ok := s.Channels[name]
+		if !ok {
+			channel = make(chan *Event, conf.ChannelBuffer)
+			s.Channels[name] = channel
+		}
+		trigger.SetChannel(channel)
+
+		triggers, ok := s.Triggers[name]
+		if !ok {
+			triggers = make([]ITrigger, 0, 1)
+		}
+		s.Triggers[name] = append(triggers, trigger)
 	}
-	s.Handlers = make(map[string]*list.List, len(handlers))
+
+	s.Handlers = make(map[string][]IHandler)
 	for _, handler := range handlers {
 		handler.Init(s)
 		name := handler.GetName()
-		handlerList, ok := s.Handlers[name]
+		handlers, ok := s.Handlers[name]
 		if !ok {
-			handlerList = list.New()
-			s.Handlers[name] = handlerList
+			handlers = make([]IHandler, 0, 1)
 		}
-		handlerList.PushBack(handler)
+		s.Handlers[name] = append(handlers, handler)
+	}
+}
+
+// EachTrigger :
+func (s *Sentry) EachTrigger(f func(ITrigger)) {
+	for _, triggers := range s.Triggers {
+		for _, trigger := range triggers {
+			f(trigger)
+		}
+	}
+}
+
+// EachHandler :
+func (s *Sentry) EachHandler(f func(IHandler)) {
+	for _, handlers := range s.Handlers {
+		for _, handler := range handlers {
+			f(handler)
+		}
 	}
 }
 
 // Ready :
 func (s *Sentry) Ready() {
-	for _, trigger := range s.Triggers {
+	s.EachTrigger(func(trigger ITrigger) {
 		trigger.Ready()
-	}
-	for _, handlers := range s.Handlers {
-		for i := handlers.Front(); i != nil; i = i.Next() {
-			handler := i.Value.(IHandler)
-			handler.Ready()
-		}
-	}
+	})
+	s.EachHandler(func(handler IHandler) {
+		handler.Ready()
+	})
 	s.BaseController.Ready()
 }
 
 // Terminate :
 func (s *Sentry) Terminate() {
-	for _, trigger := range s.Triggers {
+	s.EachTrigger(func(trigger ITrigger) {
 		trigger.Terminate()
-	}
-	for _, handlers := range s.Handlers {
-		for i := handlers.Front(); i != nil; i = i.Next() {
-			handler := i.Value.(IHandler)
-			handler.Terminate()
-		}
-	}
+	})
+	s.EachHandler(func(handler IHandler) {
+		handler.Terminate()
+	})
 	s.BaseController.Terminate()
 }
 
 // Kill :
 func (s *Sentry) Kill() {
-	for _, trigger := range s.Triggers {
+	s.EachTrigger(func(trigger ITrigger) {
 		trigger.Kill()
-	}
-	for _, handlers := range s.Handlers {
-		for i := handlers.Front(); i != nil; i = i.Next() {
-			handler := i.Value.(IHandler)
-			handler.Kill()
-		}
-	}
+	})
+	s.EachHandler(func(handler IHandler) {
+		handler.Kill()
+	})
 	if s.Status != StatusControllerTerminated {
 		s.Status = StatusControllerKilled
 	}
@@ -94,16 +119,22 @@ func (s *Sentry) Run() error {
 	s.RunAt = time.Now()
 	logging.Infof("Sentry run at: %s", s.RunAt.String())
 
-	triggers := s.Triggers
-	cases := make([]reflect.SelectCase, len(s.Triggers))
-	i := 0
-	for _, trigger := range triggers {
-		go trigger.Run()
-		cases[i] = reflect.SelectCase{
+	s.EachTrigger(func(trigger ITrigger) {
+		go func() {
+			defer utils.ErrorRecoverCall(func(err *utils.TraceableError) {
+				logging.Errorf("Trigger[%v] error: %s", trigger.GetName(), err)
+			})
+			trigger.Run()
+		}()
+	})
+
+	channels := s.Channels
+	cases := make([]reflect.SelectCase, 0, len(channels))
+	for _, channel := range channels {
+		cases = append(cases, reflect.SelectCase{
 			Dir:  reflect.SelectRecv,
-			Chan: reflect.ValueOf(trigger.GetChannel()),
-		}
-		i = i + 1
+			Chan: reflect.ValueOf(channel),
+		})
 	}
 
 	for {
@@ -112,15 +143,7 @@ func (s *Sentry) Run() error {
 		}
 		chosen, value, ok := reflect.Select(cases)
 		if !ok {
-			name := ""
-			i := 0
-			for _, trigger := range s.Triggers {
-				if i == chosen {
-					name = trigger.GetName()
-					break
-				}
-			}
-			logging.Warningf("Channel[%v] error", name)
+			logging.Warningf("Channel[%v] error", chosen)
 			continue
 		}
 		event := value.Interface().(*Event)
@@ -128,14 +151,13 @@ func (s *Sentry) Run() error {
 		if !ok {
 			continue
 		}
-		for i := handlers.Front(); i != nil; i = i.Next() {
-			handler := i.Value.(IHandler)
-			go func(ev *Event) {
+		for _, handler := range handlers {
+			go func(handler IHandler, ev *Event) {
 				defer utils.ErrorRecoverCall(func(err *utils.TraceableError) {
 					logging.Errorf("Handler[%v] error: %s", handler.GetName(), err)
 				})
 				handler.Handle(ev)
-			}(event.Copy())
+			}(handler, event.Copy())
 		}
 	}
 	return nil

@@ -32,19 +32,17 @@ func TestBaseTriggerInit(t *testing.T) {
 		itrigger sentry.ITrigger = &trigger
 	)
 	trigger.Init(nil)
+	trigger.SetChannel(make(chan *sentry.Event, 1))
 
 	if itrigger.GetName() != trigger.Name {
 		t.Errorf("name error")
-	}
-
-	if itrigger.GetChannel() != trigger.Channel {
-		t.Errorf("channel error")
 	}
 }
 
 func TestBaseTriggerNewEvent(t *testing.T) {
 	trigger := TestingTrigger{}
 	trigger.Init(nil)
+	trigger.SetChannel(make(chan *sentry.Event, 1))
 	name := "test"
 
 	event := trigger.NewEvent(name)
@@ -66,8 +64,9 @@ func TestBaseTriggerRun(t *testing.T) {
 	)
 
 	itrigger.Init(nil)
+	itrigger.SetChannel(make(chan *sentry.Event, 1))
 	itrigger.Ready()
-	channel := trigger.GetChannel()
+	channel := trigger.Channel
 	event1 := trigger.NewEvent("mrlyc")
 	trigger.Channel2 <- event1
 	itrigger.Run()

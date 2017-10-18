@@ -1,21 +1,22 @@
 package sentry_test
 
 import (
+	"fmt"
 	"friday/sentry"
 	"testing"
 )
 
 type TestingHandler struct {
 	sentry.BaseHandler
-	Channel chan sentry.Event
-	Counter int
-	Error   error
+	Channel   chan sentry.Event
+	Counter   int
+	WillPanic bool
 }
 
 // Init :
 func (h *TestingHandler) Init(s *sentry.Sentry) {
 	h.BaseHandler.Name = "testing"
-	h.Channel = make(chan sentry.Event, 1)
+	h.Channel = make(chan sentry.Event, 10)
 	h.BaseHandler.Init(s)
 }
 
@@ -25,8 +26,8 @@ func (h *TestingHandler) Handle(event *sentry.Event) {
 	ev.ID = event.Name
 	ev.Name = event.ID
 	h.Channel <- *ev
-	if h.Error != nil {
-		panic(h.Error)
+	if h.WillPanic {
+		panic(fmt.Errorf(h.GetName()))
 	}
 }
 
