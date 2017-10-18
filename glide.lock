@@ -1,6 +1,35 @@
-hash: e998a04464e7a0c103d77fdf159929e32f124c284ebdee585ac88650cdbe8917
-updated: 2017-10-13T23:19:17.927761724+08:00
+hash: 37965cce1013b3c8d3a1a00577eaa3384fc44c3db60fb5a18823229ff1a032fb
+updated: 2017-10-18T15:48:14.923753607Z
 imports:
+- name: github.com/cstockton/go-conv
+  version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
+- name: github.com/kr/fs
+  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
+- name: github.com/kr/pretty
+  version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
+- name: github.com/kr/text
+  version: 7cafcd837844e784b526369c9bce262804aebc60
+- name: github.com/pmezard/go-difflib
+  version: 792786c7400a136282c1664665ae0a8db921c6c2
+  subpackages:
+  - difflib
+- name: github.com/sirupsen/logrus
+  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
+- name: golang.org/x/crypto
+  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
+  subpackages:
+  - ssh/terminal
+- name: golang.org/x/sys
+  version: 686000749eaec0b8855b8eef5336cf63899fe51d
+  subpackages:
+  - unix
+  - windows
+- name: golang.org/x/tools
+  version: 9bd2f442688b66c5289262d70f537c2ecf81d7de
+  subpackages:
+  - go/vcs
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
-testImports: []
+testImports:
+- name: github.com/cstockton/go-iter
+  version: 353ca660c5db366129be2acc4c4c6807185474e9
