@@ -1,6 +1,6 @@
 VERSION := 0.0.1
 ROOTDIR := $(shell pwd)
-APPDIR := friday
+APPNAME := friday
 SRCDIR := src/friday
 TARGET := bin/friday
 
@@ -8,9 +8,9 @@ GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
 
-LDFLAGS := -X ${APPDIR}/config.Version=${VERSION}
-DEBUGLDFLAGS := ${LDFLAGS} -X ${APPDIR}/config.Mode=debug
-RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPDIR}/config.Mode=release
+LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
+DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug
+RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release
 
 .PHONY: release
 release: ${SRCDIR} ${GLIDELOCK}
@@ -23,7 +23,7 @@ build: ${SRCDIR} ${GLIDELOCK}
 ${SRCDIR}:
 	mkdir -p bin
 	mkdir -p src
-	ln -s ${ROOTDIR} src/
+	ln -s `dirname "${ROOTDIR}"`/${APPNAME} src/
 
 .PHONY: init
 init: ${SRCDIR}
@@ -35,7 +35,7 @@ dev-init: init
 
 .PHONY: update
 update: ${SRCDIR}
-	cd ${SRCDIR} && ${GOENV} godep save ${APPDIR}
+	cd ${SRCDIR} && ${GOENV} godep save ${APPNAME}
 
 .PHONY: test
 test:
