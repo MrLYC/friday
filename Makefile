@@ -7,17 +7,21 @@ TARGET := bin/friday
 GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
+GLIDE := ${GOENV} glide
+
+GLIDEYAML := ${ROOTDIR}/glide.yaml
+GLIDELOCK := ${ROOTDIR}/glide.lock
 
 LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
 DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug
 RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release
 
 .PHONY: release
-release: ${SRCDIR} ${GLIDELOCK}
+release: ${SRCDIR}
 	${GO} build -i -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
 
 .PHONY: build
-build: ${SRCDIR} ${GLIDELOCK}
+build: ${SRCDIR}
 	${GO} build -i -ldflags="${DEBUGLDFLAGS}" -o ${TARGET} friday
 
 ${SRCDIR}:
@@ -25,17 +29,28 @@ ${SRCDIR}:
 	mkdir -p src
 	ln -s `dirname "${ROOTDIR}"`/${APPNAME} src/
 
+${GLIDEYAML}:
+	${GLIDE} init
+
+${GLIDELOCK}: ${SRCDIR} ${GLIDEYAML}
+	${GLIDE} install
+	touch ${GLIDELOCK}
+
 .PHONY: init
-init: ${SRCDIR}
+init: ${SRCDIR} ${GLIDEYAML}
 
 .PHONY: dev-init
 dev-init: init
 	echo 'make test || exit $?' > .git/hooks/pre-push
 	chmod +x .git/hooks/pre-push
 
+
 .PHONY: update
 update: ${SRCDIR}
-	cd ${SRCDIR} && ${GOENV} godep save ${APPNAME}
+	${GLIDE} update
+
+.PHONY: install
+install: ${GLIDELOCK}
 
 .PHONY: test
 test:
