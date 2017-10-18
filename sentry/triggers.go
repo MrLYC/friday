@@ -24,7 +24,7 @@ func (t *BaseTrigger) Init(sentry *Sentry) {
 	t.EventTemplate.Channel = t.GetName()
 }
 
-// SetChannel
+// SetChannel :
 func (t *BaseTrigger) SetChannel(channel chan *Event) {
 	t.Channel = channel
 }

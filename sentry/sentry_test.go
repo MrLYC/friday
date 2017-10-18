@@ -40,6 +40,16 @@ func TestSentryInit(t *testing.T) {
 	if !ok {
 		t.Errorf("handler error")
 	}
+
+	_, ok = s.Channels[sentry.ChanNameBroadcast]
+	if !ok {
+		t.Errorf("broadcast channel error")
+	}
+
+	_, ok = s.Channels[sentry.ChanNameInternal]
+	if !ok {
+		t.Errorf("internal channel error")
+	}
 }
 
 func TestSentryFlow(t *testing.T) {

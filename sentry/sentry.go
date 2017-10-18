@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+// Channel names
+var (
+	ChanNameBroadcast = "*"
+	ChanNameInternal  = "-"
+)
+
 // Sentry :
 type Sentry struct {
 	BaseController
@@ -24,37 +30,54 @@ func (s *Sentry) GetName() string {
 
 // Init :
 func (s *Sentry) Init(triggers []ITrigger, handlers []IHandler) {
-	conf := config.Configuration.Sentry
 	s.Channels = make(map[string]chan *Event)
+	s.DeclareChannel(ChanNameBroadcast)
+	s.DeclareChannel(ChanNameInternal)
+
 	s.Triggers = make(map[string][]ITrigger)
 	for _, trigger := range triggers {
-		trigger.Init(s)
-		name := trigger.GetName()
-
-		channel, ok := s.Channels[name]
-		if !ok {
-			channel = make(chan *Event, conf.ChannelBuffer)
-			s.Channels[name] = channel
-		}
-		trigger.SetChannel(channel)
-
-		triggers, ok := s.Triggers[name]
-		if !ok {
-			triggers = make([]ITrigger, 0, 1)
-		}
-		s.Triggers[name] = append(triggers, trigger)
+		s.AddTrigger(trigger)
 	}
 
 	s.Handlers = make(map[string][]IHandler)
 	for _, handler := range handlers {
-		handler.Init(s)
-		name := handler.GetName()
-		handlers, ok := s.Handlers[name]
-		if !ok {
-			handlers = make([]IHandler, 0, 1)
-		}
-		s.Handlers[name] = append(handlers, handler)
+		s.AddHandler(handler)
 	}
+}
+
+// DeclareChannel :
+func (s *Sentry) DeclareChannel(name string) chan *Event {
+	channel, ok := s.Channels[name]
+	if !ok {
+		channel = make(chan *Event, config.Configuration.Sentry.ChannelBuffer)
+		s.Channels[name] = channel
+	}
+	return channel
+}
+
+// AddTrigger :
+func (s *Sentry) AddTrigger(trigger ITrigger) {
+	trigger.Init(s)
+	name := trigger.GetName()
+	channel := s.DeclareChannel(name)
+	trigger.SetChannel(channel)
+
+	triggers, ok := s.Triggers[name]
+	if !ok {
+		triggers = make([]ITrigger, 0, 1)
+	}
+	s.Triggers[name] = append(triggers, trigger)
+}
+
+// AddHandler :
+func (s *Sentry) AddHandler(handler IHandler) {
+	handler.Init(s)
+	name := handler.GetName()
+	handlers, ok := s.Handlers[name]
+	if !ok {
+		handlers = make([]IHandler, 0, 1)
+	}
+	s.Handlers[name] = append(handlers, handler)
 }
 
 // EachTrigger :
