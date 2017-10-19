@@ -1,8 +1,12 @@
-hash: 37965cce1013b3c8d3a1a00577eaa3384fc44c3db60fb5a18823229ff1a032fb
-updated: 2017-10-18T15:48:14.923753607Z
+hash: 28e6d1d2c3351f47b9b962ac08c3b9086d5e42af8b4bca191431b1c40ef96711
+updated: 2017-10-19T09:11:03.965866922Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
+- name: github.com/emirpasic/gods
+  version: f6c17b524822278a87e3b3bd809fec33b51f5b46
+  subpackages:
+  - trees/binaryheap
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/kr/pretty
