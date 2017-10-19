@@ -1,92 +1,95 @@
 package sentry
 
 import (
-	"container/heap"
 	"sync"
 	"time"
+
+	"github.com/emirpasic/gods/trees/binaryheap"
 )
+
+// DelayEventStatus :
+type DelayEventStatus int
+
+// DelayEventStatus
+const (
+	StatusDelayEventAbort   DelayEventStatus = iota
+	StatusDelayEventReady   DelayEventStatus = iota
+	StatusDelayEventPending DelayEventStatus = iota
+	StatusDelayEventSent    DelayEventStatus = iota
+)
+
+// IDelayEvent :
+type IDelayEvent interface {
+	GetEvent() *Event
+	GetTime() time.Time
+	StatusChanged(*Timer, DelayEventStatus)
+}
 
 // DelayEvent :
 type DelayEvent struct {
-	Event *Event
-	Time  time.Time
+	Event  *Event
+	Time   time.Time
+	Status DelayEventStatus
 }
 
-// An qItem is something we manage in a priority queue.
-type qItem struct {
-	value *DelayEvent // The value of the item; arbitrary.
-	// The index is needed by update and is maintained by the heap.Interface methods.
-	index int // The index of the item in the heap.
+// GetEvent :
+func (e *DelayEvent) GetEvent() *Event {
+	return e.Event
 }
 
-// A priorityQueue implements heap.Interface and holds Items.
-type priorityQueue []*qItem
-
-func (pq priorityQueue) Len() int { return len(pq) }
-func (pq priorityQueue) Less(i, j int) bool {
-	// We want Pop to give us the highest, not lowest, priority so we use greater than here.
-	ei := pq[i].value
-	ej := pq[j].value
-	return ei.Time.Before(ej.Time)
+// GetTime :
+func (e *DelayEvent) GetTime() time.Time {
+	return e.Time
 }
 
-func (pq priorityQueue) Swap(i, j int) {
-	pq[i], pq[j] = pq[j], pq[i]
-	pq[i].index = i
-	pq[j].index = j
-}
-
-func (pq *priorityQueue) Push(x interface{}) {
-	n := len(*pq)
-	item := x.(*qItem)
-	item.index = n
-	*pq = append(*pq, item)
-}
-
-func (pq *priorityQueue) Top() interface{} {
-	old := *pq
-	n := len(old)
-	return old[n-1]
-}
-
-func (pq *priorityQueue) Pop() interface{} {
-	old := *pq
-	n := len(old)
-	item := old[n-1]
-	item.index = -1 // for safety
-	*pq = old[0 : n-1]
-	return item
+// StatusChanged :
+func (e *DelayEvent) StatusChanged(timer *Timer, status DelayEventStatus) {
+	e.Status = status
 }
 
 // Timer :
 type Timer struct {
 	BaseTrigger
-	eventQueue priorityQueue
-	queueMux   sync.Mutex
+	eventHeap *binaryheap.Heap
+	queueMux  sync.Mutex
 }
 
 // Init :
 func (t *Timer) Init(s *Sentry) {
-	t.eventQueue = make(priorityQueue, 0, 10)
-	heap.Init(&(t.eventQueue))
+	t.eventHeap = binaryheap.NewWith(t.delayEventComparator)
 	t.BaseTrigger.Init(s)
 }
 
+// delayEventComparator
+func (t *Timer) delayEventComparator(i1 interface{}, i2 interface{}) int {
+	t1 := i1.(IDelayEvent).GetTime()
+	t2 := i2.(IDelayEvent).GetTime()
+	if t1.After(t2) {
+		return 1
+	} else if t1.Equal(t2) {
+		return 0
+	} else {
+		return -1
+	}
+}
+
 // AddEvent :
-func (t *Timer) AddEvent(event *DelayEvent) {
+func (t *Timer) AddEvent(event IDelayEvent) {
 	t.queueMux.Lock()
 	defer t.queueMux.Unlock()
-	item := &qItem{
-		value: event,
-	}
-	heap.Push(&(t.eventQueue), item)
-	heap.Fix(&(t.eventQueue), item.index)
+	t.eventHeap.Push(event)
 }
 
 // PopEvent :
-func (t *Timer) PopEvent() *DelayEvent {
+func (t *Timer) PopEvent() IDelayEvent {
 	t.queueMux.Lock()
 	defer t.queueMux.Unlock()
-	item := heap.Pop(&(t.eventQueue)).(*qItem)
-	return item.value
+	ev, _ := t.eventHeap.Pop()
+	return ev.(IDelayEvent)
+}
+
+// PeekEvent :
+func (t *Timer) PeekEvent() IDelayEvent {
+	ev, _ := t.eventHeap.Peek()
+	return ev.(IDelayEvent)
 }
