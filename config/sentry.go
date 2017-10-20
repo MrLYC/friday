@@ -6,6 +6,6 @@ type Sentry struct {
 }
 
 // Init : init Sentry
-func (e *Sentry) Init() {
-	e.ChannelBuffer = 10
+func (c *Sentry) Init() {
+	c.ChannelBuffer = 10
 }

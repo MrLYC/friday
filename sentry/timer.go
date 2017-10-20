@@ -1,6 +1,8 @@
 package sentry
 
 import (
+	"friday/config"
+	"friday/logging"
 	"sync"
 	"time"
 
@@ -22,6 +24,7 @@ const (
 type IDelayEvent interface {
 	GetEvent() *Event
 	GetTime() time.Time
+	GetStatus() DelayEventStatus
 	StatusChanged(*Timer, DelayEventStatus)
 }
 
@@ -47,16 +50,28 @@ func (e *DelayEvent) StatusChanged(timer *Timer, status DelayEventStatus) {
 	e.Status = status
 }
 
+// GetStatus :
+func (e *DelayEvent) GetStatus() DelayEventStatus {
+	return e.Status
+}
+
 // Timer :
 type Timer struct {
 	BaseTrigger
-	eventHeap *binaryheap.Heap
-	queueMux  sync.Mutex
+	CheckDuration time.Duration
+	ticker        *time.Ticker
+	eventHeap     *binaryheap.Heap
+	queueMux      sync.Mutex
 }
 
 // Init :
 func (t *Timer) Init(s *Sentry) {
 	t.eventHeap = binaryheap.NewWith(t.delayEventComparator)
+	CheckDuration, err := time.ParseDuration(config.Configuration.Timer.CheckDuration)
+	if err != nil {
+		panic(err)
+	}
+	t.CheckDuration = CheckDuration
 	t.BaseTrigger.Init(s)
 }
 
@@ -92,4 +107,80 @@ func (t *Timer) PopEvent() IDelayEvent {
 func (t *Timer) PeekEvent() IDelayEvent {
 	ev, _ := t.eventHeap.Peek()
 	return ev.(IDelayEvent)
+}
+
+// Handle :
+func (t *Timer) Handle(event *Event) {
+	if event.Name == EventBroadcastNameQuit {
+		t.Status = StatusControllerTerminating
+	}
+}
+
+func (t *Timer) handleAbortedEvents(lowerLimitTime time.Time) {
+	for delayEvent := t.PeekEvent(); delayEvent != nil; delayEvent = t.PeekEvent() {
+		eventTime := delayEvent.GetTime()
+		if eventTime.After(lowerLimitTime) {
+			break
+		}
+		delayEvent = t.PopEvent()
+		event := delayEvent.GetEvent()
+		logging.Warningf(
+			"Timer abort delay event: id=%v, name=%v, status: %v",
+			event.ID, event.Name, delayEvent.GetStatus(),
+		)
+		delayEvent.StatusChanged(t, StatusDelayEventAbort)
+	}
+}
+
+func (t *Timer) handleActivateEvents(highLimitTime time.Time) {
+	for delayEvent := t.PeekEvent(); delayEvent != nil; delayEvent = t.PeekEvent() {
+		eventTime := delayEvent.GetTime()
+		if highLimitTime.Before(eventTime) {
+			break
+		}
+		delayEvent = t.PopEvent()
+		if delayEvent.GetStatus() != StatusDelayEventReady {
+			event := delayEvent.GetEvent()
+			logging.Warningf(
+				"Timer abort delay event: id=%v, name=%v, status: %v",
+				event.ID, event.Name, delayEvent.GetStatus(),
+			)
+			delayEvent.StatusChanged(t, StatusDelayEventAbort)
+			continue
+		}
+		delayEvent.StatusChanged(t, StatusDelayEventPending)
+		t.Channel <- delayEvent.GetEvent()
+		delayEvent.StatusChanged(t, StatusDelayEventSent)
+	}
+}
+
+// Run :
+func (t *Timer) Run() {
+	if t.Status != StatusControllerReady {
+		panic(ErrNotReady)
+	}
+	t.Status = StatusControllerRuning
+	broadcastChan := t.Sentry.DeclareChannel(ChanNameBroadcast)
+	t.ticker = time.NewTicker(t.CheckDuration)
+
+	for t.Status == StatusControllerRuning {
+		select {
+		case now := <-t.ticker.C:
+			delayEvent := t.PeekEvent()
+			if delayEvent == nil {
+				continue
+			}
+			t.handleAbortedEvents(now)
+			t.handleActivateEvents(now.Add(t.CheckDuration))
+		case broadcastEv := <-broadcastChan:
+			t.Handle(broadcastEv)
+		}
+	}
+	t.Status = StatusControllerTerminated
+}
+
+// Terminate :
+func (t *Timer) Terminate() {
+	t.Status = StatusControllerTerminating
+	t.ticker.Stop()
 }

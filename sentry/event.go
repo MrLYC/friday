@@ -5,6 +5,12 @@ import (
 	"math/rand"
 )
 
+// broadcast event name
+const (
+	EventBroadcastNameQuit  = "quit"
+	EventBroadcastNameCheck = "check"
+)
+
 // Event : type for event
 type Event struct {
 	ID        string

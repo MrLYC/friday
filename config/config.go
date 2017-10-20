@@ -18,6 +18,7 @@ type ConfigurationType struct {
 	Event   Event   `yaml:"event"`
 	Logging Logging `yaml:"logging"`
 	Sentry  Sentry  `yaml:"sentry"`
+	Timer   Timer   `yaml:"timer"`
 }
 
 // Init : init ConfigurationType
@@ -27,6 +28,7 @@ func (c *ConfigurationType) Init() {
 	c.Event.Init()
 	c.Logging.Init()
 	c.Sentry.Init()
+	c.Timer.Init()
 }
 
 // ReadFrom : read configuration from path
