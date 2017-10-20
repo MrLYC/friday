@@ -14,8 +14,8 @@ type TestingHandler struct {
 }
 
 // Init :
-func (h *TestingHandler) Init(s *sentry.Sentry) {
-	h.BaseHandler.Name = "testing"
+func (h *TestingHandler) Init(s sentry.ISentry) {
+	h.Name = "testing"
 	h.Channel = make(chan sentry.Event, 10)
 	h.BaseHandler.Init(s)
 }
@@ -38,7 +38,7 @@ func TestHandlerInit(t *testing.T) {
 	)
 	ihandler.Init(nil)
 
-	if ihandler.GetName() != handler.BaseHandler.Name {
+	if ihandler.GetName() != handler.Name {
 		t.Errorf("name error")
 	}
 }

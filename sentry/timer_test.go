@@ -8,13 +8,14 @@ import (
 
 func TestDelayEventHeap(t *testing.T) {
 	var (
-		timer = sentry.Timer{}
+		s     = &TestingSentry{}
+		timer = &sentry.Timer{}
 		e1    = &sentry.DelayEvent{Time: time.Date(2017, 10, 18, 0, 0, 0, 0, time.UTC)}
 		e2    = &sentry.DelayEvent{Time: time.Date(2017, 10, 19, 0, 0, 0, 0, time.UTC)}
 		e3    = &sentry.DelayEvent{Time: time.Date(2017, 10, 20, 0, 0, 0, 0, time.UTC)}
 		e4    = &sentry.DelayEvent{Time: time.Date(2017, 10, 21, 0, 0, 0, 0, time.UTC)}
 	)
-	timer.Init(nil)
+	s.Init([]sentry.ITrigger{timer}, []sentry.IHandler{})
 	timer.AddEvent(e3)
 	timer.AddEvent(e1)
 	timer.AddEvent(e4)

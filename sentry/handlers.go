@@ -3,19 +3,19 @@ package sentry
 // IHandler : trigger interface
 type IHandler interface {
 	IController
-	Init(*Sentry)
+	Init(ISentry)
 	Handle(*Event)
 }
 
 // BaseHandler :
 type BaseHandler struct {
 	BaseController
-	Sentry *Sentry
+	Sentry ISentry
 	Name   string
 }
 
 // Init :
-func (h *BaseHandler) Init(sentry *Sentry) {
+func (h *BaseHandler) Init(sentry ISentry) {
 	h.Sentry = sentry
 }
 

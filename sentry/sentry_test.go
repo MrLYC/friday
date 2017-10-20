@@ -5,17 +5,23 @@ import (
 	"testing"
 )
 
+type TestingSentry struct {
+	sentry.Sentry
+}
+
+func (t *TestingSentry) Run() {
+
+}
+
 func TestSentryInit(t *testing.T) {
 	var (
-		s       = &sentry.Sentry{}
+		s       = &TestingSentry{}
 		trigger = &TestingTrigger{}
 		handler = &TestingHandler{}
 		ok      bool
 	)
 	s.Init([]sentry.ITrigger{trigger}, []sentry.IHandler{handler})
-	if trigger.Sentry != s {
-		t.Errorf("Trigger init error")
-	}
+
 	triggers := s.Triggers[trigger.GetName()]
 	ok = false
 	for _, tgr := range triggers {
@@ -27,9 +33,6 @@ func TestSentryInit(t *testing.T) {
 		t.Errorf("trigger error")
 	}
 
-	if handler.Sentry != s {
-		t.Errorf("Handler init error")
-	}
 	handlers := s.Handlers[handler.GetName()]
 	ok = false
 	for _, hdr := range handlers {
@@ -39,11 +42,6 @@ func TestSentryInit(t *testing.T) {
 	}
 	if !ok {
 		t.Errorf("handler error")
-	}
-
-	_, ok = s.Channels[sentry.ChanNameBroadcast]
-	if !ok {
-		t.Errorf("broadcast channel error")
 	}
 
 	_, ok = s.Channels[sentry.ChanNameInternal]
@@ -95,6 +93,18 @@ func TestSentryFlow(t *testing.T) {
 		t.Errorf("sentry error")
 	}
 }
+func TestSentryReady(t *testing.T) {
+	var (
+		s = &sentry.Sentry{}
+	)
+	s.Init([]sentry.ITrigger{}, []sentry.IHandler{})
+	defer func() {
+		if recover() == nil {
+			t.Errorf("run error")
+		}
+	}()
+	s.Run()
+}
 
 func TestSentryRun(t *testing.T) {
 	var (
@@ -106,20 +116,13 @@ func TestSentryRun(t *testing.T) {
 		}
 	)
 	s.Init([]sentry.ITrigger{trigger}, []sentry.IHandler{handler1, handler2})
-	err := s.Run()
-	if err == nil {
-		t.Errorf("run error")
-	}
 	s.Ready()
 	name := "test"
 	event1 := trigger.NewEvent(name)
 	event1.Payload = "123"
 	trigger.Channel2 <- event1
 	go func() {
-		err := s.Run()
-		if err != nil {
-			panic(err)
-		}
+		s.Run()
 	}()
 	event2 := <-handler1.Channel
 	if event1.Name != event2.Name || event1.ID != event2.ID {

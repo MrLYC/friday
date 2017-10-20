@@ -11,10 +11,16 @@ type TestingTrigger struct {
 	Counter  int
 }
 
-func (t *TestingTrigger) Init(s *sentry.Sentry) {
+func (t *TestingTrigger) Init(s sentry.ISentry) {
 	t.Name = "testing"
 	t.Channel2 = make(chan *sentry.Event, 10)
-	t.BaseTrigger.Init(s)
+	t.Sentry = s
+	t.EventTemplate = &sentry.Event{
+		Channel: t.Name,
+	}
+	if s != nil {
+		t.Channel = s.DeclareChannel(t.Name)
+	}
 }
 
 func (t *TestingTrigger) Run() {
@@ -32,7 +38,7 @@ func TestBaseTriggerInit(t *testing.T) {
 		itrigger sentry.ITrigger = &trigger
 	)
 	trigger.Init(nil)
-	trigger.SetChannel(make(chan *sentry.Event, 1))
+	trigger.SetControlChannel(make(chan *sentry.Event, 1))
 
 	if itrigger.GetName() != trigger.Name {
 		t.Errorf("name error")
@@ -42,7 +48,7 @@ func TestBaseTriggerInit(t *testing.T) {
 func TestBaseTriggerNewEvent(t *testing.T) {
 	trigger := TestingTrigger{}
 	trigger.Init(nil)
-	trigger.SetChannel(make(chan *sentry.Event, 1))
+	trigger.SetControlChannel(make(chan *sentry.Event, 1))
 	name := "test"
 
 	event := trigger.NewEvent(name)
@@ -59,12 +65,12 @@ func TestBaseTriggerNewEvent(t *testing.T) {
 
 func TestBaseTriggerRun(t *testing.T) {
 	var (
+		s                        = &TestingSentry{}
 		trigger                  = TestingTrigger{}
 		itrigger sentry.ITrigger = &trigger
 	)
-
-	itrigger.Init(nil)
-	itrigger.SetChannel(make(chan *sentry.Event, 1))
+	s.Init([]sentry.ITrigger{itrigger}, []sentry.IHandler{})
+	itrigger.SetControlChannel(make(chan *sentry.Event, 1))
 	itrigger.Ready()
 	channel := trigger.Channel
 	event1 := trigger.NewEvent("mrlyc")

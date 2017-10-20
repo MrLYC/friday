@@ -1,6 +1,7 @@
 package sentry
 
 import (
+	"fmt"
 	"friday/config"
 	"friday/logging"
 	"friday/utils"
@@ -10,9 +11,20 @@ import (
 
 // Channel names
 var (
-	ChanNameBroadcast = "*"
-	ChanNameInternal  = "-"
+	ChanNameControl  = "@"
+	ChanNameInternal = "-"
 )
+
+// ISentry :
+type ISentry interface {
+	IController
+	DeclareChannel(string) chan *Event
+	AddTrigger(ITrigger)
+	EachTrigger(func(ITrigger))
+	AddHandler(IHandler)
+	EachHandler(func(IHandler))
+	Run()
+}
 
 // Sentry :
 type Sentry struct {
@@ -31,7 +43,6 @@ func (s *Sentry) GetName() string {
 // Init :
 func (s *Sentry) Init(triggers []ITrigger, handlers []IHandler) {
 	s.Channels = make(map[string]chan *Event)
-	s.DeclareChannel(ChanNameBroadcast)
 	s.DeclareChannel(ChanNameInternal)
 
 	s.Triggers = make(map[string][]ITrigger)
@@ -59,14 +70,23 @@ func (s *Sentry) DeclareChannel(name string) chan *Event {
 func (s *Sentry) AddTrigger(trigger ITrigger) {
 	trigger.Init(s)
 	name := trigger.GetName()
-	channel := s.DeclareChannel(name)
-	trigger.SetChannel(channel)
+	channel := s.DeclareChannel(fmt.Sprintf("%s%s", ChanNameControl, name))
+	trigger.SetControlChannel(channel)
 
 	triggers, ok := s.Triggers[name]
 	if !ok {
 		triggers = make([]ITrigger, 0, 1)
 	}
 	s.Triggers[name] = append(triggers, trigger)
+}
+
+// EachTrigger :
+func (s *Sentry) EachTrigger(f func(ITrigger)) {
+	for _, triggers := range s.Triggers {
+		for _, trigger := range triggers {
+			f(trigger)
+		}
+	}
 }
 
 // AddHandler :
@@ -78,15 +98,6 @@ func (s *Sentry) AddHandler(handler IHandler) {
 		handlers = make([]IHandler, 0, 1)
 	}
 	s.Handlers[name] = append(handlers, handler)
-}
-
-// EachTrigger :
-func (s *Sentry) EachTrigger(f func(ITrigger)) {
-	for _, triggers := range s.Triggers {
-		for _, trigger := range triggers {
-			f(trigger)
-		}
-	}
 }
 
 // EachHandler :
@@ -134,9 +145,9 @@ func (s *Sentry) Kill() {
 }
 
 // Run :
-func (s *Sentry) Run() error {
+func (s *Sentry) Run() {
 	if s.Status != StatusControllerReady {
-		return ErrNotReady
+		panic(ErrNotReady)
 	}
 	s.Status = StatusControllerRuning
 	s.RunAt = time.Now()
@@ -183,5 +194,4 @@ func (s *Sentry) Run() error {
 			}(handler, event.Copy())
 		}
 	}
-	return nil
 }

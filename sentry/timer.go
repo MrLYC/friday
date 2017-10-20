@@ -65,7 +65,7 @@ type Timer struct {
 }
 
 // Init :
-func (t *Timer) Init(s *Sentry) {
+func (t *Timer) Init(s ISentry) {
 	t.eventHeap = binaryheap.NewWith(t.delayEventComparator)
 	CheckDuration, err := time.ParseDuration(config.Configuration.Timer.CheckDuration)
 	if err != nil {
@@ -160,7 +160,6 @@ func (t *Timer) Run() {
 		panic(ErrNotReady)
 	}
 	t.Status = StatusControllerRuning
-	broadcastChan := t.Sentry.DeclareChannel(ChanNameBroadcast)
 	t.ticker = time.NewTicker(t.CheckDuration)
 
 	for t.Status == StatusControllerRuning {
@@ -172,7 +171,7 @@ func (t *Timer) Run() {
 			}
 			t.handleAbortedEvents(now)
 			t.handleActivateEvents(now.Add(t.CheckDuration))
-		case broadcastEv := <-broadcastChan:
+		case broadcastEv := <-t.ControlChannel:
 			t.Handle(broadcastEv)
 		}
 	}
