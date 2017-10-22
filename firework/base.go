@@ -36,28 +36,22 @@ func (e *Firework) Copy() *Firework {
 	}
 }
 
-// Chan :
-type Chan chan *Firework
+// Handler :
+type Handler func(*Firework)
 
-// ITrigger :
-type ITrigger interface {
+// IApplet :
+type IApplet interface {
 	IController
 	SetEmitter(IEmitter)
-	SetChannel(Chan)
-}
-
-// IHandler :
-type IHandler interface {
-	Handle(*Firework)
 }
 
 // IEmitter :
 type IEmitter interface {
 	IController
-	On(string, IHandler) bool
-	Off(string, IHandler) bool
+	AddApplet(IApplet) bool
+	DelApplet(IApplet) bool
+	DeclareChannel(string) chan *Firework
+	On(string, string, Handler) bool
+	Off(string, string, Handler) bool
 	Fire(string, *Firework)
-	AddTrigger(ITrigger)
-	DelTrigger(ITrigger)
-	DeclareChannel(string)
 }

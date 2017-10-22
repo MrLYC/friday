@@ -15,12 +15,15 @@ func (a *TestingApplet) Init(name string) {
 
 func TestAppletInit(t *testing.T) {
 	var (
-		applet                    = &TestingApplet{}
-		trigger firework.ITrigger = applet
+		applet                   = &TestingApplet{}
+		iapplet firework.IApplet = applet
 	)
 
 	applet.Init("test")
-	if trigger.GetName() != applet.Name {
+	if iapplet.GetName() != applet.Name {
 		t.Errorf("name error")
+	}
+	if iapplet.GetStatus() != firework.StatusControllerInit {
+		t.Errorf("status error")
 	}
 }
