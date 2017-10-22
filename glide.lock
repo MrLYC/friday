@@ -1,5 +1,5 @@
-hash: 5e72954e33485c048ddbbfb8c16a1dbddd1dd7a89f49e838a1f09a9d878cc076
-updated: 2017-10-22T09:03:47.586047241Z
+hash: 6b6610982acb64d0f0ca91c01557cad643b2702fb477c614a144575ab1c76d7f
+updated: 2017-10-22T10:53:52.428680403Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -19,6 +19,8 @@ imports:
   version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
 - name: github.com/kr/text
   version: 7cafcd837844e784b526369c9bce262804aebc60
+- name: github.com/olebedev/emitter
+  version: a2d0ac57818e424e0bd310667ffcca8b47d69cfb
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:

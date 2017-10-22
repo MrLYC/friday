@@ -10,3 +10,4 @@ import:
   subpackages:
   - trees/binaryheap
   - maps/treemap
+- package: github.com/olebedev/emitter
