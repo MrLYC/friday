@@ -42,7 +42,7 @@ type Chan chan *Firework
 // ITrigger :
 type ITrigger interface {
 	IController
-	Init(IEmitter)
+	SetEmitter(IEmitter)
 	SetChannel(Chan)
 }
 
