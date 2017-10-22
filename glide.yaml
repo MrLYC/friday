@@ -9,3 +9,4 @@ import:
   version: ~1.9.0
   subpackages:
   - trees/binaryheap
+  - maps/treemap
