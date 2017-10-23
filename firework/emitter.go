@@ -2,7 +2,6 @@ package firework
 
 import (
 	"friday/config"
-	"friday/utils"
 	"sync"
 
 	"github.com/emirpasic/gods/maps/treemap"
@@ -31,6 +30,7 @@ type Emitter struct {
 func (e *Emitter) Init() {
 	e.Channels = treemap.NewWithStringComparator()
 	e.Applets = treemap.NewWithStringComparator()
+	e.SetStatus(StatusControllerInit)
 }
 
 // AddApplet :
@@ -58,60 +58,51 @@ func (e *Emitter) DeleteApplet(applet IApplet) bool {
 
 // DeclareChannel :
 func (e *Emitter) DeclareChannel(name string) chan *Firework {
-	if e.Status != StatusControllerReady {
-		panic(utils.ErrorWrap(ErrEmitterNotReady))
-	}
+	chanItem, _ := e.declareChannelItem(name)
+	return chanItem.Channel
+}
 
+func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
+	if e.Status != StatusControllerReady {
+		panic(ErrEmitterNotReady)
+	}
 	e.chanLock.Lock()
 	defer e.chanLock.Unlock()
-
+	item, ok := e.Channels.Get(name)
+	if ok {
+		return item.(*ChannelItem), false
+	}
 	chanItem := &ChannelItem{
 		Name:     name,
 		Channel:  make(chan *Firework, config.Configuration.Sentry.ChannelBuffer),
 		Handlers: treemap.NewWithStringComparator(),
 	}
 	e.Channels.Put(name, chanItem)
-	return chanItem.Channel
-}
-
-func (e *Emitter) getChannelItem(name string) (*ChannelItem, bool) {
-	e.chanLock.Lock()
-	defer e.chanLock.Unlock()
-	channel, ok := e.Channels.Get(name)
-	return channel.(*ChannelItem), ok
+	return chanItem, true
 }
 
 // On :
-func (e *Emitter) On(channelName string, name string, handler Handler) bool {
-	channel, ok := e.getChannelItem(channelName)
-	if !ok {
-		return false
-	}
+func (e *Emitter) On(channelName string, name string, handler Handler) (Handler, bool) {
+	channel, _ := e.declareChannelItem(channelName)
 
 	channel.Lock.Lock()
 	defer channel.Lock.Unlock()
 	channel.Handlers.Put(name, handler)
-	return true
+	return handler, true
 }
 
 // Off :
-func (e *Emitter) Off(channelName string, name string, handler Handler) bool {
-	channel, ok := e.getChannelItem(channelName)
-	if !ok {
-		return false
-	}
+func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler, bool) {
+	channel, _ := e.declareChannelItem(channelName)
 
 	channel.Lock.Lock()
 	defer channel.Lock.Unlock()
 	channel.Handlers.Remove(name)
-	return true
+	return handler, true
 }
 
 // Fire :
 func (e *Emitter) Fire(channelName string, firework *Firework) {
-	channel, ok := e.getChannelItem(channelName)
-	if !ok {
-		panic(utils.Errorf("chan *Frieworknel not found"))
-	}
+	channel, _ := e.declareChannelItem(channelName)
 	channel.Channel <- firework
 }

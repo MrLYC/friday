@@ -124,7 +124,7 @@ func ErrorNew(message string, skip int) *TraceableError {
 // Errorf :
 func Errorf(message string, v ...interface{}) *TraceableError {
 	if v != nil {
-		message = fmt.Sprintf(message, v)
+		message = fmt.Sprintf(message, v...)
 	}
 	return ErrorNew(message, 2)
 }
