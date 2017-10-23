@@ -1,10 +1,8 @@
 package firework
 
-import (
-	"errors"
-)
+import "errors"
 
 // Errors
 var (
-	ErrEmitterNotReady = errors.New("emitter not ready")
+	ErrEmitterNotReady = errors.New("")
 )

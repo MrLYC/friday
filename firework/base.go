@@ -49,8 +49,7 @@ type IApplet interface {
 type IEmitter interface {
 	IController
 	AddApplet(IApplet) bool
-	DelApplet(IApplet) bool
-	DeclareChannel(string) chan *Firework
+	DeleteApplet(IApplet) bool
 	On(string, string, Handler) bool
 	Off(string, string, Handler) bool
 	Fire(string, *Firework)

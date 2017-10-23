@@ -48,8 +48,8 @@ func (e *Emitter) AddApplet(applet IApplet) bool {
 	return true
 }
 
-// DelApplet :
-func (e *Emitter) DelApplet(applet IApplet) bool {
+// DeleteApplet :
+func (e *Emitter) DeleteApplet(applet IApplet) bool {
 	e.appletLock.Lock()
 	defer e.appletLock.Unlock()
 	e.Applets.Remove(applet)

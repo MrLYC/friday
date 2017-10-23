@@ -15,11 +15,10 @@ func (e *TestingEmitter) Init() {
 
 func TestEmitterInit(t *testing.T) {
 	var (
-		emitter                    = &TestingEmitter{}
-		iemiiter firework.IEmitter = emitter
+		emitter = &TestingEmitter{}
 	)
 	emitter.Init()
-	if iemiiter.GetName() != emitter.Name {
+	if emitter.GetName() != emitter.Name {
 		t.Errorf("name error")
 	}
 }
