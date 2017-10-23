@@ -12,6 +12,7 @@ type TestingEmitter struct {
 
 func (e *TestingEmitter) Init() {
 	e.SetName("testing")
+	e.StrictMode = true
 	e.Emitter.Init()
 }
 
@@ -141,5 +142,77 @@ func TestEmitterFire(t *testing.T) {
 	f2 := <-ch
 	if f1 != f2 {
 		t.Errorf("fire error")
+	}
+}
+
+func TestEmitterRun(t *testing.T) {
+	var (
+		name    = "test"
+		emitter = &TestingEmitter{
+			WillRun: true,
+		}
+	)
+	var (
+		name1 = "a"
+		ev1   = &firework.Firework{
+			Channel: name1,
+			Name:    name,
+		}
+		ch1      = make(chan string, 10)
+		handler1 = func(f *firework.Firework) {
+			ch1 <- f.ID
+		}
+	)
+	var (
+		name2 = "b"
+		ev2   = &firework.Firework{
+			Channel: name2,
+			Name:    name,
+		}
+		ch2      = make(chan string, 10)
+		handler2 = func(f *firework.Firework) {
+			ch2 <- f.ID
+		}
+	)
+	var (
+		ch22      = make(chan string, 10)
+		handler22 = func(f *firework.Firework) {
+			ch22 <- f.Channel
+		}
+	)
+
+	emitter.Init()
+	emitter.Ready()
+	ch3 := emitter.DeclareChannel(name1)
+	ch4 := emitter.DeclareChannel(name2)
+
+	emitter.On(name1, "test", handler1)
+	emitter.On(name2, "test", handler2)
+	emitter.On(name2, "test", handler22)
+
+	ev1.RefreshID()
+	emitter.Fire(name1, ev1)
+
+	ev2.RefreshID()
+	emitter.Fire(name2, ev2)
+
+	close(ch3)
+	close(ch4)
+
+	emitter.Run()
+
+	result1 := <-ch1
+	if result1 != ev1.ID {
+		t.Errorf("handler1 error")
+	}
+
+	result2 := <-ch2
+	if result2 != ev2.ID {
+		t.Errorf("handler2 error")
+	}
+
+	result22 := <-ch22
+	if result22 != ev2.Channel {
+		t.Errorf("handler22 error")
 	}
 }

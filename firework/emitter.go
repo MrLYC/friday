@@ -2,9 +2,13 @@ package firework
 
 import (
 	"friday/config"
+	"friday/logging"
+	"reflect"
 	"sync"
+	"time"
 
 	"github.com/emirpasic/gods/maps/treemap"
+	"github.com/emirpasic/gods/sets/treeset"
 )
 
 // ChannelItem :
@@ -18,6 +22,9 @@ type ChannelItem struct {
 // Emitter :
 type Emitter struct {
 	BaseController
+
+	StrictMode bool
+	RunAt      time.Time
 
 	Channels *treemap.Map
 	chanLock sync.Mutex
@@ -63,15 +70,17 @@ func (e *Emitter) DeclareChannel(name string) chan *Firework {
 }
 
 func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
-	if e.Status != StatusControllerReady {
-		panic(ErrEmitterNotReady)
-	}
 	e.chanLock.Lock()
 	defer e.chanLock.Unlock()
 	item, ok := e.Channels.Get(name)
 	if ok {
 		return item.(*ChannelItem), false
 	}
+
+	if e.Status != StatusControllerReady {
+		panic(ErrEmitterNotReady)
+	}
+
 	chanItem := &ChannelItem{
 		Name:     name,
 		Channel:  make(chan *Firework, config.Configuration.Sentry.ChannelBuffer),
@@ -87,7 +96,21 @@ func (e *Emitter) On(channelName string, name string, handler Handler) (Handler,
 
 	channel.Lock.Lock()
 	defer channel.Lock.Unlock()
-	channel.Handlers.Put(name, handler)
+
+	items, ok := channel.Handlers.Get(name)
+
+	var handlers *treeset.Set
+	if !ok {
+		handlers = treeset.NewWith(func(a interface{}, b interface{}) int {
+			va := reflect.ValueOf(a)
+			vb := reflect.ValueOf(b)
+			return int(va.Pointer() - vb.Pointer())
+		})
+		channel.Handlers.Put(name, handlers)
+	} else {
+		handlers = items.(*treeset.Set)
+	}
+	handlers.Add(handler)
 	return handler, true
 }
 
@@ -97,7 +120,16 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 
 	channel.Lock.Lock()
 	defer channel.Lock.Unlock()
-	channel.Handlers.Remove(name)
+
+	items, ok := channel.Handlers.Get(name)
+
+	if !ok {
+		return handler, false
+	}
+	handlers := items.(*treeset.Set)
+
+	handlers.Remove(handler)
+
 	return handler, true
 }
 
@@ -105,4 +137,56 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 func (e *Emitter) Fire(channelName string, firework *Firework) {
 	channel, _ := e.declareChannelItem(channelName)
 	channel.Channel <- firework
+}
+
+// Run :
+func (e *Emitter) Run() {
+	if e.Status != StatusControllerReady {
+		panic(ErrEmitterNotReady)
+	}
+	e.BaseController.Run()
+
+	e.RunAt = time.Now()
+	logging.Infof("Emitter run at: %s", e.RunAt.String())
+
+	channels := make([]reflect.SelectCase, e.Channels.Size())
+	iter := e.Channels.Iterator()
+	for i := 0; iter.Next(); i++ {
+		item := iter.Value().(*ChannelItem)
+		channels[i] = reflect.SelectCase{
+			Dir:  reflect.SelectRecv,
+			Chan: reflect.ValueOf(item.Channel),
+		}
+	}
+	for e.Status == StatusControllerRuning {
+		chosen, value, ok := reflect.Select(channels)
+		if !ok {
+			logging.Warningf("Channel[%v] error", chosen)
+			if e.StrictMode {
+				break
+			}
+			continue
+		}
+		firework := value.Interface().(*Firework)
+		chanItem, ok := e.Channels.Get(firework.Channel)
+		if !ok {
+			logging.Warningf(
+				"Unknown channel %s from %s(%s)",
+				firework.Channel, firework.Sender, firework.Name,
+			)
+			if e.StrictMode {
+				break
+			}
+			continue
+		}
+		items, ok := chanItem.(*ChannelItem).Handlers.Get(firework.Name)
+		if !ok {
+			continue
+		}
+		handlers := items.(*treeset.Set)
+		handlers.Each(func(index int, value interface{}) {
+			f := firework.Copy()
+			go value.(Handler)(f)
+		})
+	}
 }
