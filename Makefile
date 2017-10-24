@@ -56,8 +56,8 @@ update: ${SRCDIR}
 install: ${GLIDELOCK}
 
 .PHONY: test
-test:
-	$(eval package ?= $(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq))
+test: init
+	$(eval package ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq)))
 	${GOENV} go test ${package}
 
 .PHONY: lint
