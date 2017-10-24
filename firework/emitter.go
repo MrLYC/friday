@@ -52,6 +52,7 @@ func (e *Emitter) AddApplet(applet IApplet) bool {
 	e.appletLock.Lock()
 	e.Applets.Put(name, applet)
 	e.appletLock.Unlock()
+	applet.SetEmitter(e)
 	return true
 }
 
@@ -80,7 +81,7 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 
 	chanItem := &ChannelItem{
 		Name:     name,
-		Channel:  make(chan *Firework, config.Configuration.Sentry.ChannelBuffer),
+		Channel:  make(chan *Firework, config.Configuration.Firework.ChannelBuffer),
 		Handlers: treemap.NewWithStringComparator(),
 	}
 	e.chanLock.Lock()
@@ -134,8 +135,8 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 }
 
 // Fire :
-func (e *Emitter) Fire(channelName string, firework *Firework) {
-	channel, _ := e.declareChannelItem(channelName)
+func (e *Emitter) Fire(firework *Firework) {
+	channel, _ := e.declareChannelItem(firework.Channel)
 	channel.Channel <- firework
 }
 
@@ -158,6 +159,7 @@ func (e *Emitter) Run() {
 			Chan: reflect.ValueOf(item.Channel),
 		}
 	}
+
 	for e.Status == StatusControllerRuning {
 		chosen, value, ok := reflect.Select(channels)
 		if !ok {
@@ -189,4 +191,21 @@ func (e *Emitter) Run() {
 			go value.(Handler)(f)
 		})
 	}
+}
+
+// Terminate :
+func (e *Emitter) Terminate() {
+	e.SetStatus(StatusControllerTerminating)
+	e.Applets.Each(func(key interface{}, value interface{}) {
+		applet := value.(IApplet)
+		status := applet.GetStatus()
+		if status != StatusControllerTerminated && status != StatusControllerTerminating {
+			applet.Terminate()
+		}
+	})
+	e.Channels.Each(func(key interface{}, value interface{}) {
+		channel := value.(*ChannelItem)
+		close(channel.Channel)
+	})
+	e.BaseController.Terminate()
 }

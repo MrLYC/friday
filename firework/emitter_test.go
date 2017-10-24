@@ -137,7 +137,7 @@ func TestEmitterFire(t *testing.T) {
 	emitter.Ready()
 
 	ch := emitter.DeclareChannel(name)
-	emitter.Fire(name, f1)
+	emitter.Fire(f1)
 
 	f2 := <-ch
 	if f1 != f2 {
@@ -183,18 +183,18 @@ func TestEmitterRun(t *testing.T) {
 
 	emitter.Init()
 	emitter.Ready()
-	ch3 := emitter.DeclareChannel(name1)
-	ch4 := emitter.DeclareChannel(name2)
+	emitter.DeclareChannel(name1)
+	emitter.DeclareChannel(name2)
 
 	emitter.On(name1, "test", handler1)
 	emitter.On(name2, "test", handler2)
 	emitter.On(name2, "test", handler22)
 
 	ev1.RefreshID()
-	emitter.Fire(name1, ev1)
+	emitter.Fire(ev1)
 
 	ev2.RefreshID()
-	emitter.Fire(name2, ev2)
+	emitter.Fire(ev2)
 
 	go emitter.Run()
 
@@ -213,6 +213,5 @@ func TestEmitterRun(t *testing.T) {
 		t.Errorf("handler22 error")
 	}
 
-	close(ch3)
-	close(ch4)
+	emitter.Terminate()
 }

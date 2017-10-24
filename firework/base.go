@@ -50,7 +50,7 @@ type IEmitter interface {
 	IController
 	AddApplet(IApplet) bool
 	DeleteApplet(IApplet) bool
-	On(string, string, Handler) bool
-	Off(string, string, Handler) bool
-	Fire(string, *Firework)
+	On(string, string, Handler) (Handler, bool)
+	Off(string, string, Handler) (Handler, bool)
+	Fire(*Firework)
 }

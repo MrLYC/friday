@@ -14,11 +14,11 @@ type IConfiguration interface {
 
 // ConfigurationType : configuration type
 type ConfigurationType struct {
-	Version string
-	Event   Event   `yaml:"event"`
-	Logging Logging `yaml:"logging"`
-	Sentry  Sentry  `yaml:"sentry"`
-	Timer   Timer   `yaml:"timer"`
+	Version  string
+	Event    Event    `yaml:"event"`
+	Logging  Logging  `yaml:"logging"`
+	Firework Firework `yaml:"firework"`
+	Timer    Timer    `yaml:"timer"`
 }
 
 // Init : init ConfigurationType
@@ -27,7 +27,7 @@ func (c *ConfigurationType) Init() {
 
 	c.Event.Init()
 	c.Logging.Init()
-	c.Sentry.Init()
+	c.Firework.Init()
 	c.Timer.Init()
 }
 
