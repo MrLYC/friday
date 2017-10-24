@@ -58,9 +58,7 @@ install: ${GLIDELOCK}
 .PHONY: test
 test:
 	$(eval package ?= $(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq))
-	@for i in ${package} ; do \
-		$${GOENV} go test $${i} ; \
-	done
+	${GOENV} go test ${package}
 
 .PHONY: lint
 lint:
