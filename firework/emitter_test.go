@@ -196,10 +196,7 @@ func TestEmitterRun(t *testing.T) {
 	ev2.RefreshID()
 	emitter.Fire(name2, ev2)
 
-	close(ch3)
-	close(ch4)
-
-	emitter.Run()
+	go emitter.Run()
 
 	result1 := <-ch1
 	if result1 != ev1.ID {
@@ -215,4 +212,7 @@ func TestEmitterRun(t *testing.T) {
 	if result22 != ev2.Channel {
 		t.Errorf("handler22 error")
 	}
+
+	close(ch3)
+	close(ch4)
 }

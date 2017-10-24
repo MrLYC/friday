@@ -13,10 +13,11 @@ import (
 
 // ChannelItem :
 type ChannelItem struct {
-	Name     string
-	Channel  chan *Firework
-	Handlers *treemap.Map
-	Lock     sync.Mutex
+	Name         string
+	Channel      chan *Firework
+	Lock         sync.Mutex
+	Handlers     *treemap.Map
+	HandlersLock sync.Mutex
 }
 
 // Emitter :
@@ -44,22 +45,21 @@ func (e *Emitter) Init() {
 func (e *Emitter) AddApplet(applet IApplet) bool {
 	name := applet.GetName()
 
-	e.appletLock.Lock()
-	defer e.appletLock.Unlock()
-
 	_, ok := e.Applets.Get(name)
 	if ok {
 		return false
 	}
+	e.appletLock.Lock()
 	e.Applets.Put(name, applet)
+	e.appletLock.Unlock()
 	return true
 }
 
 // DeleteApplet :
 func (e *Emitter) DeleteApplet(applet IApplet) bool {
 	e.appletLock.Lock()
-	defer e.appletLock.Unlock()
 	e.Applets.Remove(applet)
+	e.appletLock.Unlock()
 	return true
 }
 
@@ -70,13 +70,10 @@ func (e *Emitter) DeclareChannel(name string) chan *Firework {
 }
 
 func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
-	e.chanLock.Lock()
-	defer e.chanLock.Unlock()
 	item, ok := e.Channels.Get(name)
 	if ok {
 		return item.(*ChannelItem), false
 	}
-
 	if e.Status != StatusControllerReady {
 		panic(ErrEmitterNotReady)
 	}
@@ -86,16 +83,15 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 		Channel:  make(chan *Firework, config.Configuration.Sentry.ChannelBuffer),
 		Handlers: treemap.NewWithStringComparator(),
 	}
+	e.chanLock.Lock()
 	e.Channels.Put(name, chanItem)
+	e.chanLock.Unlock()
 	return chanItem, true
 }
 
 // On :
 func (e *Emitter) On(channelName string, name string, handler Handler) (Handler, bool) {
 	channel, _ := e.declareChannelItem(channelName)
-
-	channel.Lock.Lock()
-	defer channel.Lock.Unlock()
 
 	items, ok := channel.Handlers.Get(name)
 
@@ -106,11 +102,15 @@ func (e *Emitter) On(channelName string, name string, handler Handler) (Handler,
 			vb := reflect.ValueOf(b)
 			return int(va.Pointer() - vb.Pointer())
 		})
+		channel.Lock.Lock()
 		channel.Handlers.Put(name, handlers)
+		channel.Lock.Unlock()
 	} else {
 		handlers = items.(*treeset.Set)
 	}
+	channel.HandlersLock.Lock()
 	handlers.Add(handler)
+	channel.HandlersLock.Unlock()
 	return handler, true
 }
 
