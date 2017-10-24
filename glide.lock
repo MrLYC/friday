@@ -1,5 +1,5 @@
-hash: 6b6610982acb64d0f0ca91c01557cad643b2702fb477c614a144575ab1c76d7f
-updated: 2017-10-22T10:53:52.428680403Z
+hash: 57f34e3b03abe02991ca277dee5e4a116cb4ec992960875e520dc13a64104f6c
+updated: 2017-10-23T18:11:09.755150637Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -9,7 +9,10 @@ imports:
   - containers
   - lists
   - lists/arraylist
+  - lists/doublylinkedlist
   - maps/treemap
+  - sets/hashset
+  - sets/treeset
   - trees
   - trees/binaryheap
   - utils
