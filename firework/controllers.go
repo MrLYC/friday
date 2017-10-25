@@ -6,6 +6,7 @@ type IController interface {
 	SetStatus(ControllerStatus)
 	GetName() string
 	GetStatus() ControllerStatus
+	Init()
 	Ready()
 	Run()
 	Terminate()
@@ -29,6 +30,11 @@ const (
 type BaseController struct {
 	Name   string
 	Status ControllerStatus
+}
+
+// Init :
+func (c *BaseController) Init() {
+	c.SetStatus(StatusControllerInit)
 }
 
 // SetName :

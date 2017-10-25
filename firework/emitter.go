@@ -38,7 +38,7 @@ type Emitter struct {
 func (e *Emitter) Init() {
 	e.Channels = treemap.NewWithStringComparator()
 	e.Applets = treemap.NewWithStringComparator()
-	e.SetStatus(StatusControllerInit)
+	e.BaseController.Init()
 }
 
 // AddApplet :
@@ -150,10 +150,16 @@ func (e *Emitter) Run() {
 	e.RunAt = time.Now()
 	logging.Infof("Emitter run at: %s", e.RunAt.String())
 
+	iterApplet := e.Applets.Iterator()
+	for iterApplet.Next() {
+		applet := iterApplet.Value().(IApplet)
+		go applet.Run()
+	}
+
 	channels := make([]reflect.SelectCase, e.Channels.Size())
-	iter := e.Channels.Iterator()
-	for i := 0; iter.Next(); i++ {
-		item := iter.Value().(*ChannelItem)
+	iterChannel := e.Channels.Iterator()
+	for i := 0; iterChannel.Next(); i++ {
+		item := iterChannel.Value().(*ChannelItem)
 		channels[i] = reflect.SelectCase{
 			Dir:  reflect.SelectRecv,
 			Chan: reflect.ValueOf(item.Channel),
@@ -190,6 +196,16 @@ func (e *Emitter) Run() {
 			f := firework.Copy()
 			go value.(Handler)(f)
 		})
+	}
+}
+
+// Ready :
+func (e *Emitter) Ready() {
+	e.BaseController.Ready()
+	iter := e.Applets.Iterator()
+	for iter.Next() {
+		applet := iter.Value().(IApplet)
+		applet.Ready()
 	}
 }
 

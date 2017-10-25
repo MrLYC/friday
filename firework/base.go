@@ -12,7 +12,7 @@ type Firework struct {
 	Sender    string
 	Name      string
 	Type      string
-	Payload   string
+	Payload   interface{}
 	RelatedTo string
 }
 
@@ -50,6 +50,7 @@ type IEmitter interface {
 	IController
 	AddApplet(IApplet) bool
 	DeleteApplet(IApplet) bool
+	DeclareChannel(string) chan *Firework
 	On(string, string, Handler) (Handler, bool)
 	Off(string, string, Handler) (Handler, bool)
 	Fire(*Firework)
