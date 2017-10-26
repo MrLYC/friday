@@ -31,13 +31,29 @@ const (
 
 // DelayFirework :
 type DelayFirework struct {
-	Firework *Firework
-	Time     time.Time
-	Status   DelayFireworkStatus
+	*Firework
+	Time   time.Time
+	Status DelayFireworkStatus
+}
+
+// Copy :
+func (f *DelayFirework) Copy() IFirework {
+	return &DelayFirework{
+		Time:   f.Time,
+		Status: f.Status,
+		Firework: &Firework{
+			ID:        f.ID,
+			Channel:   f.Channel,
+			Name:      f.Name,
+			Type:      f.Type,
+			Payload:   f.Payload,
+			RelatedTo: f.RelatedTo,
+		},
+	}
 }
 
 // GetFirework :
-func (f *DelayFirework) GetFirework() *Firework {
+func (f *DelayFirework) GetFirework() IFirework {
 	return f.Firework
 }
 
@@ -104,8 +120,8 @@ func (t *Timer) Peek() *DelayFirework {
 
 // Ready :
 func (t *Timer) Ready() {
-	t.Emitter.On(TimerChannelName, TimerFireworkDelay, func(firework *Firework) {
-		f := firework.Payload.(DelayFirework)
+	t.Emitter.On(TimerChannelName, TimerFireworkDelay, func(firework IFirework) {
+		f := firework.GetPayload().(DelayFirework)
 		t.Add(&f)
 	})
 	t.BaseApplet.Ready()
@@ -161,9 +177,9 @@ func (t *Timer) Run() {
 			f := df.GetFirework()
 			logging.Warningf(
 				"Timer abort at %v-%v: Channel[%s], Name[%s], Time[%v]",
-				lowLimitTime, highLimitTime, f.Channel, f.Name, df.Time,
+				lowLimitTime, highLimitTime, f.GetChannel(), f.GetName(), df.Time,
 			)
-			f.Name = TimerFireworkAbort
+			f.SetName(TimerFireworkAbort)
 			t.Emitter.Fire(f)
 		})
 	}

@@ -101,7 +101,7 @@ func TestEmitterOnNotReady(t *testing.T) {
 			t.Errorf("ready error: %v", err)
 		}
 	}()
-	emitter.On(name, "mrlyc", func(f *firework.Firework) {
+	emitter.On(name, "mrlyc", func(f firework.IFirework) {
 		t.Errorf("ready error")
 	})
 }
@@ -115,7 +115,7 @@ func TestEmitterOn(t *testing.T) {
 	)
 	emitter.Init()
 	emitter.Ready()
-	handler1, ok = emitter.On(name, "mrlyc", func(f *firework.Firework) {})
+	handler1, ok = emitter.On(name, "mrlyc", func(f firework.IFirework) {})
 	if !ok {
 		t.Errorf("on error")
 	}
@@ -159,8 +159,8 @@ func TestEmitterRun(t *testing.T) {
 			Name:    name,
 		}
 		ch1      = make(chan string, 10)
-		handler1 = func(f *firework.Firework) {
-			ch1 <- f.ID
+		handler1 = func(f firework.IFirework) {
+			ch1 <- f.GetID()
 		}
 	)
 	var (
@@ -170,14 +170,14 @@ func TestEmitterRun(t *testing.T) {
 			Name:    name,
 		}
 		ch2      = make(chan string, 10)
-		handler2 = func(f *firework.Firework) {
-			ch2 <- f.ID
+		handler2 = func(f firework.IFirework) {
+			ch2 <- f.GetID()
 		}
 	)
 	var (
 		ch22      = make(chan string, 10)
-		handler22 = func(f *firework.Firework) {
-			ch22 <- f.Channel
+		handler22 = func(f firework.IFirework) {
+			ch22 <- f.GetChannel()
 		}
 	)
 
@@ -199,17 +199,17 @@ func TestEmitterRun(t *testing.T) {
 	go emitter.Run()
 
 	result1 := <-ch1
-	if result1 != ev1.ID {
+	if result1 != ev1.GetID() {
 		t.Errorf("handler1 error")
 	}
 
 	result2 := <-ch2
-	if result2 != ev2.ID {
+	if result2 != ev2.GetID() {
 		t.Errorf("handler2 error")
 	}
 
 	result22 := <-ch22
-	if result22 != ev2.Channel {
+	if result22 != ev2.GetChannel() {
 		t.Errorf("handler22 error")
 	}
 

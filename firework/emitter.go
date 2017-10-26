@@ -14,7 +14,7 @@ import (
 // ChannelItem :
 type ChannelItem struct {
 	Name         string
-	Channel      chan *Firework
+	Channel      chan IFirework
 	Lock         sync.Mutex
 	Handlers     *treemap.Map
 	HandlersLock sync.Mutex
@@ -65,7 +65,7 @@ func (e *Emitter) DeleteApplet(applet IApplet) bool {
 }
 
 // DeclareChannel :
-func (e *Emitter) DeclareChannel(name string) chan *Firework {
+func (e *Emitter) DeclareChannel(name string) chan IFirework {
 	chanItem, _ := e.declareChannelItem(name)
 	return chanItem.Channel
 }
@@ -81,7 +81,7 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 
 	chanItem := &ChannelItem{
 		Name:     name,
-		Channel:  make(chan *Firework, config.Configuration.Firework.ChannelBuffer),
+		Channel:  make(chan IFirework, config.Configuration.Firework.ChannelBuffer),
 		Handlers: treemap.NewWithStringComparator(),
 	}
 	e.chanLock.Lock()
@@ -135,8 +135,8 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 }
 
 // Fire :
-func (e *Emitter) Fire(firework *Firework) {
-	channel, _ := e.declareChannelItem(firework.Channel)
+func (e *Emitter) Fire(firework IFirework) {
+	channel, _ := e.declareChannelItem(firework.GetChannel())
 	channel.Channel <- firework
 }
 
@@ -175,19 +175,20 @@ func (e *Emitter) Run() {
 			}
 			continue
 		}
-		firework := value.Interface().(*Firework)
-		chanItem, ok := e.Channels.Get(firework.Channel)
+		firework := value.Interface().(IFirework)
+		channel := firework.GetChannel()
+		chanItem, ok := e.Channels.Get(channel)
 		if !ok {
 			logging.Warningf(
 				"Unknown channel %s from %s(%s)",
-				firework.Channel, firework.Sender, firework.Name,
+				channel, firework.GetSender(), firework.GetName(),
 			)
 			if e.StrictMode {
 				break
 			}
 			continue
 		}
-		items, ok := chanItem.(*ChannelItem).Handlers.Get(firework.Name)
+		items, ok := chanItem.(*ChannelItem).Handlers.Get(firework.GetName())
 		if !ok {
 			continue
 		}

@@ -64,10 +64,10 @@ func TestTimerFlow(t *testing.T) {
 
 	delay := 4 * timer.CheckDuration
 
-	emitter.On(f.Channel, f.Name, func(ff *firework.Firework) {
-		ch <- ff.ID
+	emitter.On(f.GetChannel(), f.GetName(), func(ff firework.IFirework) {
+		ch <- ff.GetID()
 	})
-	emitter.On(f.Channel, firework.TimerFireworkAbort, func(ff *firework.Firework) {
+	emitter.On(f.GetChannel(), firework.TimerFireworkAbort, func(ff firework.IFirework) {
 		timer.Add(&firework.DelayFirework{
 			Time:     time.Now().Add(delay),
 			Firework: f,
@@ -84,7 +84,7 @@ func TestTimerFlow(t *testing.T) {
 
 	id := <-ch
 	t2 := time.Now()
-	if id != f.ID {
+	if id != f.GetID() {
 		t.Errorf("deay error")
 	}
 	delta := t2.Sub(t1)
