@@ -32,7 +32,7 @@ func TestTimerFlow(t *testing.T) {
 	var ok bool
 
 	timer := firework.NewTimer()
-	timer.CheckDuration = time.Second
+	timer.CheckDuration = 100 * time.Microsecond
 	emitter := &TestingEmitter{
 		WillRun: true,
 	}
@@ -62,7 +62,7 @@ func TestTimerFlow(t *testing.T) {
 	}
 	f.RefreshID()
 
-	delay := time.Second / 2
+	delay := 4 * timer.CheckDuration
 
 	emitter.On(f.Channel, f.Name, func(ff *firework.Firework) {
 		ch <- ff.ID
@@ -87,8 +87,12 @@ func TestTimerFlow(t *testing.T) {
 	if id != f.ID {
 		t.Errorf("deay error")
 	}
-	if t2.Sub(t1).Seconds() > (2 * timer.CheckDuration).Seconds() {
+	delta := t2.Sub(t1)
+	if delta < (delay-timer.CheckDuration) || delta > (delay+timer.CheckDuration) {
 		t.Errorf("timer error")
 	}
 	emitter.Terminate()
+	if timer.Status != firework.StatusControllerTerminated {
+		t.Errorf("terminate error")
+	}
 }

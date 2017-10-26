@@ -23,7 +23,7 @@ const (
 
 // Timer constants :
 const (
-	TimerChannelName     = "<TIMER>"
+	TimerChannelName     = "TIMER"
 	TimerFireworkDelay   = "Delay"
 	TimerFireworkTimesUp = "TimesUp"
 	TimerFireworkAbort   = "TimerAbort"
