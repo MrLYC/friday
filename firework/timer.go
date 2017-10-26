@@ -29,6 +29,15 @@ const (
 	TimerFireworkAbort   = "TimerAbort"
 )
 
+// IDelayFirework :
+type IDelayFirework interface {
+	GetTime() time.Time
+	UpdateTime() bool
+	GetFirework() IFirework
+	GetStatus() DelayFireworkStatus
+	SetStatus(DelayFireworkStatus)
+}
+
 // DelayFirework :
 type DelayFirework struct {
 	*Firework
@@ -52,14 +61,34 @@ func (f *DelayFirework) Copy() IFirework {
 	}
 }
 
+// GetTime :
+func (f *DelayFirework) GetTime() time.Time {
+	return f.Time
+}
+
+// UpdateTime :
+func (f *DelayFirework) UpdateTime() bool {
+	return false
+}
+
 // GetFirework :
 func (f *DelayFirework) GetFirework() IFirework {
 	return f.Firework
 }
 
+// GetStatus :
+func (f *DelayFirework) GetStatus() DelayFireworkStatus {
+	return f.Status
+}
+
+// SetStatus :
+func (f *DelayFirework) SetStatus(status DelayFireworkStatus) {
+	f.Status = status
+}
+
 func delayFireworkComparator(i1 interface{}, i2 interface{}) int {
-	t1 := i1.(*DelayFirework).Time
-	t2 := i2.(*DelayFirework).Time
+	t1 := i1.(IDelayFirework).GetTime()
+	t2 := i2.(IDelayFirework).GetTime()
 	if t1.After(t2) {
 		return 1
 	} else if t1.Equal(t2) {
@@ -89,33 +118,33 @@ func (t *Timer) Init() {
 }
 
 // Add :
-func (t *Timer) Add(firework *DelayFirework) {
+func (t *Timer) Add(firework IDelayFirework) {
 	t.queueMux.Lock()
 	defer t.queueMux.Unlock()
-	firework.Status = StatusDelayFireworkReady
+	firework.SetStatus(StatusDelayFireworkReady)
 	t.heap.Push(firework)
 }
 
 // Pop :
-func (t *Timer) Pop() *DelayFirework {
+func (t *Timer) Pop() IDelayFirework {
 	t.queueMux.Lock()
 	defer t.queueMux.Unlock()
 	f, ok := t.heap.Pop()
 	if !ok {
 		return nil
 	}
-	return f.(*DelayFirework)
+	return f.(IDelayFirework)
 }
 
 // Peek :
-func (t *Timer) Peek() *DelayFirework {
+func (t *Timer) Peek() IDelayFirework {
 	t.queueMux.Lock()
 	defer t.queueMux.Unlock()
 	f, ok := t.heap.Peek()
 	if !ok {
 		return nil
 	}
-	return f.(*DelayFirework)
+	return f.(IDelayFirework)
 }
 
 // Ready :
@@ -158,29 +187,36 @@ func (t *Timer) Run() {
 		highLimitTime := now.Add(t.CheckDuration)
 
 		for f := t.Peek(); f != nil; f = t.Peek() {
-			eventTime := f.Time
+			eventTime := f.GetTime()
 			if eventTime.After(highLimitTime) {
 				break
 			}
 			f = t.Pop()
-			if eventTime.Before(lowLimitTime) || f.Status != StatusDelayFireworkReady {
+			if eventTime.Before(lowLimitTime) || f.GetStatus() != StatusDelayFireworkReady {
 				abortFireworks.Add(f)
 			} else {
 				activateFireworks.Add(f)
 			}
 		}
-		go activateFireworks.Each(func(i int, df interface{}) {
-			t.Emitter.Fire(df.(*DelayFirework).GetFirework())
+		go activateFireworks.Each(func(i int, f interface{}) {
+			df := f.(IDelayFirework)
+			t.Emitter.Fire(df.GetFirework())
+			if df.UpdateTime() {
+				t.Add(df)
+			}
 		})
-		go abortFireworks.Each(func(i int, item interface{}) {
-			df := item.(*DelayFirework)
-			f := df.GetFirework()
+		go abortFireworks.Each(func(i int, f interface{}) {
+			df := f.(IDelayFirework)
+			rf := df.GetFirework()
 			logging.Warningf(
 				"Timer abort at %v-%v: Channel[%s], Name[%s], Time[%v]",
-				lowLimitTime, highLimitTime, f.GetChannel(), f.GetName(), df.Time,
+				lowLimitTime, highLimitTime, rf.GetChannel(), rf.GetName(), df.GetTime(),
 			)
-			f.SetName(TimerFireworkAbort)
-			t.Emitter.Fire(f)
+			rf.SetName(TimerFireworkAbort)
+			t.Emitter.Fire(rf)
+			if df.UpdateTime() {
+				t.Add(df)
+			}
 		})
 	}
 }
