@@ -85,12 +85,76 @@ func TestTimerFlow(t *testing.T) {
 	id := <-ch
 	t2 := time.Now()
 	if id != f.GetID() {
-		t.Errorf("deay error")
+		t.Errorf("delay error")
 	}
 	delta := t2.Sub(t1)
 	if delta < (delay-timer.CheckDuration) || delta > (delay+timer.CheckDuration) {
 		t.Errorf("timer error")
 	}
+	emitter.Terminate()
+	if timer.Status != firework.StatusControllerTerminated {
+		t.Errorf("terminate error")
+	}
+}
+
+func TestDurationFirework(t *testing.T) {
+	timer := firework.NewTimer()
+	timer.CheckDuration = 100 * time.Microsecond
+	emitter := &TestingEmitter{
+		WillRun: true,
+	}
+	emitter.Init()
+	emitter.AddApplet(timer)
+	emitter.Ready()
+
+	ch := make(chan string, 1)
+	f := &firework.Firework{
+		Channel: "test",
+		Name:    "delay",
+	}
+	f.RefreshID()
+
+	delay := 4 * timer.CheckDuration
+
+	emitter.On(f.GetChannel(), f.GetName(), func(ff firework.IFirework) {
+		ch <- ff.GetID()
+	})
+
+	go emitter.Run()
+
+	t1 := time.Now()
+	df := &firework.DurationFirework{
+		Duration: delay,
+		Times:    2,
+		DelayFirework: &firework.DelayFirework{
+			Time:     t1.Add(delay),
+			Firework: f,
+		},
+	}
+	timer.Add(df)
+
+	id1 := <-ch
+	t2 := time.Now()
+	id2 := <-ch
+	t3 := time.Now()
+
+	if df.Times != 1 || df.Status != firework.StatusDelayFireworkSent {
+		t.Errorf("firework error")
+	}
+
+	if id1 != f.GetID() || id2 != f.GetID() {
+		t.Errorf("delay error")
+	}
+
+	delta1 := t2.Sub(t1)
+	if delta1 < (delay-timer.CheckDuration) || delta1 > (delay+timer.CheckDuration) {
+		t.Errorf("timer error")
+	}
+	delta2 := t3.Sub(t2)
+	if delta2 < (delay-timer.CheckDuration) || delta2 > (delay+timer.CheckDuration) {
+		t.Errorf("timer error")
+	}
+
 	emitter.Terminate()
 	if timer.Status != firework.StatusControllerTerminated {
 		t.Errorf("terminate error")

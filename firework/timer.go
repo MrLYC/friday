@@ -48,16 +48,9 @@ type DelayFirework struct {
 // Copy :
 func (f *DelayFirework) Copy() IFirework {
 	return &DelayFirework{
-		Time:   f.Time,
-		Status: f.Status,
-		Firework: &Firework{
-			ID:        f.ID,
-			Channel:   f.Channel,
-			Name:      f.Name,
-			Type:      f.Type,
-			Payload:   f.Payload,
-			RelatedTo: f.RelatedTo,
-		},
+		Time:     f.Time,
+		Status:   f.Status,
+		Firework: f.Firework.Copy().(*Firework),
 	}
 }
 
@@ -84,6 +77,35 @@ func (f *DelayFirework) GetStatus() DelayFireworkStatus {
 // SetStatus :
 func (f *DelayFirework) SetStatus(status DelayFireworkStatus) {
 	f.Status = status
+}
+
+// DurationFirework :
+type DurationFirework struct {
+	*DelayFirework
+	Duration time.Duration
+	Times    uint
+}
+
+// Copy :
+func (f *DurationFirework) Copy() IFirework {
+	return &DurationFirework{
+		Duration:      f.Duration,
+		Times:         f.Times,
+		DelayFirework: f.DelayFirework.Copy().(*DelayFirework),
+	}
+}
+
+// UpdateTime :
+func (f *DurationFirework) UpdateTime() bool {
+	if f.Times == 1 {
+		f.SetStatus(StatusDelayFireworkSent)
+		return false
+	} else if f.Times > 1 {
+		f.Times--
+	}
+	// 0 for forever
+	f.Time = f.Time.Add(f.Duration)
+	return true
 }
 
 func delayFireworkComparator(i1 interface{}, i2 interface{}) int {
