@@ -2,6 +2,7 @@ package firework_test
 
 import (
 	"friday/firework"
+	"os"
 	"testing"
 	"time"
 
@@ -30,9 +31,13 @@ func TestTimerInit(t *testing.T) {
 
 func TestTimerFlow(t *testing.T) {
 	var ok bool
-
 	timer := firework.NewTimer()
-	timer.CheckDuration = 100 * time.Microsecond
+	value := os.Getenv("FRIDAY_CHECKDURATION")
+	if value == "" {
+		timer.CheckDuration = 100 * time.Microsecond
+	} else {
+		timer.CheckDuration, _ = time.ParseDuration(value)
+	}
 	emitter := &TestingEmitter{
 		WillRun: true,
 	}
@@ -99,7 +104,12 @@ func TestTimerFlow(t *testing.T) {
 
 func TestDurationFirework(t *testing.T) {
 	timer := firework.NewTimer()
-	timer.CheckDuration = 100 * time.Microsecond
+	value := os.Getenv("FRIDAY_CHECKDURATION")
+	if value == "" {
+		timer.CheckDuration = 100 * time.Microsecond
+	} else {
+		timer.CheckDuration, _ = time.ParseDuration(value)
+	}
 	emitter := &TestingEmitter{
 		WillRun: true,
 	}
