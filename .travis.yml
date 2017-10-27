@@ -1,6 +1,6 @@
 language: go
 env:
-    - FRIDAY_CHECKDURATION=1s
+    - FRIDAY_TIMER_CHECKDURATION=1s
 go:
     - 1.6
     - 1.7

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 
+	validator "gopkg.in/validator.v2"
 	yaml "gopkg.in/yaml.v2"
 )
 
@@ -45,6 +46,10 @@ func (c *ConfigurationType) ReadFrom(path string) error {
 		panic(fmt.Errorf("Unknown configuration version: %v", c.Version))
 	}
 	return nil
+}
+
+func (c *ConfigurationType) Validate() error {
+	return validator.Validate(c)
 }
 
 // Configuration : global configuration

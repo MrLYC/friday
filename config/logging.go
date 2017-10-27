@@ -1,5 +1,9 @@
 package config
 
+import (
+	"os"
+)
+
 // Logging : logging configuration
 type Logging struct {
 	Level string `yaml:"level"`
@@ -7,5 +11,11 @@ type Logging struct {
 
 // Init : init Logging
 func (l *Logging) Init() {
-	l.Level = "info"
+
+	value := os.Getenv("FRIDAY_LOGGING_LEVEL")
+	if value == "" {
+		l.Level = "info"
+	} else {
+		l.Level = value
+	}
 }

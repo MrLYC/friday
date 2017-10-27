@@ -15,3 +15,4 @@ import:
   - lists/doublylinkedlist
   - sets/treeset
 - package: github.com/olebedev/emitter
+- package: gopkg.in/validator.v2

@@ -1,5 +1,9 @@
 package config
 
+import (
+	"os"
+)
+
 // Timer : timer configuration
 type Timer struct {
 	CheckDuration string `yaml:"check_delta"`
@@ -7,5 +11,10 @@ type Timer struct {
 
 // Init : init Timer
 func (c *Timer) Init() {
-	c.CheckDuration = "10s"
+	value := os.Getenv("FRIDAY_TIMER_CHECKDURATION")
+	if value == "" {
+		c.CheckDuration = "10s"
+	} else {
+		c.CheckDuration = value
+	}
 }

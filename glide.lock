@@ -1,5 +1,5 @@
-hash: 57f34e3b03abe02991ca277dee5e4a116cb4ec992960875e520dc13a64104f6c
-updated: 2017-10-23T18:11:09.755150637Z
+hash: a5d1c5c7f81a0253f68bfdfbfe9f5f48728b708faba74c5a4ea6f52e2197226e
+updated: 2017-10-27T02:05:00.113952858Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -10,11 +10,23 @@ imports:
   - lists
   - lists/arraylist
   - lists/doublylinkedlist
+  - lists/singlylinkedlist
+  - maps
+  - maps/hashbidimap
+  - maps/hashmap
+  - maps/treebidimap
   - maps/treemap
+  - sets
   - sets/hashset
   - sets/treeset
+  - stacks
+  - stacks/arraystack
+  - stacks/linkedliststack
   - trees
+  - trees/avltree
   - trees/binaryheap
+  - trees/btree
+  - trees/redblacktree
   - utils
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
@@ -40,9 +52,11 @@ imports:
   - unix
   - windows
 - name: golang.org/x/tools
-  version: 9bd2f442688b66c5289262d70f537c2ecf81d7de
+  version: 9b61fcc4c548d69663d915801fc4b42a43b6cd9c
   subpackages:
   - go/vcs
+- name: gopkg.in/validator.v2
+  version: 460c83432a98c35224a6fe352acf8b23e067ad06
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
 testImports:

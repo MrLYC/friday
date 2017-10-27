@@ -2,7 +2,7 @@ package config
 
 // Firework : firework configuration
 type Firework struct {
-	ChannelBuffer int `yaml:"channel_buffer"`
+	ChannelBuffer int `yaml:"channel_buffer" validate:"min=1"`
 }
 
 // Init : init Firework

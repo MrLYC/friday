@@ -20,3 +20,5 @@ pkg/
 .vscode/
 debug
 .idea/
+
+friday.yaml

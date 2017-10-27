@@ -28,6 +28,12 @@ func initConfiguration(configPath string) {
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
+
+	err = config.Configuration.Validate()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err.Error())
+		os.Exit(-1)
+	}
 }
 
 func preParseCommand() {

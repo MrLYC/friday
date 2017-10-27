@@ -32,7 +32,7 @@ func TestTimerInit(t *testing.T) {
 func TestTimerFlow(t *testing.T) {
 	var ok bool
 	timer := firework.NewTimer()
-	value := os.Getenv("FRIDAY_CHECKDURATION")
+	value := os.Getenv("FRIDAY_TIMER_CHECKDURATION")
 	if value == "" {
 		timer.CheckDuration = 100 * time.Microsecond
 	} else {
@@ -104,7 +104,7 @@ func TestTimerFlow(t *testing.T) {
 
 func TestDurationFirework(t *testing.T) {
 	timer := firework.NewTimer()
-	value := os.Getenv("FRIDAY_CHECKDURATION")
+	value := os.Getenv("FRIDAY_TIMER_CHECKDURATION")
 	if value == "" {
 		timer.CheckDuration = 100 * time.Microsecond
 	} else {
