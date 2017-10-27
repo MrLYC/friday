@@ -6,7 +6,7 @@ import (
 
 // Timer : timer configuration
 type Timer struct {
-	CheckDuration string `yaml:"check_delta"`
+	CheckDuration string `yaml:"check_duration" validate:"regexp=^((\\d+(.\\d+)?)(h|m|s|ms|us|µs|ns))+$"`
 }
 
 // Init : init Timer
