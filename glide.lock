@@ -1,8 +1,10 @@
-hash: a5d1c5c7f81a0253f68bfdfbfe9f5f48728b708faba74c5a4ea6f52e2197226e
-updated: 2017-10-27T02:05:00.113952858Z
+hash: b850508308162f9f5700a9dccc2797d87a204a4f43aeefd9b44203471a832348
+updated: 2017-10-28T15:49:41.941293654Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
+- name: github.com/dghubble/sling
+  version: eb56e89ac5088bebb12eef3cb4b293300f43608b
 - name: github.com/emirpasic/gods
   version: f6c17b524822278a87e3b3bd809fec33b51f5b46
   subpackages:

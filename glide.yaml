@@ -16,3 +16,5 @@ import:
   - sets/treeset
 - package: github.com/olebedev/emitter
 - package: gopkg.in/validator.v2
+- package: github.com/dghubble/sling
+  version: ~1.1.0
