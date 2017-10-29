@@ -9,8 +9,9 @@ go:
 before_script:
     - make init
 script:
-    - make test
+    - make build
     - make release
+    - make ci-test
 branches:
     only:
         - master
