@@ -11,7 +11,7 @@ before_script:
 script:
     - make build
     - make release
-    - make ci-test
+    - make test
 branches:
     only:
         - master
