@@ -6,6 +6,7 @@ import (
 	"friday/command"
 	"friday/config"
 	"friday/logging"
+	"friday/vm"
 	"math/rand"
 	"os"
 	"time"
@@ -16,6 +17,7 @@ func parseCommand() *command.CommandInfo {
 		Commands: map[string]command.ICommand{
 			"version":  &config.VersionCommand{},
 			"confinfo": &config.ConfigurationCommand{},
+			"vm":       &vm.Command{},
 		},
 	}
 	factory.Init()
@@ -63,6 +65,9 @@ func main() {
 	initConfiguration(configPath)
 
 	preCommandRun(commandInfo)
-	commandInfo.Command.Run()
+	err := commandInfo.Command.Run()
+	if err != nil {
+		fmt.Fprintln(os.Stderr, err)
+	}
 	postCommandRun(commandInfo)
 }
