@@ -1,5 +1,5 @@
-hash: b850508308162f9f5700a9dccc2797d87a204a4f43aeefd9b44203471a832348
-updated: 2017-10-28T15:49:41.941293654Z
+hash: 1d4e80fb33c8c6dd0745533e87602dfed14f0ea80233de8b817cb87a03120f67
+updated: 2017-11-02T14:16:01.501048376Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -42,6 +42,8 @@ imports:
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
+- name: github.com/Shopify/go-lua
+  version: 88a6f168eee0ba102d7d20c5281056a5dd3d7550
 - name: github.com/sirupsen/logrus
   version: 89742aefa4b206dcf400792f3bd35b542998eb3b
 - name: golang.org/x/crypto
