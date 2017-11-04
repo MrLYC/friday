@@ -7,19 +7,9 @@ import (
 )
 
 func TestCronFireworkUpdateTime(t *testing.T) {
-	f := &firework.CronFirework{
-		DelayFirework: &firework.DelayFirework{
-			Time: time.Date(2017, 2, 28, 2, 0, 0, 0, time.Local),
-		},
-		Delta:   time.Minute,
-		Seconds: []int{0},
-		Minutes: []int{0, 1},
-		Hours:   []int{2, 4, 6},
-		Days:    []int{28, 29, 30, 31},
-		Months:  []int{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
-		Years:   []int{2017},
-	}
-	f.UpdateIndex()
+	f := &firework.CronFirework{}
+	f.Init("0,1 2-6/2 28-31 */1 * 2017")
+	f.Time = time.Date(2017, 2, 28, 2, 0, 0, 0, time.Local)
 
 	timeValues := []string{
 		"2017-02-28 02:01:00",
@@ -89,7 +79,6 @@ func TestCronFireworkUpdateTime(t *testing.T) {
 		t, ok := timeChangeTables[v]
 		if ok {
 			f.Time = t
-			f.UpdateIndex()
 		}
 	}
 }
