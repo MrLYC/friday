@@ -1,5 +1,5 @@
-hash: 1d4e80fb33c8c6dd0745533e87602dfed14f0ea80233de8b817cb87a03120f67
-updated: 2017-11-02T14:16:01.501048376Z
+hash: a5e517d0f3cd9396aee1e10cf4d91d6507ed0f35dc543112fd9733cf9aa66709
+updated: 2017-11-04T15:43:47.20161864Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -30,6 +30,8 @@ imports:
   - trees/btree
   - trees/redblacktree
   - utils
+- name: github.com/gorhill/cronexpr
+  version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/kr/pretty
@@ -56,7 +58,7 @@ imports:
   - unix
   - windows
 - name: golang.org/x/tools
-  version: 9b61fcc4c548d69663d915801fc4b42a43b6cd9c
+  version: 032dfd515a0b058cc9bc616139b136f923d3924a
   subpackages:
   - go/vcs
 - name: gopkg.in/validator.v2
