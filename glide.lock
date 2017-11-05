@@ -1,5 +1,5 @@
-hash: a5e517d0f3cd9396aee1e10cf4d91d6507ed0f35dc543112fd9733cf9aa66709
-updated: 2017-11-04T15:43:47.20161864Z
+hash: 7e9965187090b849dadd6e00469cc9c0806f86a67d9174dbf45f96db14d0aa34
+updated: 2017-11-05T03:34:57.708521873Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -38,16 +38,18 @@ imports:
   version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
 - name: github.com/kr/text
   version: 7cafcd837844e784b526369c9bce262804aebc60
-- name: github.com/olebedev/emitter
-  version: a2d0ac57818e424e0bd310667ffcca8b47d69cfb
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
   - difflib
-- name: github.com/Shopify/go-lua
-  version: 88a6f168eee0ba102d7d20c5281056a5dd3d7550
 - name: github.com/sirupsen/logrus
   version: 89742aefa4b206dcf400792f3bd35b542998eb3b
+- name: github.com/yuin/gopher-lua
+  version: 609c9cd2697344dec90fe0543c6493e3b8da3435
+  subpackages:
+  - ast
+  - parse
+  - pm
 - name: golang.org/x/crypto
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:

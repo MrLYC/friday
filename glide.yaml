@@ -14,10 +14,9 @@ import:
   - sets/hashset
   - lists/doublylinkedlist
   - sets/treeset
-- package: github.com/olebedev/emitter
 - package: gopkg.in/validator.v2
 - package: github.com/dghubble/sling
   version: ~1.1.0
-- package: github.com/Shopify/go-lua
 - package: github.com/gorhill/cronexpr
   version: ~1.0.0
+- package: github.com/yuin/gopher-lua
