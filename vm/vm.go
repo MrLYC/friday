@@ -1,18 +1,17 @@
 package vm
 
 import (
-	"github.com/Shopify/go-lua"
+	"github.com/yuin/gopher-lua"
 )
 
 type VM struct {
-	LuaState *lua.State
+	LuaState *lua.LState
 }
 
 func (v *VM) Init() {
 	v.LuaState = lua.NewState()
-	lua.OpenLibraries(v.LuaState)
 }
 
 func (v *VM) Execute(statement string) error {
-	return lua.DoString(v.LuaState, statement)
+	return v.LuaState.DoString(statement)
 }
