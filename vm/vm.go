@@ -28,6 +28,30 @@ func (t Table) EachAsStrMap(f TableEachFunc) {
 	}
 }
 
+// ParseValue :
+func ParseValue(value lua.LValue) interface{} {
+	switch value.Type() {
+	case lua.LTNil:
+		return nil
+	case lua.LTBool:
+		return bool(value.(lua.LBool))
+	case lua.LTNumber:
+		return float64(value.(lua.LNumber))
+	case lua.LTString:
+		return string(value.(lua.LString))
+	case lua.LTTable:
+		table := Table{}
+		value.(*lua.LTable).ForEach(func(lkey lua.LValue, litem lua.LValue) {
+			key := ParseValue(lkey)
+			item := ParseValue(litem)
+			table[key] = item
+		})
+		return table
+	default:
+		return value
+	}
+}
+
 type VM struct {
 	LuaState *lua.LState
 }
@@ -48,32 +72,8 @@ func (v *VM) Execute(statement string) error {
 	return v.LuaState.DoString(statement)
 }
 
-// ParseValue :
-func (v *VM) ParseValue(value lua.LValue) interface{} {
-	switch value.Type() {
-	case lua.LTNil:
-		return nil
-	case lua.LTBool:
-		return bool(value.(lua.LBool))
-	case lua.LTNumber:
-		return float64(value.(lua.LNumber))
-	case lua.LTString:
-		return string(value.(lua.LString))
-	case lua.LTTable:
-		table := Table{}
-		value.(*lua.LTable).ForEach(func(lkey lua.LValue, litem lua.LValue) {
-			key := v.ParseValue(lkey)
-			item := v.ParseValue(litem)
-			table[key] = item
-		})
-		return table
-	default:
-		return value
-	}
-}
-
 // GetGlobal :
 func (v *VM) GetGlobal(name string) interface{} {
 	value := v.LuaState.GetGlobal(name)
-	return v.ParseValue(value)
+	return ParseValue(value)
 }
