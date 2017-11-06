@@ -74,8 +74,8 @@ func TestTimerFlow(t *testing.T) {
 	})
 	emitter.On(f.GetChannel(), firework.TimerFireworkAbort, func(ff firework.IFirework) {
 		timer.Add(&firework.DelayFirework{
-			Time:     time.Now().Add(delay),
-			Firework: f,
+			Time:      time.Now().Add(delay),
+			IFirework: f,
 		})
 	})
 
@@ -83,8 +83,8 @@ func TestTimerFlow(t *testing.T) {
 
 	t1 := time.Now()
 	timer.Add(&firework.DelayFirework{
-		Time:     t1.Add(delay),
-		Firework: f,
+		Time:      t1.Add(delay),
+		IFirework: f,
 	})
 
 	id := <-ch
@@ -137,8 +137,8 @@ func TestDurationFirework(t *testing.T) {
 		Duration: delay,
 		Times:    2,
 		DelayFirework: &firework.DelayFirework{
-			Time:     t1.Add(delay),
-			Firework: f,
+			Time:      t1.Add(delay),
+			IFirework: f,
 		},
 	}
 	timer.Add(df)

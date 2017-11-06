@@ -12,12 +12,14 @@ type CronFirework struct {
 	Expression *cronexpr.Expression
 }
 
-// Init :
-func (f *CronFirework) Init(rule string) {
-	f.DelayFirework = &DelayFirework{
-		Time: time.Now(),
-	}
+// NewCronFirework :
+func NewCronFirework(rule string, startAt time.Time, firework IFirework) *CronFirework {
+	f := &CronFirework{}
+	f.DelayFirework = &DelayFirework{}
+	f.Time = startAt
+	f.IFirework = firework
 	f.Expression = cronexpr.MustParse(rule)
+	return f
 }
 
 // Copy :

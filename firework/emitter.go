@@ -140,6 +140,27 @@ func (e *Emitter) Fire(firework IFirework) {
 	channel.Channel <- firework
 }
 
+// FireAt :
+func (e *Emitter) FireAt(at time.Time, firework IFirework) {
+	e.Fire(NewDelayFirework(at, firework))
+}
+
+// FireDelay :
+func (e *Emitter) FireDelay(duration time.Duration, firework IFirework) {
+	e.FireDelayN(duration, 1, firework)
+}
+
+// FireDelayN :
+func (e *Emitter) FireDelayN(duration time.Duration, times uint, firework IFirework) {
+	e.Fire(NewDurationFirework(duration, times, firework))
+}
+
+// FireCron :
+func (e *Emitter) FireCron(rule string, firework IFirework) {
+	f := NewCronFirework(rule, time.Now(), firework)
+	e.Fire(f)
+}
+
 // Run :
 func (e *Emitter) Run() {
 	if e.Status != StatusControllerReady {

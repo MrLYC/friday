@@ -7,9 +7,11 @@ import (
 )
 
 func TestCronFireworkUpdateTime(t *testing.T) {
-	f := &firework.CronFirework{}
-	f.Init("0,1 2-6/2 28-31 */1 * 2017")
-	f.Time = time.Date(2017, 2, 28, 2, 0, 0, 0, time.Local)
+	f := firework.NewCronFirework(
+		"0,1 2-6/2 28-31 */1 * 2017",
+		time.Date(2017, 2, 28, 2, 0, 0, 0, time.Local),
+		&firework.Firework{},
+	)
 
 	timeValues := []string{
 		"2017-02-28 02:01:00",
