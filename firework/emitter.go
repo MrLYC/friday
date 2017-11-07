@@ -136,13 +136,21 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 
 // Fire :
 func (e *Emitter) Fire(firework IFirework) {
+	if firework.GetID() == "" {
+		firework.RefreshID()
+	}
 	channel, _ := e.declareChannelItem(firework.GetChannel())
 	channel.Channel <- firework
 }
 
 // FireAt :
 func (e *Emitter) FireAt(at time.Time, firework IFirework) {
-	e.Fire(NewDelayFirework(at, firework))
+	e.Fire(NewDelayFirework(at, &Firework{
+		Channel: TimerChannelName,
+		Sender:  firework.GetSender(),
+		Name:    TimerFireworkDelay,
+		Payload: firework,
+	}))
 }
 
 // FireDelay :
@@ -152,13 +160,22 @@ func (e *Emitter) FireDelay(duration time.Duration, firework IFirework) {
 
 // FireDelayN :
 func (e *Emitter) FireDelayN(duration time.Duration, times uint, firework IFirework) {
-	e.Fire(NewDurationFirework(duration, times, firework))
+	e.Fire(NewDurationFirework(duration, times, &Firework{
+		Channel: TimerChannelName,
+		Sender:  firework.GetSender(),
+		Name:    TimerFireworkDelay,
+		Payload: firework,
+	}))
 }
 
 // FireCron :
 func (e *Emitter) FireCron(rule string, firework IFirework) {
-	f := NewCronFirework(rule, time.Now(), firework)
-	e.Fire(f)
+	e.Fire(NewCronFirework(rule, time.Now(), &Firework{
+		Channel: TimerChannelName,
+		Sender:  firework.GetSender(),
+		Name:    TimerFireworkDelay,
+		Payload: firework,
+	}))
 }
 
 // Run :
