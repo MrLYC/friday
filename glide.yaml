@@ -27,3 +27,4 @@ import:
   - dialects/mysql
   - dialects/mssql
   - dialects/postgres
+- package: github.com/jinzhu/inflection

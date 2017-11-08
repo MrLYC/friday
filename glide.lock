@@ -1,5 +1,5 @@
-hash: 3896c6bf035598e2af279a2be6437d91c9865c47c01b38df10121f1ade5a8264
-updated: 2017-11-08T16:36:45.8855717Z
+hash: 93f5b22b2f579da569cf87f62516328557b7eb25956c42bfcab0a95265124131
+updated: 2017-11-08T17:38:53.36746372Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -39,6 +39,8 @@ imports:
   - dialects/mysql
   - dialects/postgres
   - dialects/sqlite
+- name: github.com/jinzhu/inflection
+  version: 1c35d901db3da928c72a72d8458480cc9ade058f
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/kr/pretty
