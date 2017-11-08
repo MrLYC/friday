@@ -1,5 +1,5 @@
-hash: dff7e85a1329826fbdc8999bdd9dd4fa934a1c0e9b527a437448289d0feb0db4
-updated: 2017-11-08T17:46:02.488326342Z
+hash: 516dfc716be354ee093d5baadc983f46c2dccbb5ce213ce89bbe682e615681bf
+updated: 2017-11-08T17:47:50.517587954Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -65,6 +65,10 @@ imports:
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
   - ssh/terminal
+- name: golang.org/x/net
+  version: a337091b0525af65de94df2eb7e98bd9962dcbe2
+  subpackages:
+  - context
 - name: golang.org/x/sys
   version: 686000749eaec0b8855b8eef5336cf63899fe51d
   subpackages:
