@@ -1,5 +1,5 @@
-hash: 7e9965187090b849dadd6e00469cc9c0806f86a67d9174dbf45f96db14d0aa34
-updated: 2017-11-05T03:34:57.708521873Z
+hash: 3896c6bf035598e2af279a2be6437d91c9865c47c01b38df10121f1ade5a8264
+updated: 2017-11-08T16:36:45.8855717Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -32,6 +32,13 @@ imports:
   - utils
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
+- name: github.com/jinzhu/gorm
+  version: 5174cc5c242a728b435ea2be8a2f7f998e15429b
+  subpackages:
+  - dialects/mssql
+  - dialects/mysql
+  - dialects/postgres
+  - dialects/sqlite
 - name: github.com/kr/fs
   version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
 - name: github.com/kr/pretty
@@ -60,7 +67,7 @@ imports:
   - unix
   - windows
 - name: golang.org/x/tools
-  version: 032dfd515a0b058cc9bc616139b136f923d3924a
+  version: 05e91d06384e3a4eb0aba75560d254b8d5a7b431
   subpackages:
   - go/vcs
 - name: gopkg.in/validator.v2
