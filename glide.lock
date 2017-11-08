@@ -1,5 +1,5 @@
-hash: 93f5b22b2f579da569cf87f62516328557b7eb25956c42bfcab0a95265124131
-updated: 2017-11-08T17:38:53.36746372Z
+hash: dff7e85a1329826fbdc8999bdd9dd4fa934a1c0e9b527a437448289d0feb0db4
+updated: 2017-11-08T17:46:02.488326342Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -47,6 +47,8 @@ imports:
   version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
 - name: github.com/kr/text
   version: 7cafcd837844e784b526369c9bce262804aebc60
+- name: github.com/mattn/go-sqlite3
+  version: 5160b48509cf5c877bc22c11c373f8c7738cdb38
 - name: github.com/pmezard/go-difflib
   version: 792786c7400a136282c1664665ae0a8db921c6c2
   subpackages:
