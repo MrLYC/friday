@@ -16,6 +16,7 @@ type IConfiguration interface {
 // ConfigurationType : configuration type
 type ConfigurationType struct {
 	Version  string
+	Database Database `yaml:"database"`
 	Event    Event    `yaml:"event"`
 	Logging  Logging  `yaml:"logging"`
 	Firework Firework `yaml:"firework"`
@@ -26,6 +27,7 @@ type ConfigurationType struct {
 func (c *ConfigurationType) Init() {
 	c.Version = ConfVersion
 
+	c.Database.Init()
 	c.Event.Init()
 	c.Logging.Init()
 	c.Firework.Init()
@@ -48,6 +50,7 @@ func (c *ConfigurationType) ReadFrom(path string) error {
 	return nil
 }
 
+// Validate :
 func (c *ConfigurationType) Validate() error {
 	return validator.Validate(c)
 }
