@@ -50,7 +50,7 @@ update: ${SRCDIR}
 	${GLIDE} update
 	find vendor -name 'testdata' -type d -exec rm -rf {} \; || true
 	find vendor -name '*_test.go' -delete || true
-	find vendor -type f \( ! -name '*.go' ! -name 'LICENSE' ! -name '*.s' ! -name '*.c' ! -name '*.cpp' \) -delete || true
+	find vendor -type f \( ! -name '*.go' ! -name 'LICENSE' ! -name '*.s' ! -name '*.h' ! -name '*.c' ! -name '*.cpp' \) -delete || true
 
 .PHONY: install
 install: ${GLIDELOCK}
