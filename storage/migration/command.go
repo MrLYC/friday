@@ -14,15 +14,24 @@ import (
 // MigrateFunc :
 type MigrateFunc func(*Migration, *storage.DatabaseConnection) error
 
+// MigrationStatus
+const (
+	MigrationStatusNone       = ""
+	MigrationStatusMigrating  = "migrating"
+	MigrationStatusMigrated   = "migrated"
+	MigrationStatusError      = "error"
+	MigrationStatusRollbacked = "rollbacked"
+)
+
 // Migration :
 type Migration struct {
 	ID         uint `gorm:"primary_key"`
 	CreatedAt  time.Time
-	MigrateAt  *time.Time
-	RollbackAt *time.Time
+	MigrateAt  time.Time
+	RollbackAt time.Time
+	Status     string `gorm:"size:32"`
 	Name       string `gorm:"size:32"`
 
-	fetched      bool
 	migrateFunc  func(*Migration, *storage.DatabaseConnection) error
 	rollbackFunc func(*Migration, *storage.DatabaseConnection) error
 }
@@ -49,20 +58,36 @@ func (m *Migration) GetRollbackFunc() MigrateFunc {
 
 // FetchFromDB :
 func (m *Migration) FetchFromDB() bool {
-	m.fetched = false
 	if m.Name == "" {
 		return false
 	}
 	db := storage.GetDBConnection()
 	err := db.Last(m, "name = ?", m.Name).Error
 	if err == storage.ErrRecordNotFound {
-		m.fetched = true
 		return false
 	} else if err != nil {
 		panic(err)
 	}
-	m.fetched = true
 	return true
+}
+
+// SaveToDB :
+func (m *Migration) SaveToDB() bool {
+	var (
+		db      = storage.GetDBConnection()
+		err     error
+		created = false
+	)
+	if db.NewRecord(m) {
+		err = db.Create(m).Error
+		created = true
+	} else {
+		err = db.Save(m).Error
+	}
+	if err != nil {
+		panic(err)
+	}
+	return created
 }
 
 // TableName :
@@ -72,16 +97,23 @@ func (m *Migration) TableName() string {
 
 // ToString :
 func (m *Migration) ToString() string {
-	flag := "*"
+	flag := ""
 	remark := ""
-	if m.RollbackAt != nil {
+	switch m.Status {
+	case MigrationStatusMigrated:
 		flag = "+"
-		remark = fmt.Sprintf("(%s)", m.RollbackAt.Format("2006-01-02 15:04:05"))
-	} else if m.MigrateAt != nil {
-		flag = "-"
 		remark = fmt.Sprintf("(%s)", m.MigrateAt.Format("2006-01-02 15:04:05"))
-	} else if m.fetched {
+	case MigrationStatusRollbacked:
+		flag = "-"
+		remark = fmt.Sprintf("(%s)", m.RollbackAt.Format("2006-01-02 15:04:05"))
+	case MigrationStatusMigrating:
+		flag = "*"
+	case MigrationStatusError:
+		flag = "x"
+	case MigrationStatusNone:
 		flag = " "
+	default:
+		flag = "?"
 	}
 	return fmt.Sprintf("[%s]%s%s", flag, m.Name, remark)
 }
@@ -208,7 +240,40 @@ func (c *Command) ListAction() error {
 
 // RunAction :
 func (c *Command) RunAction() error {
-	return nil
+	var (
+		migrations = c.GetMigrationsByMethod()
+		db         = storage.GetDBConnection()
+		err        error
+		fun        MigrateFunc
+	)
+	for _, migration := range migrations {
+		if err != nil {
+			break
+		}
+
+		migration.MigrateAt = time.Now()
+		migration.Status = MigrationStatusMigrating
+		info := migration.ToString()
+		if migration.FetchFromDB() {
+			fmt.Printf("%s\n", migration.ToString())
+			continue
+		}
+		fmt.Printf("%s\n", info)
+
+		db.LogMode(true)
+		fun = migration.GetMigrateFunc()
+		if fun != nil {
+			err = fun(migration, db)
+			migration.Status = MigrationStatusMigrated
+		}
+		if fun == nil || err != nil {
+			migration.Status = MigrationStatusError
+		}
+		db.LogMode(false)
+		migration.MigrateAt = time.Now()
+		migration.SaveToDB()
+	}
+	return err
 }
 
 // Run : run command
