@@ -63,3 +63,20 @@ test: init
 .PHONY: lint
 lint:
 	${GOENV} find . -type f -name "*.go" -not -path "./vendor/*" -not -path "./src/*" -exec golint {} \;
+
+.PHONY: migration
+migration:
+	$(eval migration ?= `date +%y%m%d%H%M%S`)
+	@echo "package migration \n\
+	\n\
+	import \"friday/storage\"\n\
+	\n\
+	// Migrate${migration} :\n\
+	func (c *Command) Migrate${migration}(migration *Migration, conn *storage.DatabaseConnection) error { \n\
+	\n\
+	}\n\
+	\n\
+	// Rollback${migration} :\n\
+	func (c *Command) Rollback${migration}(migration *Migration, conn *storage.DatabaseConnection) error { \n\
+	    return nil\n\
+	}"> storage/migration/migration${migration}.go
