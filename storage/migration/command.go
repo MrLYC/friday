@@ -245,20 +245,20 @@ func (c *Command) RunAction() error {
 		db         = storage.GetDBConnection()
 		err        error
 		fun        MigrateFunc
+		fetched    bool
 	)
 	for _, migration := range migrations {
 		if err != nil {
 			break
 		}
 
-		migration.MigrateAt = time.Now()
 		migration.Status = MigrationStatusMigrating
-		info := migration.ToString()
-		if migration.FetchFromDB() {
-			fmt.Printf("%s\n", migration.ToString())
+		fetched = migration.FetchFromDB()
+		fmt.Printf("%s\n", migration.ToString())
+
+		if fetched {
 			continue
 		}
-		fmt.Printf("%s\n", info)
 
 		db.LogMode(true)
 		fun = migration.GetMigrateFunc()
