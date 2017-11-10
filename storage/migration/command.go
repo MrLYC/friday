@@ -228,8 +228,8 @@ func (c *Command) GetMigrationsByMethod() MigrationSortedArr {
 	return migrations
 }
 
-// ListAction :
-func (c *Command) ListAction() error {
+// ActionList :
+func (c *Command) ActionList() error {
 	migrations := c.GetMigrationsByMethod()
 	for _, migration := range migrations {
 		migration.FetchFromDB()
@@ -238,8 +238,8 @@ func (c *Command) ListAction() error {
 	return nil
 }
 
-// RunAction :
-func (c *Command) RunAction() error {
+// ActionRun :
+func (c *Command) ActionRun() error {
 	var (
 		migrations = c.GetMigrationsByMethod()
 		db         = storage.GetDBConnection()
@@ -276,8 +276,8 @@ func (c *Command) RunAction() error {
 	return err
 }
 
-// CancelAction :
-func (c *Command) CancelAction() error {
+// ActionRollback :
+func (c *Command) ActionRollback() error {
 	var (
 		migrations = c.GetMigrationsByMethod()
 		db         = storage.GetDBConnection()
@@ -316,11 +316,11 @@ func (c *Command) Run() error {
 	}
 	switch c.Action {
 	case "list":
-		return c.ListAction()
+		return c.ActionList()
 	case "run":
-		return c.RunAction()
+		return c.ActionRun()
 	case "rollback":
-		return c.CancelAction()
+		return c.ActionRollback()
 	}
 	return nil
 }
