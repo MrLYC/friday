@@ -276,6 +276,35 @@ func (c *Command) RunAction() error {
 	return err
 }
 
+// CancelAction :
+func (c *Command) CancelAction() error {
+	var (
+		migrations = c.GetMigrationsByMethod()
+		db         = storage.GetDBConnection()
+		fun        MigrateFunc
+		err        error
+	)
+	for index := len(migrations) - 1; index >= 0; index-- {
+		migration := migrations[index]
+		migration.FetchFromDB()
+		if migration.Status == MigrationStatusMigrated || migration.Status == MigrationStatusError {
+			db.LogMode(true)
+			fun = migration.GetRollbackFunc()
+			if fun != nil {
+				err = fun(migration, db)
+				migration.Status = MigrationStatusRollbacked
+			}
+			if fun == nil || err != nil {
+				migration.Status = MigrationStatusError
+			}
+			db.LogMode(false)
+			migration.SaveToDB()
+			break
+		}
+	}
+	return err
+}
+
 // Run : run command
 func (c *Command) Run() error {
 	db := storage.GetDBConnection()
@@ -290,6 +319,8 @@ func (c *Command) Run() error {
 		return c.ListAction()
 	case "run":
 		return c.RunAction()
+	case "rollback":
+		return c.CancelAction()
 	}
 	return nil
 }
