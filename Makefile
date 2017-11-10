@@ -18,11 +18,11 @@ RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release
 
 .PHONY: release
 release: ${SRCDIR}
-	${GO} build -i -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
+	${GO} build -i -tags dball -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
 
 .PHONY: build
 build: ${SRCDIR}
-	${GO} build -i -ldflags="${DEBUGLDFLAGS}" -o ${TARGET} friday
+	${GO} build -i -tags dbsqlite -ldflags="${DEBUGLDFLAGS}" -o ${TARGET} friday
 
 ${SRCDIR}:
 	mkdir -p bin

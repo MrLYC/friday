@@ -1,8 +1,10 @@
-hash: 516dfc716be354ee093d5baadc983f46c2dccbb5ce213ce89bbe682e615681bf
-updated: 2017-11-08T17:47:50.517587954Z
+hash: 94927ed9082d99433fc2b0a747cb74a6ecb213e1d0bc49871b5cabebb510dc58
+updated: 2017-11-10T02:23:27.56535199Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
+- name: github.com/denisenkom/go-mssqldb
+  version: 88555645b640cc621e32f8693d7586a1aa1575f4
 - name: github.com/dghubble/sling
   version: eb56e89ac5088bebb12eef3cb4b293300f43608b
 - name: github.com/emirpasic/gods
@@ -30,6 +32,8 @@ imports:
   - trees/btree
   - trees/redblacktree
   - utils
+- name: github.com/go-sql-driver/mysql
+  version: fade21009797158e7b79e04c340118a9220c6f9e
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
@@ -47,6 +51,11 @@ imports:
   version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
 - name: github.com/kr/text
   version: 7cafcd837844e784b526369c9bce262804aebc60
+- name: github.com/lib/pq
+  version: b609790bd85edf8e9ab7e0f8912750a786177bcf
+  subpackages:
+  - hstore
+  - oid
 - name: github.com/mattn/go-sqlite3
   version: 5160b48509cf5c877bc22c11c373f8c7738cdb38
 - name: github.com/pmezard/go-difflib
@@ -64,6 +73,7 @@ imports:
 - name: golang.org/x/crypto
   version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
   subpackages:
+  - md4
   - ssh/terminal
 - name: golang.org/x/net
   version: a337091b0525af65de94df2eb7e98bd9962dcbe2
@@ -75,7 +85,7 @@ imports:
   - unix
   - windows
 - name: golang.org/x/tools
-  version: 05e91d06384e3a4eb0aba75560d254b8d5a7b431
+  version: bce7a99f8ae89e194045114404fcc6287b1f8722
   subpackages:
   - go/vcs
 - name: gopkg.in/validator.v2
