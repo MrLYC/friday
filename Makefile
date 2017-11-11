@@ -1,3 +1,6 @@
+space := ${space} ${space}
+comma := ,
+
 VERSION := 0.0.1
 ROOTDIR := $(shell pwd)
 APPNAME := friday
@@ -12,12 +15,12 @@ GLIDE := ${GOENV} glide
 GLIDEYAML := ${ROOTDIR}/glide.yaml
 GLIDELOCK := ${ROOTDIR}/glide.lock
 
-LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
-DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug
-RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release
-
 DEBUGBUILDTAGS := debug dbsqlite
 RELEASEBUILDTAGS := release dball
+
+LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
+DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug -X ${APPNAME}/config.BuildTag=$(subst ${space},${comma},${DEBUGBUILDTAGS})
+RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release -X ${APPNAME}/config.BuildTag=$(subst ${space},${comma},${RELEASEBUILDTAGS})
 
 .PHONY: release
 release: ${SRCDIR}

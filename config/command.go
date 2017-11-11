@@ -23,6 +23,7 @@ func (c *VersionCommand) SetFlags() {
 func (c *VersionCommand) Run() error {
 	fmt.Printf("Version: %v\n", Version)
 	fmt.Printf("Mode: %v\n", Mode)
+	fmt.Printf("BuildTag: %v\n", BuildTag)
 	return nil
 }
 
