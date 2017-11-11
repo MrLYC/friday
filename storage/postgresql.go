@@ -1,4 +1,4 @@
-// +build dball dbpostgres
+// +build dball dbpostgresql
 
 package storage
 

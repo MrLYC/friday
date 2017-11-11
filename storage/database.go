@@ -27,7 +27,7 @@ var dbConnection *DatabaseConnection
 // ConnectDatabase :
 func ConnectDatabase() (*DatabaseConnection, error) {
 	conf := config.Configuration.Database
-	db, err := gorm.Open(conf.Type, conf.Name)
+	db, err := gorm.Open(conf.Type, conf.GetConnectionString())
 	if err != nil {
 		return nil, err
 	}
