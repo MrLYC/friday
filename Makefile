@@ -16,13 +16,16 @@ LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
 DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug
 RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release
 
+DEBUGBUILDTAGS := debug dbsqlite
+RELEASEBUILDTAGS := release dball
+
 .PHONY: release
 release: ${SRCDIR}
-	${GO} build -i -tags dball -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
+	${GO} build -i -tags "${RELEASEBUILDTAGS}" -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
 
 .PHONY: build
 build: ${SRCDIR}
-	${GO} build -i -tags dbsqlite -ldflags="${DEBUGLDFLAGS}" -o ${TARGET} friday
+	${GO} build -i -tags "${DEBUGBUILDTAGS}" -ldflags="${DEBUGLDFLAGS}" -o ${TARGET} friday
 
 ${SRCDIR}:
 	mkdir -p bin
