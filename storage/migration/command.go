@@ -28,7 +28,7 @@ type Migration struct {
 	ID         uint `gorm:"primary_key"`
 	CreatedAt  time.Time
 	MigrateAt  time.Time
-	RollbackAt time.Time
+	RollbackAt *time.Time
 	Status     string `gorm:"size:32"`
 	Name       string `gorm:"size:32"`
 
@@ -256,7 +256,7 @@ func (c *Command) ActionRun() error {
 		fetched = migration.FetchFromDB()
 		fmt.Printf("%s\n", migration.ToString())
 
-		if fetched {
+		if fetched && migration.RollbackAt == nil {
 			continue
 		}
 
@@ -271,6 +271,7 @@ func (c *Command) ActionRun() error {
 		}
 		db.LogMode(false)
 		migration.MigrateAt = time.Now()
+		migration.RollbackAt = nil
 		migration.SaveToDB()
 	}
 	return err
@@ -281,6 +282,7 @@ func (c *Command) ActionRollback() error {
 	var (
 		migrations = c.GetMigrationsByMethod()
 		db         = storage.GetDBConnection()
+		now        = time.Now()
 		fun        MigrateFunc
 		err        error
 	)
@@ -298,6 +300,7 @@ func (c *Command) ActionRollback() error {
 				migration.Status = MigrationStatusError
 			}
 			db.LogMode(false)
+			migration.RollbackAt = &now
 			migration.SaveToDB()
 			break
 		}
