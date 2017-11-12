@@ -8,6 +8,7 @@ SRCDIR := src/friday
 TARGET := bin/friday
 
 TESTSHROOT := ${ROOTDIR}/testdata/scripts
+TESTLUAROOT := ${ROOTDIR}/testdata/lua
 
 GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
@@ -71,6 +72,10 @@ test: init
 .PHONY: test-scripts
 test-scripts:
 	${TESTSHROOT}/migrate_test.sh
+
+.PHONY: test-lua
+test-lua:
+	${TARGET} vm -path ${TESTLUAROOT}/hello_world.lua
 
 .PHONY: lint
 lint:

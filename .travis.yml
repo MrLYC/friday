@@ -12,6 +12,7 @@ script:
     - make release
     - make test
     - make test-scripts
+    - make test-lua
 branches:
     only:
         - master
