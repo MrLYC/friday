@@ -7,6 +7,8 @@ APPNAME := friday
 SRCDIR := src/friday
 TARGET := bin/friday
 
+TESTSHROOT := ${ROOTDIR}/testdata/scripts
+
 GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
@@ -65,6 +67,10 @@ install: ${GLIDELOCK}
 test: init
 	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq)))
 	${GOENV} go test ${packages}
+
+.PHONY: test-scripts
+test-scripts:
+	${TESTSHROOT}/migrate_test.sh
 
 .PHONY: lint
 lint:

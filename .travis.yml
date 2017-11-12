@@ -11,6 +11,7 @@ script:
     - make build
     - make release
     - make test
+    - make test-scripts
 branches:
     only:
         - master
