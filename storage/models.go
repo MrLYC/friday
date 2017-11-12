@@ -19,3 +19,8 @@ func (m *Model) IsExpireAt(time time.Time) bool {
 	}
 	return m.DeletedAt.Before(time)
 }
+
+// BeforeUpdate :
+func (m *Model) BeforeUpdate() (err error) {
+	m.UpdatedAt = time.Now()
+}
