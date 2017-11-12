@@ -70,6 +70,7 @@ func main() {
 	err := commandInfo.Command.Run()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err)
+		os.Exit(-1)
 	}
 	postCommandRun(commandInfo)
 }
