@@ -53,7 +53,6 @@ dev-init: init
 	echo 'make test || exit $?' > .git/hooks/pre-push
 	chmod +x .git/hooks/pre-push
 
-
 .PHONY: update
 update: ${SRCDIR}
 	${GLIDE} update
@@ -71,11 +70,10 @@ test: init
 
 .PHONY: test-scripts
 test-scripts:
-	${TESTSHROOT}/migrate_test.sh
-
-.PHONY: test-lua
-test-lua:
-	${TARGET} vm -path ${TESTLUAROOT}/hello_world.lua
+	find ${TESTSHROOT} -name '*.sh' | while read script; do \
+		echo $${script}; \
+		env ROOTDIR=${ROOTDIR} TARGET=${TARGET} TESTSHROOT=${TESTSHROOT} TESTLUAROOT=${TESTLUAROOT} GO={GO} $${script} || exit $$? ; \
+	done
 
 .PHONY: lint
 lint:
