@@ -26,19 +26,30 @@ func (m *Model) BeforeUpdate() (err error) {
 	return nil
 }
 
+// TModelStatus :
+type TModelStatus int
+
+// ModelStatus
+const (
+	ModelStatusBusy   TModelStatus = iota
+	ModelStatusNormal TModelStatus = iota
+)
+
 // Item :
 type Item struct {
 	Model
 
-	Tags  []ItemTag `gorm:"many2many:item_tags;"`
-	Key   string    `gorm:"type:varchar(255)" sql:"index"`
-	Value string    `gorm:"type:varchar(65535)"`
-	Type  string    `gorm:"type:varchar(64)" sql:"index"`
+	Tags   []ItemTag    `gorm:"many2many:item_tags;"`
+	Key    string       `gorm:"type:varchar(255)" sql:"index"`
+	Value  string       `gorm:"type:varchar(65535)"`
+	Type   string       `gorm:"type:varchar(64)" sql:"index"`
+	Status TModelStatus `sql:"index"`
 }
 
 // ItemTag :
 type ItemTag struct {
 	Model
 
-	Name string `gorm:"type:varchar(255)" sql:"index"`
+	Name   string       `gorm:"type:varchar(255)" sql:"index"`
+	Status TModelStatus `sql:"index"`
 }
