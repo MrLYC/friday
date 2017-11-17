@@ -17,7 +17,7 @@ func TestModelIsExpireAt(t *testing.T) {
 		t.Errorf("expire error")
 	}
 
-	model.DeletedAt = &time1
+	model.ExpiredAt = &time1
 	if model.IsExpireAt(time0) {
 		t.Errorf("expire error")
 	}

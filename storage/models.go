@@ -9,15 +9,23 @@ type Model struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
-	DeletedAt *time.Time `sql:"index"`
+	ExpiredAt *time.Time `sql:"index"`
 }
 
 // IsExpireAt :
 func (m *Model) IsExpireAt(time time.Time) bool {
-	if m.DeletedAt == nil {
+	if m.ExpiredAt == nil {
 		return false
 	}
-	return m.DeletedAt.Before(time)
+	return m.ExpiredAt.Before(time)
+}
+
+// BeforeCreate :
+func (m *Model) BeforeCreate() (err error) {
+	m.CreatedAt = time.Now()
+	m.UpdatedAt = time.Now()
+	m.ExpiredAt = nil
+	return nil
 }
 
 // BeforeUpdate :
@@ -33,6 +41,14 @@ type TModelStatus int
 const (
 	ModelStatusBusy   TModelStatus = iota
 	ModelStatusNormal TModelStatus = iota
+)
+
+// ItemTagType
+const (
+	ItemTagTypeString = "STRING"
+	ItemTagTypeList   = "LIST"
+	ItemTagTypeTable  = "TABLE"
+	ItemTagTypeSet    = "SET"
 )
 
 // Item :
