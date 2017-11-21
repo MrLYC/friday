@@ -16,7 +16,7 @@ func (c *Command) Migrate171118005546(migration *Migration, conn *storage.Databa
 	for _, name := range []string{
 		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable, ItemTagTypeSet,
 	} {
-		conn.Create(&ItemTag171112224339{
+		conn.Create(&ItemTag1{
 			Name:      name,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -30,7 +30,7 @@ func (c *Command) Rollback171118005546(migration *Migration, conn *storage.Datab
 	for _, name := range []string{
 		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable, ItemTagTypeSet,
 	} {
-		conn.Delete(ItemTag171112224339{}, "name = ?", name)
+		conn.Delete(ItemTag1{}, "name = ?", name)
 	}
 	return nil
 }

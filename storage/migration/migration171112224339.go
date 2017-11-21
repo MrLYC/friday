@@ -5,8 +5,8 @@ import (
 	"time"
 )
 
-// ItemTag171112224339 :
-type ItemTag171112224339 struct {
+// ItemTag1 :
+type ItemTag1 struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
@@ -17,37 +17,37 @@ type ItemTag171112224339 struct {
 }
 
 // TableName :
-func (ItemTag171112224339) TableName() string {
+func (ItemTag1) TableName() string {
 	return "item_tags"
 }
 
-// Item171112224339 :
-type Item171112224339 struct {
+// Item1 :
+type Item1 struct {
 	ID        uint `gorm:"primary_key"`
 	CreatedAt time.Time
 	UpdatedAt time.Time
 	ExpireAt  *time.Time `sql:"index"`
 
-	Tags   []ItemTag171112224339 `gorm:"many2many:item_tags;"`
-	Key    string                `gorm:"type:varchar(255)" sql:"index"`
-	Value  string                `gorm:"type:varchar(65535)"`
-	Type   string                `gorm:"type:varchar(64)" sql:"index"`
-	Status int                   `sql:"index"`
+	Tags   []ItemTag1 `gorm:"many2many:item_tags;"`
+	Key    string     `gorm:"type:varchar(255)" sql:"index"`
+	Value  string     `gorm:"type:varchar(65535)"`
+	Type   string     `gorm:"type:varchar(64)" sql:"index"`
+	Status int        `sql:"index"`
 }
 
 // TableName :
-func (Item171112224339) TableName() string {
+func (Item1) TableName() string {
 	return "items"
 }
 
 // Migrate171112224339 :
 func (c *Command) Migrate171112224339(migration *Migration, conn *storage.DatabaseConnection) error {
-	conn.AutoMigrate(ItemTag171112224339{}, Item171112224339{})
+	conn.AutoMigrate(ItemTag1{}, Item1{})
 	return nil
 }
 
 // Rollback171112224339 :
 func (c *Command) Rollback171112224339(migration *Migration, conn *storage.DatabaseConnection) error {
-	conn.DropTable(ItemTag171112224339{}.TableName(), Item171112224339{}.TableName())
+	conn.DropTable(ItemTag1{}.TableName(), Item1{}.TableName())
 	return nil
 }
