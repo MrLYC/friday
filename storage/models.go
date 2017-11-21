@@ -46,6 +46,14 @@ type Item struct {
 	Status TModelStatus `sql:"index"`
 }
 
+// ItemTagTypes
+const (
+	ItemTagTypeString = "STRING"
+	ItemTagTypeList   = "LIST"
+	ItemTagTypeTable  = "TABLE"
+	ItemTagTypeSet    = "SET"
+)
+
 // ItemTag :
 type ItemTag struct {
 	Model

@@ -12,8 +12,7 @@ EOF
 ${TARGET} confinfo -c ${conf_file}
 ${TARGET} migrate -c ${conf_file} -action rollback || exit $?
 ${TARGET} migrate -c ${conf_file} || exit $?
-${TARGET} migrate -c ${conf_file} -action rollback || exit $?
-${TARGET} migrate -c ${conf_file} || exit $?
+${TARGET} migrate -c ${conf_file} -action rebuild || exit $?
 ${TARGET} migrate -c ${conf_file} -action list || exit $?
 
 rm -rf "${dbname}"

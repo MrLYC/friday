@@ -118,26 +118,26 @@ func (m *Migration) ToString() string {
 	return fmt.Sprintf("[%s]%s%s", flag, m.Name, remark)
 }
 
-// MigrationSortedArr :
-type MigrationSortedArr []*Migration
+// SortedMigrationArr :
+type SortedMigrationArr []*Migration
 
 // Len :
-func (m MigrationSortedArr) Len() int {
+func (m SortedMigrationArr) Len() int {
 	return len(m)
 }
 
 // Swap :
-func (m MigrationSortedArr) Swap(i int, j int) {
+func (m SortedMigrationArr) Swap(i int, j int) {
 	m[i], m[j] = m[j], m[i]
 }
 
 // Less :
-func (m MigrationSortedArr) Less(i int, j int) bool {
+func (m SortedMigrationArr) Less(i int, j int) bool {
 	return m[i].CreatedAt.Before(m[j].CreatedAt)
 }
 
 // Sort :
-func (m MigrationSortedArr) Sort() {
+func (m SortedMigrationArr) Sort() {
 	sort.Sort(m)
 }
 
@@ -182,7 +182,7 @@ func reflectMigrateFunc(method reflect.Value) MigrateFunc {
 }
 
 // GetMigrationsByMethod :
-func (c *Command) GetMigrationsByMethod() MigrationSortedArr {
+func (c *Command) GetMigrationsByMethod() SortedMigrationArr {
 	var (
 		err                  error
 		ok                   bool
@@ -191,7 +191,7 @@ func (c *Command) GetMigrationsByMethod() MigrationSortedArr {
 		number               = rvalue.NumMethod()
 		migrateMethodPrefix  = "Migrate"
 		rollbackMethodPrefix = "Rollback"
-		migrations           = make(MigrationSortedArr, 0)
+		migrations           = make(SortedMigrationArr, 0)
 		migration            *Migration
 		migrateMethod        reflect.Value
 		rollbackMethod       reflect.Value
@@ -277,8 +277,8 @@ func (c *Command) ActionRun() error {
 	return err
 }
 
-// ActionRollback :
-func (c *Command) ActionRollback() error {
+// Rollback :
+func (c *Command) Rollback(callback func(*Migration) bool) error {
 	var (
 		migrations = c.GetMigrationsByMethod()
 		db         = storage.GetDBConnection()
@@ -302,10 +302,35 @@ func (c *Command) ActionRollback() error {
 			db.LogMode(false)
 			migration.RollbackAt = &now
 			migration.SaveToDB()
-			break
+			if !callback(migration) {
+				break
+			}
 		}
 	}
 	return err
+}
+
+// ActionRollback :
+func (c *Command) ActionRollback() error {
+	return c.Rollback(func(m *Migration) bool {
+		return false
+	})
+}
+
+// ActionRollbackAll :
+func (c *Command) ActionRollbackAll() error {
+	return c.Rollback(func(m *Migration) bool {
+		return true
+	})
+}
+
+// ActionRebuild :
+func (c *Command) ActionRebuild() error {
+	err := c.ActionRollbackAll()
+	if err != nil {
+		return err
+	}
+	return c.ActionRun()
 }
 
 // Run : run command
@@ -324,6 +349,10 @@ func (c *Command) Run() error {
 		return c.ActionRun()
 	case "rollback":
 		return c.ActionRollback()
+	case "clear":
+		return c.ActionRollbackAll()
+	case "rebuild":
+		return c.ActionRebuild()
 	}
 	return nil
 }
