@@ -61,6 +61,8 @@ func (d *Database) Init() {
 		case "dbmssql":
 			d.initSQLServer()
 			return
+		default:
+			d.initSQLite()
 		}
 	}
 }

@@ -8,15 +8,14 @@ const (
 	ItemTagTypeString = "STRING"
 	ItemTagTypeList   = "LIST"
 	ItemTagTypeTable  = "TABLE"
-	ItemTagTypeSet    = "SET"
 )
 
 // Migrate171118005546 :
 func (c *Command) Migrate171118005546(migration *Migration, conn *storage.DatabaseConnection) error {
 	for _, name := range []string{
-		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable, ItemTagTypeSet,
+		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable,
 	} {
-		conn.Create(&ItemTag1{
+		conn.Create(&ItemTag{
 			Name:      name,
 			CreatedAt: time.Now(),
 			UpdatedAt: time.Now(),
@@ -28,9 +27,9 @@ func (c *Command) Migrate171118005546(migration *Migration, conn *storage.Databa
 // Rollback171118005546 :
 func (c *Command) Rollback171118005546(migration *Migration, conn *storage.DatabaseConnection) error {
 	for _, name := range []string{
-		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable, ItemTagTypeSet,
+		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable,
 	} {
-		conn.Delete(ItemTag1{}, "name = ?", name)
+		conn.Delete(ItemTag{}, "name = ?", name)
 	}
 	return nil
 }

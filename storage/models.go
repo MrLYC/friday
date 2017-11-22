@@ -39,7 +39,7 @@ const (
 type Item struct {
 	Model
 
-	Tags   []ItemTag    `gorm:"many2many:item_tags;"`
+	Tags   []ItemTag    `gorm:"many2many:item_tag_links;column:tag"`
 	Key    string       `gorm:"type:varchar(255)" sql:"index"`
 	Value  string       `gorm:"type:varchar(65535)"`
 	Type   string       `gorm:"type:varchar(64)" sql:"index"`
@@ -51,13 +51,13 @@ const (
 	ItemTagTypeString = "STRING"
 	ItemTagTypeList   = "LIST"
 	ItemTagTypeTable  = "TABLE"
-	ItemTagTypeSet    = "SET"
 )
 
 // ItemTag :
 type ItemTag struct {
 	Model
 
+	Items  []Item       `gorm:"many2many:item_tag_links;column:item"`
 	Name   string       `gorm:"type:varchar(255)" sql:"index"`
 	Status TModelStatus `sql:"index"`
 }

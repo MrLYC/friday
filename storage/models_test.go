@@ -1,10 +1,21 @@
 package storage_test
 
 import (
+	"friday/config"
 	"friday/storage"
+	"friday/storage/migration"
 	"testing"
 	"time"
+
+	_ "github.com/jinzhu/gorm/dialects/sqlite"
 )
+
+func rebuildDB() {
+	command := migration.Command{}
+	config.Configuration.Init()
+	command.CreateMigrationTableIfNotExists()
+	command.ActionRebuild()
+}
 
 func TestModelIsExpireAt(t *testing.T) {
 	model := storage.Model{}
@@ -27,4 +38,8 @@ func TestModelIsExpireAt(t *testing.T) {
 	if !model.IsExpireAt(time2) {
 		t.Errorf("expire error")
 	}
+}
+
+func TestModelItemCreate(t *testing.T) {
+	rebuildDB()
 }
