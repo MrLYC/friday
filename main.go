@@ -26,9 +26,8 @@ func parseCommand() *command.CommandInfo {
 	return factory.ParseCommand()
 }
 
-func initConfiguration(configPath string) {
-	config.Configuration.Init()
-	err := config.Configuration.ReadFrom(configPath)
+func initConfiguration() {
+	err := config.Configuration.Read()
 	if err != nil {
 		fmt.Fprintln(os.Stderr, err.Error())
 	}
@@ -55,16 +54,17 @@ func postCommandRun(commandInfo *command.CommandInfo) {
 }
 
 func main() {
-	var (
-		configPath string
+	flag.StringVar(
+		&(config.Configuration.ConfigurationPath),
+		"c", config.Configuration.ConfigurationPath,
+		"Configuration file",
 	)
-	flag.StringVar(&configPath, "c", "friday.yaml", "Configuration file")
 
 	preParseCommand()
 	commandInfo := parseCommand()
 	postParseCommand()
 
-	initConfiguration(configPath)
+	initConfiguration()
 
 	preCommandRun(commandInfo)
 	err := commandInfo.Command.Run()

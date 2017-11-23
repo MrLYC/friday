@@ -66,13 +66,13 @@ install: ${GLIDELOCK}
 .PHONY: test
 test: init
 	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq)))
-	${GOENV} go test ${packages}
+	${GOENV} FRIDAY_CONFIG_PATH=testdata/friday_test.yaml go test -tags "${DEBUGBUILDTAGS}" -ldflags="${DEBUGLDFLAGS}" ${packages}
 
 .PHONY: test-scripts
 test-scripts:
 	find ${TESTSHROOT} -name '*.sh' | while read script; do \
 		echo $${script}; \
-		env ROOTDIR=${ROOTDIR} TARGET=${TARGET} TESTSHROOT=${TESTSHROOT} TESTLUAROOT=${TESTLUAROOT} GO={GO} $${script} || exit $$? ; \
+		env FRIDAY_CONFIG_PATH=testdata/friday_test.yaml ROOTDIR=${ROOTDIR} TARGET=${TARGET} TESTSHROOT=${TESTSHROOT} TESTLUAROOT=${TESTLUAROOT} GO={GO} $${script} || exit $$? ; \
 	done
 
 .PHONY: lint

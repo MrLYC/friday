@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	validator "gopkg.in/validator.v2"
 	yaml "gopkg.in/yaml.v2"
@@ -15,7 +16,9 @@ type IConfiguration interface {
 
 // ConfigurationType : configuration type
 type ConfigurationType struct {
-	Version  string
+	Version           string
+	ConfigurationPath string `yaml:"configuration_path"`
+
 	Database Database `yaml:"database"`
 	Event    Event    `yaml:"event"`
 	Logging  Logging  `yaml:"logging"`
@@ -27,6 +30,11 @@ type ConfigurationType struct {
 func (c *ConfigurationType) Init() {
 	c.Version = ConfVersion
 
+	c.ConfigurationPath = os.Getenv("FRIDAY_CONFIG_PATH")
+	if c.ConfigurationPath == "" {
+		c.ConfigurationPath = "friday.yaml"
+	}
+
 	c.Database.Init()
 	c.Event.Init()
 	c.Logging.Init()
@@ -36,7 +44,13 @@ func (c *ConfigurationType) Init() {
 
 // ReadFrom : read configuration from path
 func (c *ConfigurationType) ReadFrom(path string) error {
-	data, err := ioutil.ReadFile(path)
+	c.ConfigurationPath = path
+	return c.Read()
+}
+
+// Read : read configuration
+func (c *ConfigurationType) Read() error {
+	data, err := ioutil.ReadFile(c.ConfigurationPath)
 	if err != nil {
 		return err
 	}

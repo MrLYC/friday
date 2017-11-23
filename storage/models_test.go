@@ -12,7 +12,7 @@ import (
 
 func rebuildDB() {
 	command := migration.Command{}
-	config.Configuration.Init()
+	config.Configuration.Read()
 	command.CreateMigrationTableIfNotExists()
 	command.ActionRebuild()
 }
@@ -38,8 +38,4 @@ func TestModelIsExpireAt(t *testing.T) {
 	if !model.IsExpireAt(time2) {
 		t.Errorf("expire error")
 	}
-}
-
-func TestModelItemCreate(t *testing.T) {
-	rebuildDB()
 }
