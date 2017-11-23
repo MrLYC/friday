@@ -3,6 +3,7 @@ package logging
 import (
 	"friday/config"
 	"friday/utils"
+	"os"
 
 	"github.com/sirupsen/logrus"
 )
@@ -21,11 +22,12 @@ func Init() {
 		level logrus.Level
 		err   error
 	)
-	GlobalLogger = logrus.New()
+	GlobalLogger = logrus.StandardLogger()
 	level, err = logrus.ParseLevel(conf.Level)
 	if err != nil {
 		panic(err)
 	}
+	logrus.SetOutput(os.Stdout)
 	GlobalLogger.SetLevel(level)
 }
 

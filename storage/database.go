@@ -2,6 +2,7 @@ package storage
 
 import (
 	"friday/config"
+	"friday/logging"
 	"sync"
 
 	"github.com/jinzhu/gorm"
@@ -27,7 +28,11 @@ var dbConnection *DatabaseConnection
 // ConnectDatabase :
 func ConnectDatabase() (*DatabaseConnection, error) {
 	conf := config.Configuration.Database
-	db, err := gorm.Open(conf.Type, conf.GetConnectionString())
+	connectStr := conf.GetConnectionString()
+	if config.Configuration.Debug {
+		logging.Debugf("connect string: %s", connectStr)
+	}
+	db, err := gorm.Open(conf.Type, connectStr)
 	if err != nil {
 		return nil, err
 	}
