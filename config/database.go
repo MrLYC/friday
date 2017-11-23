@@ -18,6 +18,7 @@ type Database struct {
 	Password *string `yaml:"password,omitempty"`
 }
 
+// GetConnectionString :
 func (d *Database) GetConnectionString() string {
 	if d.Connection != nil {
 		return *(d.Connection)
@@ -28,18 +29,18 @@ func (d *Database) GetConnectionString() string {
 		return d.Name
 	case "mysql":
 		return fmt.Sprintf(
-			"%s:%s@tcp(%s:%d)/dbname?charset=utf8&parseTime=True&loc=Local",
-			d.User, d.Password, d.Host, d.Port, d.Name,
+			"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
+			*(d.User), *(d.Password), *(d.Host), *(d.Port), d.Name,
 		)
 	case "postgresql":
 		return fmt.Sprintf(
 			"host=%s port=%d user=%s dbname=%s sslmode=disable password=%s",
-			d.Host, d.Port, d.User, d.Name, d.Password,
+			*(d.Host), *(d.Port), *(d.User), d.Name, *(d.Password),
 		)
 	case "mssql":
 		return fmt.Sprintf(
 			"sqlserver://%s:%s@%s:%d?database=%s",
-			d.User, d.Password, d.Host, d.Port, d.Name,
+			*(d.User), *(d.Password), *(d.Host), *(d.Port), d.Name,
 		)
 	}
 	panic(fmt.Errorf("Can not make connection string for %v", d))
