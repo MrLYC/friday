@@ -10,15 +10,24 @@ const (
 	ItemTagTypeTable  = "TABLE"
 )
 
+// ModelStatus
+const (
+	ModelStatusBusy      storage.TModelStatus = iota
+	ModelStatusNormal    storage.TModelStatus = iota
+	ModelStatusProtected storage.TModelStatus = iota
+)
+
 // Migrate171118005546 :
 func (c *Command) Migrate171118005546(migration *Migration, conn *storage.DatabaseConnection) error {
+	now := time.Now()
 	for _, name := range []string{
 		ItemTagTypeString, ItemTagTypeList, ItemTagTypeTable,
 	} {
 		conn.Create(&ItemTag{
 			Name:      name,
-			CreatedAt: time.Now(),
-			UpdatedAt: time.Now(),
+			CreatedAt: now,
+			UpdatedAt: now,
+			Status:    ModelStatusProtected,
 		})
 	}
 	return nil

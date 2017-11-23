@@ -12,9 +12,9 @@ type ItemTag struct {
 	UpdatedAt time.Time
 	ExpireAt  *time.Time `sql:"index"`
 
-	Items  []Item `gorm:"many2many:item_tag_links;column:item"`
-	Name   string `gorm:"type:varchar(255)" sql:"index"`
-	Status int    `sql:"index"`
+	Items  []Item               `gorm:"many2many:item_tag_links;column:item"`
+	Name   string               `gorm:"type:varchar(255)" sql:"index"`
+	Status storage.TModelStatus `sql:"index"`
 }
 
 // TableName :
@@ -29,11 +29,11 @@ type Item struct {
 	UpdatedAt time.Time
 	ExpireAt  *time.Time `sql:"index"`
 
-	Tags   []ItemTag `gorm:"many2many:item_tag_links;column:tag"`
-	Key    string    `gorm:"type:varchar(255)" sql:"index"`
-	Value  string    `gorm:"type:varchar(65535)"`
-	Type   string    `gorm:"type:varchar(64)" sql:"index"`
-	Status int       `sql:"index"`
+	Tags   []ItemTag            `gorm:"many2many:item_tag_links;column:tag"`
+	Key    string               `gorm:"type:varchar(255)" sql:"index"`
+	Value  string               `gorm:"type:varchar(65535)"`
+	Type   string               `gorm:"type:varchar(64)" sql:"index"`
+	Status storage.TModelStatus `sql:"index"`
 }
 
 // TableName :

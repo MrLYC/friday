@@ -31,8 +31,9 @@ type TModelStatus int
 
 // ModelStatus
 const (
-	ModelStatusBusy   TModelStatus = iota
-	ModelStatusNormal TModelStatus = iota
+	ModelStatusBusy      TModelStatus = iota
+	ModelStatusNormal    TModelStatus = iota
+	ModelStatusProtected TModelStatus = iota
 )
 
 // Item :
