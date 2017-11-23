@@ -2,8 +2,6 @@ package config
 
 import (
 	"fmt"
-
-	"gopkg.in/yaml.v2"
 )
 
 // VersionCommand : version info
@@ -42,10 +40,10 @@ func (c *ConfigurationCommand) SetFlags() {
 
 // Run : run command
 func (c *ConfigurationCommand) Run() error {
-	data, err := yaml.Marshal(Configuration)
+	data, err := Configuration.Dumps()
 	if err != nil {
 		panic(err)
 	}
-	fmt.Println(string(data))
+	fmt.Println(data)
 	return nil
 }

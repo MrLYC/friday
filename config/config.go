@@ -17,6 +17,7 @@ type IConfiguration interface {
 // ConfigurationType : configuration type
 type ConfigurationType struct {
 	Version           string
+	Debug             bool
 	ConfigurationPath string `yaml:"configuration_path"`
 
 	Database Database `yaml:"database"`
@@ -29,6 +30,7 @@ type ConfigurationType struct {
 // Init : init ConfigurationType
 func (c *ConfigurationType) Init() {
 	c.Version = ConfVersion
+	c.Debug = Mode == "debug"
 
 	c.ConfigurationPath = os.Getenv("FRIDAY_CONFIG_PATH")
 	if c.ConfigurationPath == "" {
@@ -67,6 +69,12 @@ func (c *ConfigurationType) Read() error {
 // Validate :
 func (c *ConfigurationType) Validate() error {
 	return validator.Validate(c)
+}
+
+// Dumps :
+func (c *ConfigurationType) Dumps() (string, error) {
+	data, err := yaml.Marshal(Configuration)
+	return string(data), err
 }
 
 // Configuration : global configuration

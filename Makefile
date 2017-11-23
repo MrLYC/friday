@@ -7,8 +7,9 @@ APPNAME := friday
 SRCDIR := src/friday
 TARGET := bin/friday
 
-TESTSHROOT := ${ROOTDIR}/testdata/scripts
-TESTLUAROOT := ${ROOTDIR}/testdata/lua
+TESTDATAROOT := ${ROOTDIR}/testdata
+TESTSHROOT := ${TESTDATAROOT}/scripts
+TESTLUAROOT := ${TESTDATAROOT}/lua
 
 GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
@@ -18,7 +19,7 @@ GLIDE := ${GOENV} glide
 GLIDEYAML := ${ROOTDIR}/glide.yaml
 GLIDELOCK := ${ROOTDIR}/glide.lock
 
-DEBUGBUILDTAGS := debug dbsqlite
+DEBUGBUILDTAGS := debug dball
 RELEASEBUILDTAGS := release dball
 
 LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
@@ -66,7 +67,7 @@ install: ${GLIDELOCK}
 .PHONY: test
 test: init
 	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq)))
-	${GOENV} FRIDAY_CONFIG_PATH=testdata/friday_test.yaml go test -tags "${DEBUGBUILDTAGS}" -ldflags="${DEBUGLDFLAGS}" ${packages}
+	${GOENV} FRIDAY_CONFIG_PATH=${TESTDATAROOT}/friday_test.yaml go test -tags "${DEBUGBUILDTAGS}" -ldflags="${DEBUGLDFLAGS}" ${packages}
 
 .PHONY: test-scripts
 test-scripts:
