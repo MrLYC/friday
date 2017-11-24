@@ -38,11 +38,11 @@ func TestModelItem(t *testing.T) {
 	item := &storage.Item{
 		Key:   itemKey,
 		Value: itemValue,
-		Tags: []storage.ItemTag{
-			storage.ItemTag{
+		Tags: []*storage.ItemTag{
+			&storage.ItemTag{
 				Name: tagName,
 			},
-			storage.ItemTag{
+			&storage.ItemTag{
 				Name: "test_0982345234",
 			},
 		},
@@ -63,8 +63,8 @@ func TestModelItem(t *testing.T) {
 	if err := conn.Create(&storage.Item{
 		Key:   itemKey,
 		Value: "0871234786",
-		Tags: []storage.ItemTag{
-			storage.ItemTag{
+		Tags: []*storage.ItemTag{
+			&storage.ItemTag{
 				Name: tagName,
 			},
 		},
