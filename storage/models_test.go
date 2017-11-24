@@ -42,6 +42,9 @@ func TestModelItem(t *testing.T) {
 			storage.ItemTag{
 				Name: tagName,
 			},
+			storage.ItemTag{
+				Name: "test_0982345234",
+			},
 		},
 	}
 
@@ -86,5 +89,12 @@ func TestModelItem(t *testing.T) {
 	queryItem := queryItemTag.Items[0]
 	if queryItem.Value != item.Value {
 		t.Errorf("value error: %s", queryItem.Value)
+	}
+
+	if err := conn.Model(queryItem).Related(&(queryItem.Tags), "Tags").Error; err != nil {
+		t.Error(err)
+	}
+	if len(queryItem.Tags) != 2 {
+		t.Errorf("tag query failed")
 	}
 }
