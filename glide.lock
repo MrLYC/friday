@@ -1,5 +1,5 @@
 hash: 94927ed9082d99433fc2b0a747cb74a6ecb213e1d0bc49871b5cabebb510dc58
-updated: 2017-11-10T02:23:27.56535199Z
+updated: 2017-11-25T22:12:56.796491+08:00
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1
@@ -14,26 +14,17 @@ imports:
   - lists
   - lists/arraylist
   - lists/doublylinkedlist
-  - lists/singlylinkedlist
   - maps
-  - maps/hashbidimap
-  - maps/hashmap
-  - maps/treebidimap
   - maps/treemap
   - sets
   - sets/hashset
   - sets/treeset
-  - stacks
-  - stacks/arraystack
-  - stacks/linkedliststack
   - trees
-  - trees/avltree
   - trees/binaryheap
-  - trees/btree
   - trees/redblacktree
   - utils
 - name: github.com/go-sql-driver/mysql
-  version: fade21009797158e7b79e04c340118a9220c6f9e
+  version: a0583e0143b1624142adab07e0e97fe106d99561
 - name: github.com/gorhill/cronexpr
   version: a557574d6c024ed6e36acc8b610f5f211c91568a
 - name: github.com/jinzhu/gorm
@@ -45,25 +36,15 @@ imports:
   - dialects/sqlite
 - name: github.com/jinzhu/inflection
   version: 1c35d901db3da928c72a72d8458480cc9ade058f
-- name: github.com/kr/fs
-  version: 2788f0dbd16903de03cb8186e5c7d97b69ad387b
-- name: github.com/kr/pretty
-  version: cfb55aafdaf3ec08f0db22699ab822c50091b1c4
-- name: github.com/kr/text
-  version: 7cafcd837844e784b526369c9bce262804aebc60
 - name: github.com/lib/pq
-  version: b609790bd85edf8e9ab7e0f8912750a786177bcf
+  version: 8c6ee72f3e6bcb1542298dd5f76cb74af9742cec
   subpackages:
   - hstore
   - oid
 - name: github.com/mattn/go-sqlite3
   version: 5160b48509cf5c877bc22c11c373f8c7738cdb38
-- name: github.com/pmezard/go-difflib
-  version: 792786c7400a136282c1664665ae0a8db921c6c2
-  subpackages:
-  - difflib
 - name: github.com/sirupsen/logrus
-  version: 89742aefa4b206dcf400792f3bd35b542998eb3b
+  version: 95cd2b9c79aa5e72ab0bc69b7ccc2be15bf850f6
 - name: github.com/yuin/gopher-lua
   version: 609c9cd2697344dec90fe0543c6493e3b8da3435
   subpackages:
@@ -71,27 +52,21 @@ imports:
   - parse
   - pm
 - name: golang.org/x/crypto
-  version: 9419663f5a44be8b34ca85f08abc5fe1be11f8a3
+  version: b080dc9a8c480b08e698fb1219160d598526310f
   subpackages:
   - md4
   - ssh/terminal
 - name: golang.org/x/net
-  version: a337091b0525af65de94df2eb7e98bd9962dcbe2
+  version: c7086645de248775cbf2373cf5ca4d2fa664b8c1
   subpackages:
   - context
 - name: golang.org/x/sys
-  version: 686000749eaec0b8855b8eef5336cf63899fe51d
+  version: 4ff8c001ce4cc464e644b922325097228fce14d8
   subpackages:
   - unix
   - windows
-- name: golang.org/x/tools
-  version: bce7a99f8ae89e194045114404fcc6287b1f8722
-  subpackages:
-  - go/vcs
 - name: gopkg.in/validator.v2
   version: 460c83432a98c35224a6fe352acf8b23e067ad06
 - name: gopkg.in/yaml.v2
   version: eb3733d160e74a9c7e442f435eb3bea458e1d19f
-testImports:
-- name: github.com/cstockton/go-iter
-  version: 353ca660c5db366129be2acc4c4c6807185474e9
+testImports: []
