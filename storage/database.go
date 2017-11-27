@@ -4,6 +4,7 @@ import (
 	"friday/config"
 	"friday/logging"
 	"sync"
+	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -20,6 +21,27 @@ var (
 // DatabaseConnection :
 type DatabaseConnection struct {
 	*gorm.DB
+}
+
+// CopyWithDB :
+func (c *DatabaseConnection) CopyWithDB(db *gorm.DB) *DatabaseConnection {
+	return &DatabaseConnection{
+		DB: db,
+	}
+}
+
+// WhereNotExpires :
+func (c *DatabaseConnection) WhereNotExpires() *DatabaseConnection {
+	return c.CopyWithDB(c.Where(
+		"expire_at IS NULL OR expire_at <= ?", time.Now(),
+	))
+}
+
+// WhereExpired :
+func (c *DatabaseConnection) WhereExpired() *DatabaseConnection {
+	return c.CopyWithDB(c.Where(
+		"expire_at > ?", time.Now(),
+	))
 }
 
 var dbConectOnce sync.Once
