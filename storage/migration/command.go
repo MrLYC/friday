@@ -63,11 +63,11 @@ func (m *Migration) FetchFromDB() bool {
 		return false
 	}
 	db := storage.GetDBConnection()
-	err := db.Last(m, "name = ?", m.Name).Error
-	if err == storage.ErrRecordNotFound {
+	result := db.Last(m, "name = ?", m.Name)
+	if result.RecordNotFound() {
 		return false
-	} else if err != nil {
-		panic(err)
+	} else if result.Error != nil {
+		panic(result.Error)
 	}
 	return true
 }
