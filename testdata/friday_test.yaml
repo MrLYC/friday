@@ -4,3 +4,4 @@ debug: true
 includes:
   - ./config/logging.yaml
   - config/sqlite3.yaml
+  - config/migration.yaml

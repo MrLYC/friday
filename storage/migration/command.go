@@ -8,6 +8,7 @@ import (
 	"strings"
 	"time"
 
+	"friday/config"
 	"friday/storage"
 )
 
@@ -246,6 +247,7 @@ func (c *Command) ActionRun() error {
 		err        error
 		fun        MigrateFunc
 		fetched    bool
+		conf       = config.Configuration.Migration
 	)
 	for _, migration := range migrations {
 		if err != nil {
@@ -260,7 +262,9 @@ func (c *Command) ActionRun() error {
 			continue
 		}
 
-		db.LogMode(true)
+		if conf.LogMode {
+			db.LogMode(true)
+		}
 		fun = migration.GetMigrateFunc()
 		if fun != nil {
 			err = fun(migration, db)
@@ -269,7 +273,11 @@ func (c *Command) ActionRun() error {
 		if fun == nil || err != nil {
 			migration.Status = MigrationStatusError
 		}
-		db.LogMode(false)
+
+		if conf.LogMode {
+			db.LogMode(false)
+		}
+
 		migration.MigrateAt = time.Now()
 		migration.RollbackAt = nil
 		migration.SaveToDB()
@@ -285,12 +293,17 @@ func (c *Command) Rollback(callback func(*Migration) bool) error {
 		now        = time.Now()
 		fun        MigrateFunc
 		err        error
+		conf       = config.Configuration.Migration
 	)
 	for index := len(migrations) - 1; index >= 0; index-- {
 		migration := migrations[index]
 		migration.FetchFromDB()
 		if migration.Status == MigrationStatusMigrated || migration.Status == MigrationStatusError {
-			db.LogMode(true)
+
+			if conf.LogMode {
+				db.LogMode(true)
+			}
+
 			fun = migration.GetRollbackFunc()
 			if fun != nil {
 				err = fun(migration, db)
@@ -299,7 +312,11 @@ func (c *Command) Rollback(callback func(*Migration) bool) error {
 			if fun == nil || err != nil {
 				migration.Status = MigrationStatusError
 			}
-			db.LogMode(false)
+
+			if conf.LogMode {
+				db.LogMode(false)
+			}
+
 			migration.RollbackAt = &now
 			migration.SaveToDB()
 			if !callback(migration) {
