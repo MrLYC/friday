@@ -13,11 +13,16 @@ type Model struct {
 }
 
 // IsExpireAt :
-func (m *Model) IsExpireAt(time time.Time) bool {
+func (m *Model) IsExpireAt(t time.Time) bool {
 	if m.ExpireAt == nil {
 		return false
 	}
-	return m.ExpireAt.Before(time)
+	return m.ExpireAt.Before(t)
+}
+
+// MakeExpireAt :
+func (m *Model) MakeExpireAt(t time.Time) {
+	m.ExpireAt = &t
 }
 
 // BeforeUpdate :

@@ -33,15 +33,15 @@ func (c *DatabaseConnection) CopyWithDB(db *gorm.DB) *DatabaseConnection {
 // WhereNotExpires :
 func (c *DatabaseConnection) WhereNotExpires() *DatabaseConnection {
 	return c.CopyWithDB(c.Where(
-		"expire_at IS NULL OR expire_at <= ?", time.Now(),
-	))
+		"expire_at IS NULL OR expire_at >= ?", time.Now(),
+	).Where("status = ?", ModelStatusNormal))
 }
 
 // WhereExpired :
 func (c *DatabaseConnection) WhereExpired() *DatabaseConnection {
 	return c.CopyWithDB(c.Where(
-		"expire_at > ?", time.Now(),
-	))
+		"expire_at < ?", time.Now(),
+	).Where("status = ?", ModelStatusNormal))
 }
 
 var dbConectOnce sync.Once
