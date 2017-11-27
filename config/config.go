@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
 
 	validator "gopkg.in/validator.v2"
 	yaml "gopkg.in/yaml.v2"
@@ -19,6 +20,9 @@ type ConfigurationType struct {
 	Version           string
 	Debug             bool
 	ConfigurationPath string `yaml:"configuration_path"`
+
+	StrictInclude bool     `yaml:"strict_include"`
+	Includes      []string `yaml:"includes,omitempty"`
 
 	Database Database `yaml:"database"`
 	Event    Event    `yaml:"event"`
@@ -37,6 +41,8 @@ func (c *ConfigurationType) Init() {
 		c.ConfigurationPath = "friday.yaml"
 	}
 
+	c.StrictInclude = true
+
 	c.Database.Init()
 	c.Event.Init()
 	c.Logging.Init()
@@ -46,13 +52,7 @@ func (c *ConfigurationType) Init() {
 
 // ReadFrom : read configuration from path
 func (c *ConfigurationType) ReadFrom(path string) error {
-	c.ConfigurationPath = path
-	return c.Read()
-}
-
-// Read : read configuration
-func (c *ConfigurationType) Read() error {
-	data, err := ioutil.ReadFile(c.ConfigurationPath)
+	data, err := ioutil.ReadFile(path)
 	if err != nil {
 		return err
 	}
@@ -60,8 +60,35 @@ func (c *ConfigurationType) Read() error {
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+// Read : read configuration
+func (c *ConfigurationType) Read() error {
+	var err error
+
+	err = c.ReadFrom(c.ConfigurationPath)
+	if err != nil {
+		return err
+	}
+
+	dirPath, _ := filepath.Split(c.ConfigurationPath)
+
+	for _, p := range c.Includes {
+		if !filepath.IsAbs(p) {
+			p, err = filepath.Abs(filepath.Join(dirPath, p))
+			if c.StrictInclude && err != nil {
+				return err
+			}
+		}
+		err = c.ReadFrom(p)
+		if c.StrictInclude && err != nil {
+			return err
+		}
+	}
+
 	if c.Version != ConfVersion {
-		panic(fmt.Errorf("Unknown configuration version: %v", c.Version))
+		return fmt.Errorf("Unknown configuration version: %v", c.Version)
 	}
 	return nil
 }

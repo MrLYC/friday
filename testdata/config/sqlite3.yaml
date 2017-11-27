@@ -1,0 +1,3 @@
+database:
+  type: sqlite3
+  name: /tmp/friday_test.db

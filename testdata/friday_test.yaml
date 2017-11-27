@@ -1,9 +1,6 @@
 version: v1
 debug: true
 
-database:
-  type: sqlite3
-  name: /tmp/friday_test.db
-
-logging:
-  level: debug
+includes:
+  - ./config/logging.yaml
+  - config/sqlite3.yaml
