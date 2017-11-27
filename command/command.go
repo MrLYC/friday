@@ -1,10 +1,28 @@
 package command
 
+import (
+	"strings"
+)
+
 // ICommand : command interface
 type ICommand interface {
 	GetDescription() string
 	SetFlags()
 	Run() error
+}
+
+// TFlagStringArr :
+type TFlagStringArr []string
+
+// String :
+func (i *TFlagStringArr) String() string {
+	return strings.Join([]string(*i), ",")
+}
+
+// Set :
+func (i *TFlagStringArr) Set(value string) error {
+	*i = append(*i, value)
+	return nil
 }
 
 // BaseCommand : base command

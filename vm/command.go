@@ -3,11 +3,13 @@ package vm
 import (
 	"flag"
 	"io/ioutil"
+
+	"friday/command"
 )
 
 // Command :
 type Command struct {
-	Path string
+	Path command.TFlagStringArr
 }
 
 // GetDescription : get command description
@@ -17,19 +19,28 @@ func (c *Command) GetDescription() string {
 
 // SetFlags : set parsing flags
 func (c *Command) SetFlags() {
-	flag.StringVar(&(c.Path), "path", "", "Path to lua file")
+	flag.Var(&c.Path, "path", "Path to lua file")
 }
 
 // Run : run command
 func (c *Command) Run() error {
-	data, err := ioutil.ReadFile(c.Path)
-	if err != nil {
-		return err
-	}
-
 	vm := &VM{}
 	vm.Init()
-	vm.Execute(string(data))
+
+	for _, i := range c.Path {
+		path := string(i)
+		if path == "" {
+			continue
+		}
+		data, err := ioutil.ReadFile(path)
+		if err != nil {
+			return err
+		}
+		err = vm.Execute(string(data))
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }
