@@ -75,8 +75,9 @@ func (c *ConfigurationType) Read() error {
 	}
 
 	dirPath, _ := filepath.Split(c.ConfigurationPath)
+	includes := c.Includes
 
-	for _, p := range c.Includes {
+	for _, p := range includes {
 		if !filepath.IsAbs(p) {
 			p, err = filepath.Abs(filepath.Join(dirPath, p))
 			if c.StrictInclude && err != nil {
@@ -88,6 +89,7 @@ func (c *ConfigurationType) Read() error {
 			return err
 		}
 	}
+	c.Includes = includes
 
 	if c.Version != ConfVersion {
 		return fmt.Errorf("Unknown configuration version: %v", c.Version)
