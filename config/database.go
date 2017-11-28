@@ -48,10 +48,10 @@ func (d *Database) GetConnectionString() string {
 
 // Init : init Database
 func (d *Database) Init() {
+	d.initSQLite()
 	for _, t := range strings.Split(BuildTag, ",") {
 		switch t {
 		case "dball", "dbsqlite":
-			d.initSQLite()
 			return
 		case "dbmysql":
 			d.initMySQL()
@@ -62,8 +62,6 @@ func (d *Database) Init() {
 		case "dbmssql":
 			d.initSQLServer()
 			return
-		default:
-			d.initSQLite()
 		}
 	}
 }
