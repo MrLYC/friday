@@ -68,28 +68,32 @@ func (c *ConfigurationType) ReadFrom(path string) error {
 // Read : read configuration
 func (c *ConfigurationType) Read() error {
 	var err error
+	confPath := c.ConfigurationPath
 
-	err = c.ReadFrom(c.ConfigurationPath)
+	err = c.ReadFrom(confPath)
 	if err != nil {
 		return err
 	}
 
-	dirPath, _ := filepath.Split(c.ConfigurationPath)
+	dirPath, _ := filepath.Split(confPath)
 	includes := c.Includes
+	strictInclude := c.StrictInclude
 
 	for _, p := range includes {
 		if !filepath.IsAbs(p) {
 			p, err = filepath.Abs(filepath.Join(dirPath, p))
-			if c.StrictInclude && err != nil {
+			if strictInclude && err != nil {
 				return err
 			}
 		}
 		err = c.ReadFrom(p)
-		if c.StrictInclude && err != nil {
+		if strictInclude && err != nil {
 			return err
 		}
 	}
 	c.Includes = includes
+	c.StrictInclude = strictInclude
+	c.ConfigurationPath = confPath
 
 	if c.Version != ConfVersion {
 		return fmt.Errorf("Unknown configuration version: %v", c.Version)
