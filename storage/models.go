@@ -26,7 +26,7 @@ func (m *Model) MakeExpireAt(t time.Time) {
 }
 
 // BeforeUpdate :
-func (m *Model) BeforeUpdate() (err error) {
+func (m *Model) BeforeUpdate() error {
 	m.UpdatedAt = time.Now()
 	return nil
 }
@@ -36,8 +36,8 @@ type TModelStatus int
 
 // ModelStatus
 const (
-	ModelStatusBusy      TModelStatus = iota
 	ModelStatusNormal    TModelStatus = iota
+	ModelStatusBusy      TModelStatus = iota
 	ModelStatusProtected TModelStatus = iota
 )
 
