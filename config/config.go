@@ -42,7 +42,7 @@ func (c *ConfigurationType) Init() {
 		c.ConfigurationPath = "friday.yaml"
 	}
 
-	c.StrictInclude = true
+	c.StrictInclude = false
 
 	c.Database.Init()
 	c.Migration.Init()
