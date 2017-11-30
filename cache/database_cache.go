@@ -115,7 +115,7 @@ func (c *DBCache) SetKey(key string, val string) error {
 		return err
 	}
 
-	err = c.Conn.Model(&storage.Item{}).Where(
+	err = c.Conn.WhereNotExpires().Model(&storage.Item{}).Where(
 		"key = ? AND (id < ? OR created_at < ?)",
 		key, item.ID, item.CreatedAt,
 	).Update("expire_at", item.CreatedAt).Error
