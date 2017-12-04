@@ -8,6 +8,8 @@ import (
 	"friday/utils"
 )
 
+var newConn = storage.NewExpireQueryConn
+
 // DBCache :
 type DBCache struct {
 	Conn *storage.DatabaseConnection
@@ -52,7 +54,7 @@ func (c *DBCache) Close() error {
 func (c *DBCache) GetItemByKeyAndTag(key string, tag string) (*storage.Item, error) {
 	item := &storage.Item{}
 
-	result := c.Conn.WhereNotExpires().Preload(
+	result := newConn(c.Conn).WhereNotExpires().Preload(
 		"Tags", "name = ?",
 		c.TagTypeString.Name,
 	).Where(
@@ -115,7 +117,7 @@ func (c *DBCache) SetKey(key string, val string) error {
 		return err
 	}
 
-	err = c.Conn.WhereNotExpires().Model(&storage.Item{}).Where(
+	err = newConn(c.Conn).WhereNotExpires().Model(&storage.Item{}).Where(
 		"key = ? AND (id < ? OR created_at < ?)",
 		key, item.ID, item.CreatedAt,
 	).Update("expire_at", item.CreatedAt).Error

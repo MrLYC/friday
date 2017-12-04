@@ -4,7 +4,6 @@ import (
 	"friday/config"
 	"friday/logging"
 	"sync"
-	"time"
 
 	"github.com/jinzhu/gorm"
 )
@@ -18,9 +17,31 @@ var (
 	ErrUnaddressable        = gorm.ErrUnaddressable
 )
 
+// IBaseDB :
+type IBaseDB interface {
+	Close() error
+}
+
+// IDB :
+type IDB interface {
+	IBaseDB
+	GetDB() *gorm.DB
+	SetDB(*gorm.DB)
+}
+
 // DatabaseConnection :
 type DatabaseConnection struct {
 	*gorm.DB
+}
+
+// GetDB :
+func (c *DatabaseConnection) GetDB() *gorm.DB {
+	return c.DB
+}
+
+// SetDB :
+func (c *DatabaseConnection) SetDB(db *gorm.DB) {
+	c.DB = db
 }
 
 // CopyWithDB :
@@ -30,18 +51,12 @@ func (c *DatabaseConnection) CopyWithDB(db *gorm.DB) *DatabaseConnection {
 	}
 }
 
-// WhereNotExpires :
-func (c *DatabaseConnection) WhereNotExpires() *DatabaseConnection {
-	return c.CopyWithDB(c.Where(
-		"expire_at IS NULL OR expire_at >= ?", time.Now(),
-	).Where("status = ?", ModelStatusNormal))
-}
-
-// WhereExpired :
-func (c *DatabaseConnection) WhereExpired() *DatabaseConnection {
-	return c.CopyWithDB(c.Where(
-		"expire_at < ?", time.Now(),
-	).Where("status = ?", ModelStatusNormal))
+// Close :
+func (c *DatabaseConnection) Close() error {
+	if c.DB != nil {
+		return c.DB.Close()
+	}
+	return nil
 }
 
 var dbConectOnce sync.Once

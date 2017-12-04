@@ -13,3 +13,10 @@ func TestCopyWithDB(t *testing.T) {
 		t.Errorf("copy error")
 	}
 }
+
+func TestIDB(t *testing.T) {
+	db := storage.GetDBConnection()
+	var _ storage.IBaseDB = db.DB
+	var _ storage.IBaseDB = db
+	var _ storage.IDB = db
+}
