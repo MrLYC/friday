@@ -45,7 +45,7 @@ const (
 type Item struct {
 	Model
 
-	Tags   []*ItemTag   `gorm:"many2many:item_tag_links;column:tag"`
+	Tags   []*ItemTag   `gorm:"many2many:item_tag_x_refs;column:tag"`
 	Key    string       `gorm:"type:varchar(255)" sql:"index"`
 	Value  string       `gorm:"type:varchar(65535)"`
 	Type   string       `gorm:"type:varchar(64)" sql:"index"`
@@ -63,7 +63,13 @@ const (
 type ItemTag struct {
 	Model
 
-	Items  []*Item      `gorm:"many2many:item_tag_links;column:item"`
+	Items  []*Item      `gorm:"many2many:item_tag_x_refs;column:item"`
 	Name   string       `gorm:"type:varchar(255)" sql:"index"`
 	Status TModelStatus `sql:"index"`
+}
+
+// ItemTagXRef :
+type ItemTagXRef struct {
+	ItemTagID int `gorm:"item_tag_id;primary_key"`
+	ItemID    int `gorm:"item_id;primary_key"`
 }
