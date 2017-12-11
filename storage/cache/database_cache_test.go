@@ -3,7 +3,7 @@ package cache_test
 import (
 	"testing"
 
-	"friday/cache"
+	"friday/storage/cache"
 
 	"friday/config"
 	"friday/logging"
