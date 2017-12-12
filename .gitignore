@@ -19,6 +19,7 @@ pkg/
 
 .vscode/
 debug
+cache/
 .idea/
 
 friday.yaml

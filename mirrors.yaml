@@ -1,3 +1,4 @@
 repos:
-- original: github.com/jinzhu/gorm
-  repo: github.com/MrLYC/gorm
+- original: https://github.com/jinzhu/gorm
+  repo: https://github.com/Mrlyc/gorm
+  vcs: git
