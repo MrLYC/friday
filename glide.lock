@@ -1,5 +1,5 @@
-hash: 94927ed9082d99433fc2b0a747cb74a6ecb213e1d0bc49871b5cabebb510dc58
-updated: 2017-12-12T17:20:28.529258012Z
+hash: 5006e31ce43a4ca2d874c36b24d4fadca5a6da5690bf879a0be41be5dd8a2374
+updated: 2017-12-12T17:38:35.611607179Z
 imports:
 - name: github.com/cstockton/go-conv
   version: 4f5d7d0741daefda544681ef5613ff8bc2fc65c1

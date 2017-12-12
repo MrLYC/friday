@@ -11,7 +11,7 @@ TESTDATAROOT := ${ROOTDIR}/testdata
 TESTSHROOT := ${TESTDATAROOT}/scripts
 TESTLUAROOT := ${TESTDATAROOT}/lua
 
-GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
+GOENV := GLIDE_HOME=${ROOTDIR} GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
 GLIDE := ${GOENV} glide
@@ -56,7 +56,7 @@ dev-init: init
 
 .PHONY: update
 update: ${SRCDIR}
-	${GLIDE} update --skip-test
+	${GLIDE} update --skip-test -v --quick
 	find vendor -name 'testdata' -type d -exec rm -rf {} \; || true
 	find vendor -name '*_test.go' -delete || true
 	find vendor -type f \( ! -name '*.go' ! -name 'LICENSE' ! -name '*.s' ! -name '*.h' ! -name '*.c' ! -name '*.cpp' \) -delete || true
