@@ -56,7 +56,7 @@ dev-init: init
 
 .PHONY: update
 update: ${SRCDIR}
-	${GLIDE} update --skip-test -v --quick
+	${GLIDE} update --skip-test -v
 	find vendor -name 'testdata' -type d -exec rm -rf {} \; || true
 	find vendor -name '*_test.go' -delete || true
 	find vendor -type f \( ! -name '*.go' ! -name 'LICENSE' ! -name '*.s' ! -name '*.h' ! -name '*.c' ! -name '*.cpp' \) -delete || true
