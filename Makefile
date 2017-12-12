@@ -11,7 +11,7 @@ TESTDATAROOT := ${ROOTDIR}/testdata
 TESTSHROOT := ${TESTDATAROOT}/scripts
 TESTLUAROOT := ${TESTDATAROOT}/lua
 
-GOENV := GLIDE_HOME=${ROOTDIR} GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
+GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
 GLIDE := ${GOENV} glide
@@ -67,7 +67,7 @@ install: ${GLIDELOCK}
 
 .PHONY: test
 test: init
-	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -exec dirname {} \; | uniq)))
+	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -not -path "./cache/*" -exec dirname {} \; | uniq)))
 	${GOENV} FRIDAY_CONFIG_PATH=${TESTDATAROOT}/friday_test.yaml go test -tags "${DEBUGBUILDTAGS}" -ldflags="${DEBUGLDFLAGS}" ${packages}
 
 .PHONY: test-scripts
