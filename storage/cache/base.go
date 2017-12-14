@@ -1,7 +1,14 @@
 package cache
 
 import (
+	"errors"
 	"time"
+)
+
+//
+var (
+	ErrItemNotFound  error
+	ErrItemTypeError error
 )
 
 // ICache :
@@ -27,4 +34,9 @@ type ICache interface {
 	TableGet(string, string) (error, string)
 	TableGetAll(string) (error, map[string]string)
 	DelTable(string) (error, bool)
+}
+
+func init() {
+	ErrItemNotFound = errors.New("Item not found")
+	ErrItemTypeError = errors.New("Item type error")
 }
