@@ -4,8 +4,8 @@ comma := ,
 VERSION := 0.0.1
 ROOTDIR := $(shell pwd)
 APPNAME := friday
-SRCDIR := src/friday
-TARGET := bin/friday
+SRCDIR := src/${APPNAME}
+TARGET := bin/${APPNAME}
 
 TESTDATAROOT := ${ROOTDIR}/testdata
 TESTSHROOT := ${TESTDATAROOT}/scripts
@@ -14,10 +14,7 @@ TESTLUAROOT := ${TESTDATAROOT}/lua
 GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
-GLIDE := ${GOENV} glide
-
-GLIDEYAML := ${ROOTDIR}/glide.yaml
-GLIDELOCK := ${ROOTDIR}/glide.lock
+DEP :=${GOENV} dep
 
 DEBUGBUILDTAGS := debug dball
 RELEASEBUILDTAGS := release dball
@@ -37,17 +34,10 @@ build: ${SRCDIR}
 ${SRCDIR}:
 	mkdir -p bin
 	mkdir -p src
-	ln -s `dirname "${ROOTDIR}"`/${APPNAME} src/
-
-${GLIDEYAML}:
-	${GLIDE} init
-
-${GLIDELOCK}: ${SRCDIR} ${GLIDEYAML}
-	${GLIDE} install
-	touch ${GLIDELOCK}
+	ln -s `dirname "${ROOTDIR}"` ${SRCDIR}
 
 .PHONY: init
-init: ${SRCDIR} ${GLIDEYAML}
+init: ${SRCDIR}
 
 .PHONY: dev-init
 dev-init: init
@@ -56,14 +46,10 @@ dev-init: init
 
 .PHONY: update
 update: ${SRCDIR}
-	${GLIDE} update --skip-test -v
+	cd ${SRCDIR} && ${DEP} ensure || true
 	find vendor -name 'testdata' -type d -exec rm -rf {} \; || true
 	find vendor -name '*_test.go' -delete || true
 	find vendor -type f \( ! -name '*.go' ! -name 'LICENSE' ! -name '*.s' ! -name '*.h' ! -name '*.c' ! -name '*.cpp' \) -delete || true
-	rm -rf cache
-
-.PHONY: install
-install: ${GLIDELOCK}
 
 .PHONY: test
 test: init
