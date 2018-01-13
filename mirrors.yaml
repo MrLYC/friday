@@ -1,4 +1,0 @@
-repos:
-- original: https://github.com/jinzhu/gorm
-  repo: https://github.com/Mrlyc/gorm
-  vcs: git
