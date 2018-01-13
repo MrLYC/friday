@@ -46,7 +46,7 @@ init: ${SRCDIR}
 
 .PHONY: dev-init
 dev-init: init
-	echo 'make test || exit $?' > .git/hooks/pre-push
+	echo 'make test || exit $$?' > .git/hooks/pre-push
 	chmod +x .git/hooks/pre-push
 
 .PHONY: update
