@@ -5,7 +5,7 @@ VERSION := 0.0.1
 ROOTDIR := $(shell pwd)
 APPNAME := friday
 GODIR := /tmp/gopath
-SRCDIR := ${GODIR}/${APPNAME}
+SRCDIR := ${GODIR}/src/${APPNAME}
 TARGET := bin/${APPNAME}
 
 TESTDATAROOT := ${ROOTDIR}/testdata
@@ -24,6 +24,10 @@ LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
 DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug -X ${APPNAME}/config.BuildTag=$(subst ${space},${comma},${DEBUGBUILDTAGS})
 RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release -X ${APPNAME}/config.BuildTag=$(subst ${space},${comma},${RELEASEBUILDTAGS})
 
+.PHONY: goenv
+goenv:
+	@echo ${GOENV}
+
 .PHONY: release
 release: ${SRCDIR}
 	${GO} build -i -tags "${RELEASEBUILDTAGS}" -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
@@ -34,8 +38,8 @@ build: ${SRCDIR}
 
 ${SRCDIR}:
 	mkdir -p bin
-	mkdir -p ${GODIR}
-	ln -s `dirname "${ROOTDIR}"` ${SRCDIR}
+	mkdir -p ${GODIR}/src
+	ln -s ${ROOTDIR} ${SRCDIR}
 
 .PHONY: init
 init: ${SRCDIR}
@@ -46,7 +50,7 @@ dev-init: init
 	chmod +x .git/hooks/pre-push
 
 .PHONY: update
-update:
+update: init
 	cd ${SRCDIR} && ${DEP} ensure || true
 	find vendor -name 'testdata' -type d -exec rm -rf {} \; || true
 	find vendor -name '*_test.go' -delete || true
@@ -54,7 +58,7 @@ update:
 
 .PHONY: test
 test: init
-	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./src/*" -not -path "./.*" -not -path "./cache/*" -exec dirname {} \; | uniq)))
+	$(eval packages ?= $(patsubst ./%,${APPNAME}/%,$(shell find "." -name "*_test.go" -not -path "./vendor/*" -not -path "./_vendor*" -not -path "./.*" -exec dirname {} \; | uniq)))
 	${GOENV} FRIDAY_CONFIG_PATH=${TESTDATAROOT}/friday_test.yaml go test -tags "${DEBUGBUILDTAGS}" -ldflags="${DEBUGLDFLAGS}" ${packages}
 
 .PHONY: test-scripts

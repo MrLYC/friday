@@ -24,3 +24,5 @@ debug
 
 friday.yaml
 friday.db
+
+_vendor-*
