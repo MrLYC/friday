@@ -4,14 +4,15 @@ comma := ,
 VERSION := 0.0.1
 ROOTDIR := $(shell pwd)
 APPNAME := friday
-SRCDIR := src/${APPNAME}
+GODIR := /tmp/gopath
+SRCDIR := ${GODIR}/${APPNAME}
 TARGET := bin/${APPNAME}
 
 TESTDATAROOT := ${ROOTDIR}/testdata
 TESTSHROOT := ${TESTDATAROOT}/scripts
 TESTLUAROOT := ${TESTDATAROOT}/lua
 
-GOENV := GOPATH=${ROOTDIR} GO15VENDOREXPERIMENT=1
+GOENV := GOPATH=${GODIR}:${GOPATH} GO15VENDOREXPERIMENT=1
 
 GO := ${GOENV} go
 DEP :=${GOENV} dep
@@ -33,7 +34,7 @@ build: ${SRCDIR}
 
 ${SRCDIR}:
 	mkdir -p bin
-	mkdir -p src
+	mkdir -p ${GODIR}
 	ln -s `dirname "${ROOTDIR}"` ${SRCDIR}
 
 .PHONY: init
@@ -45,7 +46,7 @@ dev-init: init
 	chmod +x .git/hooks/pre-push
 
 .PHONY: update
-update: ${SRCDIR}
+update:
 	cd ${SRCDIR} && ${DEP} ensure || true
 	find vendor -name 'testdata' -type d -exec rm -rf {} \; || true
 	find vendor -name '*_test.go' -delete || true
