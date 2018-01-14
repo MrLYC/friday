@@ -24,11 +24,12 @@ type ConfigurationType struct {
 	StrictInclude bool     `yaml:"strict_include"`
 	Includes      []string `yaml:"includes,omitempty"`
 
+	Cache     Cache     `yaml:"cache"`
 	Database  Database  `yaml:"database"`
-	Migration Migration `yaml:"migration"`
 	Event     Event     `yaml:"event"`
-	Logging   Logging   `yaml:"logging"`
 	Firework  Firework  `yaml:"firework"`
+	Logging   Logging   `yaml:"logging"`
+	Migration Migration `yaml:"migration"`
 	Timer     Timer     `yaml:"timer"`
 }
 
@@ -44,11 +45,12 @@ func (c *ConfigurationType) Init() {
 
 	c.StrictInclude = false
 
+	c.Cache.Init()
 	c.Database.Init()
-	c.Migration.Init()
 	c.Event.Init()
-	c.Logging.Init()
 	c.Firework.Init()
+	c.Logging.Init()
+	c.Migration.Init()
 	c.Timer.Init()
 }
 
