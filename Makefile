@@ -24,10 +24,6 @@ LDFLAGS := -X ${APPNAME}/config.Version=${VERSION}
 DEBUGLDFLAGS := ${LDFLAGS} -X ${APPNAME}/config.Mode=debug -X ${APPNAME}/config.BuildTag=$(subst ${space},${comma},${DEBUGBUILDTAGS})
 RELEASELDFLAGS := -w ${LDFLAGS} -X ${APPNAME}/config.Mode=release -X ${APPNAME}/config.BuildTag=$(subst ${space},${comma},${RELEASEBUILDTAGS})
 
-.PHONY: goenv
-goenv:
-	@echo ${GOENV}
-
 .PHONY: release
 release: ${SRCDIR}
 	${GO} build -i -tags "${RELEASEBUILDTAGS}" -ldflags="${RELEASELDFLAGS}" -o ${TARGET} friday
@@ -88,3 +84,7 @@ migration:
 	func (c *Command) Rollback${migration}(migration *Migration, conn *storage.DatabaseConnection) error { \n\
 	    return nil\n\
 	}"> storage/migration/migration${migration}.go
+
+.PHONY: goenv
+goenv:
+	@echo ${GOENV}
