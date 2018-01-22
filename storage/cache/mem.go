@@ -162,6 +162,13 @@ func (c *MemCache) Expire(key string, duration time.Duration) error {
 	return nil
 }
 
+// Size :
+func (c *MemCache) Size() int {
+	c.RWLock.RLock()
+	defer c.RWLock.RUnlock()
+	return c.Mappings.Size()
+}
+
 // NewMemCache :
 func NewMemCache() *MemCache {
 	c := &MemCache{}

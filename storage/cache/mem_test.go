@@ -1,6 +1,8 @@
 package cache_test
 
 import (
+	"fmt"
+	"sync"
 	"testing"
 	"time"
 
@@ -50,6 +52,10 @@ func TestMemCache1(t *testing.T) {
 		t.Errorf("item not exists")
 	}
 
+	if c.Size() != 1 {
+		t.Errorf("size error")
+	}
+
 	item, err := c.Get("test")
 	if err != nil {
 		t.Errorf("get item error")
@@ -84,6 +90,10 @@ func TestMemCache1(t *testing.T) {
 	if c.Clean() != 1 {
 		t.Errorf("clean error")
 	}
+
+	if c.Size() != 0 {
+		t.Errorf("size error")
+	}
 }
 
 func TestMemCache2(t *testing.T) {
@@ -94,7 +104,13 @@ func TestMemCache2(t *testing.T) {
 		Value: "1",
 	})
 
+	if c.Size() != 1 {
+		t.Errorf("size error")
+	}
 	c.Remove("test")
+	if c.Size() != 0 {
+		t.Errorf("size error")
+	}
 
 	item, err := c.Get("test")
 	if err != cache.ErrItemNotFound {
@@ -102,5 +118,61 @@ func TestMemCache2(t *testing.T) {
 	}
 	if item != nil {
 		t.Errorf("return item error")
+	}
+}
+
+func TestMemCacheConcurrency(t *testing.T) {
+	c := cache.NewMemCache()
+	defer c.Close()
+	var (
+		count = 100
+		flag  = make([]int, count)
+		wg    sync.WaitGroup
+	)
+	wg.Add(1)
+	go func() {
+		for index := 0; index < count; index++ {
+			wg.Add(2)
+			key := fmt.Sprintf("%v", index)
+			go func(k string, i int) {
+				c.Set(k, &cache.MappingItem{
+					Value: i,
+				})
+				wg.Done()
+			}(key, index)
+
+			go func(k string, cnt int) {
+				for cnt > 0 {
+					item, err := c.Get(k)
+					if err == cache.ErrItemNotFound {
+						continue
+					} else if err != nil {
+						t.Errorf("Get error: %v", err)
+						break
+					}
+					index := item.GetValue().(int)
+					if k != fmt.Sprintf("%v", index) {
+						t.Errorf("value error: %v-%v", k, index)
+						break
+					}
+					cnt -= 1
+					flag[index] += 1
+				}
+				c.Remove(k)
+				wg.Done()
+			}(key, count)
+		}
+		wg.Done()
+	}()
+
+	wg.Wait()
+
+	if c.Size() != 0 {
+		t.Errorf("size error")
+	}
+	for i, v := range flag {
+		if v != count {
+			t.Errorf("%v error: %v", i, v)
+		}
 	}
 }
