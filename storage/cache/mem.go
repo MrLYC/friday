@@ -1,12 +1,11 @@
 package cache
 
 import (
+	"sync"
 	"time"
 
 	"github.com/emirpasic/gods/lists/arraylist"
 	"github.com/emirpasic/gods/maps/treemap"
-
-	"friday/utils"
 )
 
 // IMappingItem :
@@ -14,6 +13,7 @@ type IMappingItem interface {
 	IsAvailable() bool
 	GetValue() interface{}
 	SetExpireAt(time.Time)
+	IsExpireAt(time.Time) bool
 }
 
 // MappingItem :
@@ -22,32 +22,12 @@ type MappingItem struct {
 	Value    interface{}
 }
 
-// MappingStringItem :
-type MappingStringItem struct {
-	MappingItem
-}
-
-// MappingListItem :
-type MappingListItem struct {
-	MappingItem
-	Atomic utils.Atomic
-}
-
-// MappingTableItem :
-type MappingTableItem struct {
-	MappingItem
-	Atomic utils.Atomic
-}
-
 // IsAvailable :
 func (i *MappingItem) IsAvailable() bool {
 	if i.ExpireAt == nil {
 		return true
 	}
-	if !(*i.ExpireAt).Before(time.Now()) {
-		return false
-	}
-	return true
+	return !i.IsExpireAt(time.Now())
 }
 
 // GetValue :
@@ -60,10 +40,18 @@ func (i *MappingItem) SetExpireAt(expired time.Time) {
 	i.ExpireAt = &expired
 }
 
+// IsExpireAt :
+func (i *MappingItem) IsExpireAt(t time.Time) bool {
+	if i.ExpireAt == nil {
+		return false
+	}
+	return t.After(*i.ExpireAt)
+}
+
 // MemCache :
 type MemCache struct {
-	Mappings            *treemap.Map
-	MappingsWriteAtomic utils.Atomic
+	Mappings *treemap.Map
+	RWLock   sync.RWMutex
 }
 
 // Init :
@@ -78,22 +66,71 @@ func (c *MemCache) Close() error {
 
 // Remove :
 func (c *MemCache) Remove(key string) {
-	c.MappingsWriteAtomic.Run(func() {
-		c.Mappings.Remove(key)
+	c.RWLock.Lock()
+	c.Mappings.Remove(key)
+	c.RWLock.Unlock()
+}
+
+// Exists :
+func (c *MemCache) Exists(key string) bool {
+	c.RWLock.RLock()
+	item, err := c.Get(key)
+	c.RWLock.RUnlock()
+	if err != nil {
+		return false
+	}
+	return item.IsAvailable()
+}
+
+// IterItems :
+func (c *MemCache) IterItems(f CacheItemIter) {
+	c.RWLock.Lock()
+	defer c.RWLock.Unlock()
+	iter := c.Mappings.Iterator()
+
+	for iter.Next() {
+		f(iter.Key().(string), iter.Value())
+	}
+}
+
+// Clean :
+func (c *MemCache) Clean() int {
+	var (
+		now  = time.Now()
+		list = arraylist.New()
+	)
+
+	c.IterItems(func(key string, value interface{}) {
+		item := value.(IMappingItem)
+		if item.IsExpireAt(now) {
+			list.Add(key)
+		}
 	})
+
+	if list.Size() == 0 {
+		return 0
+	}
+
+	iter := list.Iterator()
+	for iter.Next() {
+		c.Remove(iter.Value().(string))
+	}
+	return list.Size()
 }
 
 // Set :
 func (c *MemCache) Set(key string, value IMappingItem) error {
-	c.MappingsWriteAtomic.Run(func() {
-		c.Mappings.Put(key, value)
-	})
+	c.RWLock.Lock()
+	c.Mappings.Put(key, value)
+	defer c.RWLock.Unlock()
 	return nil
 }
 
 // Get :
 func (c *MemCache) Get(key string) (IMappingItem, error) {
+	c.RWLock.RLock()
 	value, ok := c.Mappings.Get(key)
+	c.RWLock.RUnlock()
 	if !ok {
 		return nil, ErrItemNotFound
 	}
@@ -106,115 +143,25 @@ func (c *MemCache) Get(key string) (IMappingItem, error) {
 
 // Expire :
 func (c *MemCache) Expire(key string, duration time.Duration) error {
+	c.RWLock.RLock()
 	item, err := c.Get(key)
+	c.RWLock.RUnlock()
 	if err != nil {
 		return err
 	}
-	item.SetExpireAt(time.Now().Add(duration))
+	now := time.Now()
+	if item.IsExpireAt(now) {
+		c.Remove(key)
+		return ErrItemExpired
+	}
+
+	item.SetExpireAt(now.Add(duration))
 	return nil
 }
 
-// GetString :
-func (c *MemCache) GetString(key string) (*MappingStringItem, error) {
-	item, err := c.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	switch item.(type) {
-	case *MappingStringItem:
-		return item.(*MappingStringItem), nil
-	default:
-		return nil, ErrItemTypeError
-	}
-}
-
-// GetList :
-func (c *MemCache) GetList(key string) (*MappingListItem, error) {
-	item, err := c.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	switch item.(type) {
-	case *MappingListItem:
-		return item.(*MappingListItem), nil
-	default:
-		return nil, ErrItemTypeError
-	}
-}
-
-// GetTable :
-func (c *MemCache) GetTable(key string) (*MappingTableItem, error) {
-	item, err := c.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	switch item.(type) {
-	case *MappingTableItem:
-		return item.(*MappingTableItem), nil
-	default:
-		return nil, ErrItemTypeError
-	}
-}
-
-// SetKey :
-func (c *MemCache) SetKey(key string, value string) error {
-	item := &MappingStringItem{}
-	item.Value = value
-	return c.Set(key, item)
-}
-
-// GetKey :
-func (c *MemCache) GetKey(key string) (string, error) {
-	item, err := c.GetString(key)
-	if err != nil {
-		return "", err
-	}
-	return item.Value.(string), nil
-}
-
-// DeclareList :
-func (c *MemCache) DeclareList(key string) (*MappingListItem, error) {
-	item, err := c.GetList(key)
-	if err == ErrItemNotFound {
-		err = nil
-		item = &MappingListItem{}
-		item.Value = arraylist.New()
-		c.Set(key, item)
-	} else if err != nil {
-		return nil, err
-	}
-	return item, err
-}
-
-// ListPush :
-func (c *MemCache) ListPush(key string, value string) error {
-	item, err := c.DeclareList(key)
-	if err != nil {
-		return err
-	}
-	item.Atomic.Run(func() {
-		list := item.Value.(*arraylist.List)
-		list.Add(value)
-	})
-	return nil
-}
-
-// ListPop :
-func (c *MemCache) ListPop(key string) (string, error) {
-	item, err := c.GetList(key)
-	if err != nil {
-		return "", err
-	}
-	value := ""
-	item.Atomic.Run(func() {
-		list := item.Value.(*arraylist.List)
-		iter := list.Iterator()
-		iter.End()
-		end := iter.Value()
-		if iter.Last() && end != nil {
-			value = end.(string)
-		}
-		list.Remove(iter.Index())
-	})
-	return value, nil
+// NewMemCache :
+func NewMemCache() *MemCache {
+	c := &MemCache{}
+	c.Init()
+	return c
 }

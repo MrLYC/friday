@@ -7,9 +7,13 @@ import (
 
 //
 var (
-	ErrItemNotFound  error
-	ErrItemTypeError error
+	ErrItemNotFound  = errors.New("Item not found")
+	ErrItemTypeError = errors.New("Item type error")
+	ErrItemExpired   = errors.New("Item expired")
 )
+
+// CacheItemIter :
+type CacheItemIter func(string, interface{})
 
 // ICache :
 type ICache interface {
@@ -25,7 +29,7 @@ type ICache interface {
 	DelKey(string) (error, bool)
 
 	ListPush(string, string) error
-	ListPopString(string) (string, error)
+	ListPop(string) (string, error)
 	ListLen(string) (error, int)
 	ListGet(string, int) (string, error)
 	DelList(string) (error, bool)
