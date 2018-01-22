@@ -84,8 +84,8 @@ func (c *MemCache) Exists(key string) bool {
 
 // IterItems :
 func (c *MemCache) IterItems(f CacheItemIter) {
-	c.RWLock.Lock()
-	defer c.RWLock.Unlock()
+	c.RWLock.RLock()
+	defer c.RWLock.RUnlock()
 	iter := c.Mappings.Iterator()
 
 	for iter.Next() {
@@ -111,9 +111,12 @@ func (c *MemCache) Clean() int {
 		return 0
 	}
 
+	c.RWLock.Lock()
+	defer c.RWLock.Unlock()
+
 	iter := list.Iterator()
 	for iter.Next() {
-		c.Remove(iter.Value().(string))
+		c.Mappings.Remove(iter.Value())
 	}
 	return list.Size()
 }
