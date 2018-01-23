@@ -289,6 +289,39 @@ func TestTestMemCache3(t *testing.T) {
 	}
 }
 
+func TestMemCacheUpdate(t *testing.T) {
+	c := cache.NewMemCache()
+	defer c.Close()
+
+	var wg1, wg2 sync.WaitGroup
+
+	wg1.Add(1)
+	wg2.Add(1)
+	go func() {
+		wg1.Wait()
+		value, err := c.GetString("test")
+		if err != nil {
+			t.Errorf("get string error: %v", err)
+		}
+		c.SetString("test", fmt.Sprintf("readed: %v", value))
+		wg2.Done()
+	}()
+
+	c.SetString("test", "")
+	c.Update("test", func(key string, item interface{}) {
+		item.(*cache.MappingStringItem).Value = "lyc"
+	})
+	wg1.Done()
+	wg2.Wait()
+	value, err := c.GetString("test")
+	if err != nil {
+		t.Errorf("get string error: %v", err)
+	}
+	if value != "readed: lyc" {
+		t.Errorf("update error: %v", value)
+	}
+}
+
 func TestMemCacheSetGetString(t *testing.T) {
 	c := cache.NewMemCache()
 	defer c.Close()

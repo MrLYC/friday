@@ -114,7 +114,7 @@ func (c *MemCache) Exists(key string) bool {
 }
 
 // IterItems :
-func (c *MemCache) IterItems(f CacheItemIter) {
+func (c *MemCache) IterItems(f ItemVistor) {
 	c.RWLock.RLock()
 	defer c.RWLock.RUnlock()
 	iter := c.Mappings.Iterator()
@@ -181,6 +181,19 @@ func (c *MemCache) Get(key string) (IMappingItem, error) {
 		return item, nil
 	}
 	return nil, ErrItemNotFound
+}
+
+// Update :
+func (c *MemCache) Update(key string, f ItemVistor) error {
+	item, err := c.Get(key)
+	if err != nil {
+		return err
+	}
+
+	c.RWLock.Lock()
+	defer c.RWLock.Unlock()
+	f(key, item)
+	return nil
 }
 
 // Expire :
