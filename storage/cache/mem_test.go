@@ -111,6 +111,9 @@ func TestMemCache2(t *testing.T) {
 	if c.Size() != 0 {
 		t.Errorf("size error")
 	}
+	if c.TypeOf("test") != "" {
+		t.Errorf("type error")
+	}
 
 	item, err := c.Get("test")
 	if err != cache.ErrItemNotFound {
