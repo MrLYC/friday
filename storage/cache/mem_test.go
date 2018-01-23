@@ -293,26 +293,22 @@ func TestMemCacheUpdate(t *testing.T) {
 	c := cache.NewMemCache()
 	defer c.Close()
 
-	var wg1, wg2 sync.WaitGroup
-
-	wg1.Add(1)
-	wg2.Add(1)
-	go func() {
-		wg1.Wait()
-		value, err := c.GetString("test")
-		if err != nil {
-			t.Errorf("get string error: %v", err)
-		}
-		c.SetString("test", fmt.Sprintf("readed: %v", value))
-		wg2.Done()
-	}()
+	var wg sync.WaitGroup
 
 	c.SetString("test", "")
 	c.Update("test", func(key string, item interface{}) {
+		wg.Add(1)
+		go func() {
+			value, err := c.GetString("test")
+			if err != nil {
+				t.Errorf("get string error: %v", err)
+			}
+			c.SetString("test", fmt.Sprintf("readed: %v", value))
+			wg.Done()
+		}()
 		item.(*cache.MappingStringItem).Value = "lyc"
 	})
-	wg1.Done()
-	wg2.Wait()
+	wg.Wait()
 	value, err := c.GetString("test")
 	if err != nil {
 		t.Errorf("get string error: %v", err)
