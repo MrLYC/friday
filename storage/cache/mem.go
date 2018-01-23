@@ -153,15 +153,23 @@ func (c *MemCache) Set(key string, value IMappingItem) error {
 	return nil
 }
 
-// Get :
-func (c *MemCache) Get(key string) (IMappingItem, error) {
+// GetRaw :
+func (c *MemCache) GetRaw(key string) (IMappingItem, error) {
 	c.RWLock.RLock()
-	value, ok := c.Mappings.Get(key)
+	item, ok := c.Mappings.Get(key)
 	c.RWLock.RUnlock()
 	if !ok {
 		return nil, ErrItemNotFound
 	}
-	item := value.(IMappingItem)
+	return item.(IMappingItem), nil
+}
+
+// Get :
+func (c *MemCache) Get(key string) (IMappingItem, error) {
+	item, err := c.GetRaw(key)
+	if err != nil {
+		return nil, err
+	}
 	if item.IsAvailable() {
 		return item, nil
 	}

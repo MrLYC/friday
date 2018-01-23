@@ -44,6 +44,9 @@ func TestMemCache1(t *testing.T) {
 	c := cache.NewMemCache()
 	defer c.Close()
 
+	var err error
+	var item cache.IMappingItem
+
 	c.Set("test", &cache.MappingItem{
 		Value: "1",
 	})
@@ -56,7 +59,12 @@ func TestMemCache1(t *testing.T) {
 		t.Errorf("size error")
 	}
 
-	item, err := c.Get("test")
+	t1, _ := time.ParseDuration("10h")
+	err = c.Expire("test", t1)
+	if err != nil {
+		t.Errorf("expire error")
+	}
+	item, err = c.Get("test")
 	if err != nil {
 		t.Errorf("get item error")
 	}
@@ -67,13 +75,18 @@ func TestMemCache1(t *testing.T) {
 		t.Errorf("item not available")
 	}
 
-	tt, _ := time.ParseDuration("-10h")
-	if !item.IsAvailable() {
-		t.Errorf("item error")
-	}
-	err = c.Expire("test", tt)
+	t2, _ := time.ParseDuration("-10h")
+	err = c.Expire("test", t2)
 	if err != nil {
 		t.Errorf("expire error")
+	}
+	if item.IsAvailable() {
+		t.Errorf("item error")
+	}
+
+	item, err = c.GetRaw("test")
+	if err != nil {
+		t.Errorf("get item error")
 	}
 	if item.IsAvailable() {
 		t.Errorf("item error")
