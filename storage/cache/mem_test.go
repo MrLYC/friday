@@ -288,3 +288,29 @@ func TestTestMemCache3(t *testing.T) {
 		}
 	}
 }
+
+func TestMemCacheSetGetString(t *testing.T) {
+	c := cache.NewMemCache()
+	defer c.Close()
+
+	err := c.SetString("test", "123")
+	if err != nil {
+		t.Errorf("set error")
+	}
+
+	value, err := c.GetString("test")
+	if err != nil {
+		t.Errorf("get error")
+	}
+	if value != "123" {
+		t.Errorf("get value error")
+	}
+
+	value, err = c.GetString("nothing")
+	if err != cache.ErrItemNotFound {
+		t.Errorf("get error")
+	}
+	if value != "" {
+		t.Errorf("get value error")
+	}
+}

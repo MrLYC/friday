@@ -55,6 +55,13 @@ func (i *MappingItem) IsExpireAt(t time.Time) bool {
 	return t.After(*i.ExpireAt)
 }
 
+//
+const (
+	TypeMappingStringItem = "string"
+	TypeMappingListItem   = "list"
+	TypeMappingTableItem  = "table"
+)
+
 // MappingStringItem :
 type MappingStringItem struct {
 	MappingItem
@@ -209,11 +216,11 @@ func (c *MemCache) TypeOf(key string) string {
 	}
 	switch item.(type) {
 	case *MappingStringItem:
-		return "string"
+		return TypeMappingStringItem
 	case *MappingListItem:
-		return "list"
+		return TypeMappingListItem
 	case *MappingTableItem:
-		return "table"
+		return TypeMappingTableItem
 	default:
 		typ := reflect.TypeOf(item)
 		return typ.Name()
@@ -232,6 +239,22 @@ func (c *MemCache) GetStringItem(key string) (*MappingStringItem, error) {
 	default:
 		return nil, ErrItemTypeError
 	}
+}
+
+// SetString :
+func (c *MemCache) SetString(key string, value string) error {
+	item := &MappingStringItem{}
+	item.Value = value
+	return c.Set(key, item)
+}
+
+// GetString :
+func (c *MemCache) GetString(key string) (string, error) {
+	item, err := c.GetStringItem(key)
+	if err != nil {
+		return "", err
+	}
+	return item.Value.(string), nil
 }
 
 // GetListItem :
