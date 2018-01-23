@@ -1,6 +1,7 @@
 package cache
 
 import (
+	"reflect"
 	"sync"
 	"time"
 
@@ -11,6 +12,7 @@ import (
 // IMappingItem :
 type IMappingItem interface {
 	IsAvailable() bool
+	SetValue(interface{})
 	GetValue() interface{}
 	SetExpireAt(time.Time)
 	IsExpireAt(time.Time) bool
@@ -30,6 +32,11 @@ func (i *MappingItem) IsAvailable() bool {
 	return !i.IsExpireAt(time.Now())
 }
 
+// SetValue :
+func (i *MappingItem) SetValue(value interface{}) {
+	i.Value = value
+}
+
 // GetValue :
 func (i *MappingItem) GetValue() interface{} {
 	return i.Value
@@ -46,6 +53,23 @@ func (i *MappingItem) IsExpireAt(t time.Time) bool {
 		return false
 	}
 	return t.After(*i.ExpireAt)
+}
+
+// MappingStringItem :
+type MappingStringItem struct {
+	MappingItem
+}
+
+// MappingListItem :
+type MappingListItem struct {
+	MappingItem
+	RWLock sync.RWMutex
+}
+
+// MappingTableItem :
+type MappingTableItem struct {
+	MappingItem
+	RWLock sync.RWMutex
 }
 
 // MemCache :
@@ -167,6 +191,67 @@ func (c *MemCache) Size() int {
 	c.RWLock.RLock()
 	defer c.RWLock.RUnlock()
 	return c.Mappings.Size()
+}
+
+// TypeOf :
+func (c *MemCache) TypeOf(key string) string {
+	item, err := c.Get(key)
+	if err != nil {
+		return ""
+	}
+	switch item.(type) {
+	case *MappingStringItem:
+		return "string"
+	case *MappingListItem:
+		return "list"
+	case *MappingTableItem:
+		return "table"
+	default:
+		typ := reflect.TypeOf(item)
+		return typ.Name()
+	}
+}
+
+// GetStringItem :
+func (c *MemCache) GetStringItem(key string) (*MappingStringItem, error) {
+	item, err := c.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	switch item.(type) {
+	case *MappingStringItem:
+		return item.(*MappingStringItem), nil
+	default:
+		return nil, ErrItemTypeError
+	}
+}
+
+// GetListItem :
+func (c *MemCache) GetListItem(key string) (*MappingListItem, error) {
+	item, err := c.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	switch item.(type) {
+	case *MappingListItem:
+		return item.(*MappingListItem), nil
+	default:
+		return nil, ErrItemTypeError
+	}
+}
+
+// GetTableItem :
+func (c *MemCache) GetTableItem(key string) (*MappingTableItem, error) {
+	item, err := c.Get(key)
+	if err != nil {
+		return nil, err
+	}
+	switch item.(type) {
+	case *MappingTableItem:
+		return item.(*MappingTableItem), nil
+	default:
+		return nil, ErrItemTypeError
+	}
 }
 
 // NewMemCache :

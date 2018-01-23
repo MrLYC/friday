@@ -176,3 +176,99 @@ func TestMemCacheConcurrency(t *testing.T) {
 		}
 	}
 }
+
+func TestTestMemCache3(t *testing.T) {
+	c := cache.NewMemCache()
+	defer c.Close()
+
+	c.Set("string", &cache.MappingStringItem{})
+	c.Set("list", &cache.MappingListItem{})
+	c.Set("table", &cache.MappingTableItem{})
+
+	var (
+		keys    = []string{"string", "list", "table"}
+		results = [][]bool{
+			[]bool{true, false, false},
+			[]bool{false, true, false},
+			[]bool{false, false, true},
+		}
+	)
+
+	for i, key := range keys {
+		item, err := c.GetStringItem(key)
+		result := results[i]
+		if result[0] {
+			if item == nil {
+				t.Errorf("item[string] value error")
+			}
+			if err != nil {
+				t.Errorf("item error: %v", err)
+			}
+			if c.TypeOf(key) != key {
+				t.Errorf("item type error: string")
+			}
+		} else {
+			if item != nil {
+				t.Errorf("item[string] value error")
+			}
+			if err != cache.ErrItemTypeError {
+				t.Errorf("item error: %v", err)
+			}
+			if !c.Exists(key) {
+				t.Errorf("exists error: string")
+			}
+		}
+	}
+
+	for i, key := range keys {
+		item, err := c.GetListItem(key)
+		result := results[i]
+		if result[1] {
+			if item == nil {
+				t.Errorf("item[list] value error")
+			}
+			if err != nil {
+				t.Errorf("item error: %v", err)
+			}
+			if c.TypeOf(key) != key {
+				t.Errorf("item type error: list")
+			}
+		} else {
+			if item != nil {
+				t.Errorf("item[list] value error")
+			}
+			if err != cache.ErrItemTypeError {
+				t.Errorf("item error: %v", err)
+			}
+			if !c.Exists(key) {
+				t.Errorf("exists error: list")
+			}
+		}
+	}
+
+	for i, key := range keys {
+		item, err := c.GetTableItem(key)
+		result := results[i]
+		if result[2] {
+			if item == nil {
+				t.Errorf("item[table] value error")
+			}
+			if err != nil {
+				t.Errorf("item error: %v", err)
+			}
+			if c.TypeOf(key) != key {
+				t.Errorf("item type error: table")
+			}
+		} else {
+			if item != nil {
+				t.Errorf("item[table] value error")
+			}
+			if err != cache.ErrItemTypeError {
+				t.Errorf("item error: %v", err)
+			}
+			if !c.Exists(key) {
+				t.Errorf("exists error: table")
+			}
+		}
+	}
+}
