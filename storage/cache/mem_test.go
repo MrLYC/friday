@@ -40,6 +40,43 @@ func TestMappingItem(t *testing.T) {
 	}
 }
 
+func TestMappingStringItem(t *testing.T) {
+	var item cache.MappingStringItem
+	if item.Length() != 0 {
+		t.Errorf("length error")
+	}
+	if item.GetString() != "" {
+		t.Errorf("value error")
+	}
+	item.SetValue("test")
+	if item.Length() != 4 {
+		t.Errorf("length error")
+	}
+}
+
+func TestMappingListItem(t *testing.T) {
+	var item cache.MappingListItem
+
+	if item.Length() != 0 {
+		t.Errorf("length error")
+	}
+
+	item.Init()
+
+	list := item.GetList()
+	if list == nil {
+		t.Errorf("list init failed")
+	}
+	if item.Length() != 0 {
+		t.Errorf("length error")
+	}
+
+	list.Add("test")
+	if item.Length() != 1 {
+		t.Errorf("length error")
+	}
+}
+
 func TestMemCache1(t *testing.T) {
 	c := cache.NewMemCache()
 	defer c.Close()

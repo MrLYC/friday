@@ -5,6 +5,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/emirpasic/gods/lists/doublylinkedlist"
 	"github.com/emirpasic/gods/lists/singlylinkedlist"
 	"github.com/emirpasic/gods/maps/treemap"
 )
@@ -16,6 +17,7 @@ type IMappingItem interface {
 	GetValue() interface{}
 	SetExpireAt(time.Time)
 	IsExpireAt(time.Time) bool
+	Length() int
 }
 
 // MappingItem :
@@ -55,6 +57,11 @@ func (i *MappingItem) IsExpireAt(t time.Time) bool {
 	return t.After(*i.ExpireAt)
 }
 
+// Length :
+func (i *MappingItem) Length() int {
+	return 0
+}
+
 //
 const (
 	TypeMappingStringItem = "string"
@@ -69,13 +76,43 @@ type MappingStringItem struct {
 
 // GetString :
 func (i *MappingStringItem) GetString() string {
+	if i.Value == nil {
+		return ""
+	}
 	return i.Value.(string)
+}
+
+// Length :
+func (i *MappingStringItem) Length() int {
+	return len(i.GetString())
 }
 
 // MappingListItem :
 type MappingListItem struct {
 	MappingItem
 	RWLock sync.RWMutex
+}
+
+// GetList :
+func (i *MappingListItem) GetList() *doublylinkedlist.List {
+	if i.Value == nil {
+		return nil
+	}
+	return i.Value.(*doublylinkedlist.List)
+}
+
+// Init :
+func (i *MappingListItem) Init() {
+	i.Value = doublylinkedlist.New()
+}
+
+// Length :
+func (i *MappingListItem) Length() int {
+	list := i.GetList()
+	if list == nil {
+		return 0
+	}
+	return list.Size()
 }
 
 // MappingTableItem :
@@ -287,6 +324,30 @@ func (c *MemCache) GetListItem(key string) (*MappingListItem, error) {
 	default:
 		return nil, ErrItemTypeError
 	}
+}
+
+// DeclareListItem :
+func (c *MemCache) DeclareListItem(key string) (*MappingListItem, error) {
+	item, err := c.GetListItem(key)
+	if err != nil {
+		item = &MappingListItem{}
+		item.Init()
+		err = c.Set(key, item)
+	}
+	return item, err
+}
+
+// GetListLength :
+func (c *MemCache) GetListLength(key string) (int, error) {
+	item, err := c.DeclareListItem(key)
+	if err == nil {
+		return 0, err
+	}
+
+	list := item.GetList()
+	item.RWLock.RLock()
+	defer item.RWLock.RUnlock()
+	return list.Size(), nil
 }
 
 // GetTableItem :
