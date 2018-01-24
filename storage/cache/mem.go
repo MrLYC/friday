@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/emirpasic/gods/lists/arraylist"
+	"github.com/emirpasic/gods/lists/singlylinkedlist"
 	"github.com/emirpasic/gods/maps/treemap"
 )
 
@@ -133,7 +133,7 @@ func (c *MemCache) IterItems(f ItemVistor) {
 func (c *MemCache) Clean() int {
 	var (
 		now  = time.Now()
-		list = arraylist.New()
+		list = singlylinkedlist.New()
 	)
 
 	c.IterItems(func(key string, value interface{}) {
