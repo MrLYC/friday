@@ -67,6 +67,11 @@ type MappingStringItem struct {
 	MappingItem
 }
 
+// GetString :
+func (i *MappingStringItem) GetString() string {
+	return i.Value.(string)
+}
+
 // MappingListItem :
 type MappingListItem struct {
 	MappingItem
@@ -267,7 +272,7 @@ func (c *MemCache) GetString(key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return item.Value.(string), nil
+	return item.GetString(), nil
 }
 
 // GetListItem :
