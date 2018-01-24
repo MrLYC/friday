@@ -20,6 +20,15 @@ type IMappingItem interface {
 	Length() int
 }
 
+// IComplexMappingItem :
+type IComplexMappingItem interface {
+	IMappingItem
+	Lock()
+	Unlock()
+	RLock()
+	RUnlock()
+}
+
 // MappingItem :
 type MappingItem struct {
 	ExpireAt *time.Time
@@ -87,10 +96,35 @@ func (i *MappingStringItem) Length() int {
 	return len(i.GetString())
 }
 
-// MappingListItem :
-type MappingListItem struct {
+// ComplexMappingItem :
+type ComplexMappingItem struct {
 	MappingItem
 	RWLock sync.RWMutex
+}
+
+// Lock :
+func (i *ComplexMappingItem) Lock() {
+	i.RWLock.Lock()
+}
+
+// Unlock :
+func (i *ComplexMappingItem) Unlock() {
+	i.RWLock.Unlock()
+}
+
+// RLock :
+func (i *ComplexMappingItem) RLock() {
+	i.RWLock.RLock()
+}
+
+// RUnlock :
+func (i *ComplexMappingItem) RUnlock() {
+	i.RWLock.RUnlock()
+}
+
+// MappingListItem :
+type MappingListItem struct {
+	ComplexMappingItem
 }
 
 // GetList :
@@ -115,10 +149,36 @@ func (i *MappingListItem) Length() int {
 	return list.Size()
 }
 
+// GetFirstString :
+func (i *MappingListItem) GetFirstString() string {
+	list := i.GetList()
+	if list == nil {
+		return ""
+	}
+	value, ok := list.Get(0)
+	if !ok {
+		return ""
+	}
+	return value.(string)
+}
+
+// GetLastString :
+func (i *MappingListItem) GetLastString() string {
+	length := i.Length()
+	if length <= 0 {
+		return ""
+	}
+	list := i.GetList()
+	value, ok := list.Get(length - 1)
+	if !ok {
+		return ""
+	}
+	return value.(string)
+}
+
 // MappingTableItem :
 type MappingTableItem struct {
-	MappingItem
-	RWLock sync.RWMutex
+	ComplexMappingItem
 }
 
 // MemCache :
@@ -344,10 +404,9 @@ func (c *MemCache) GetListLength(key string) (int, error) {
 		return 0, err
 	}
 
-	list := item.GetList()
-	item.RWLock.RLock()
-	defer item.RWLock.RUnlock()
-	return list.Size(), nil
+	item.RLock()
+	defer item.RUnlock()
+	return item.Length(), nil
 }
 
 // GetTableItem :
