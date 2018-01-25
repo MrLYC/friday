@@ -359,7 +359,7 @@ func (c *MemCache) GetStringItem(key string) (*MappingStringItem, error) {
 // SetString :
 func (c *MemCache) SetString(key string, value string) error {
 	item := &MappingStringItem{}
-	item.Value = value
+	item.SetValue(value)
 	return c.Set(key, item)
 }
 
