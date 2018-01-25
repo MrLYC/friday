@@ -1,9 +1,9 @@
-package cache_test
+package dbcache_test
 
 import (
 	"testing"
 
-	"friday/storage/cache"
+	"friday/storage/cache/dbcache"
 
 	"friday/config"
 	"friday/logging"
@@ -25,7 +25,7 @@ func TestGetItemByKeyAndTag(t *testing.T) {
 	setUp()
 	key := "test1980237234"
 	value := "test0981234879"
-	c := &cache.DBCache{}
+	c := &dbcache.DBCache{}
 	c.Init()
 	c.Conn.Create(&storage.Item{
 		Key: key, Value: value,
@@ -54,7 +54,7 @@ func TestMakeItemExpired(t *testing.T) {
 	item := &storage.Item{
 		Key: "test2345567856",
 	}
-	c := &cache.DBCache{}
+	c := &dbcache.DBCache{}
 	c.Init()
 	c.Conn.Create(item)
 	c.MakeItemExpired(item.Key, item.CreatedAt)
@@ -69,7 +69,7 @@ func TestMakeItemTagExpired(t *testing.T) {
 	itemTag := &storage.ItemTag{
 		Name: "test6789235234",
 	}
-	c := &cache.DBCache{}
+	c := &dbcache.DBCache{}
 	c.Init()
 	c.Conn.Create(itemTag)
 	c.MakeItemTagExpired(itemTag.Name, itemTag.CreatedAt)
@@ -81,7 +81,7 @@ func TestMakeItemTagExpired(t *testing.T) {
 
 func TestGetKey(t *testing.T) {
 	setUp()
-	c := &cache.DBCache{}
+	c := &dbcache.DBCache{}
 	c.Init()
 	item := &storage.Item{
 		Key: "test8912876345", Value: "mrlyc",
@@ -101,7 +101,7 @@ func TestGetKey(t *testing.T) {
 
 func TestSetKey(t *testing.T) {
 	setUp()
-	c := &cache.DBCache{}
+	c := &dbcache.DBCache{}
 	c.Init()
 	var err error
 	key := "test0987123445"

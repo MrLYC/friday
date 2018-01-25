@@ -12,9 +12,6 @@ var (
 	ErrItemExpired   = errors.New("Item expired")
 )
 
-// ItemVistor :
-type ItemVistor func(string, interface{})
-
 // ICache :
 type ICache interface {
 	Init()

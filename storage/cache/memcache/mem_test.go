@@ -1,4 +1,4 @@
-package cache_test
+package memcache_test
 
 import (
 	"fmt"
@@ -7,101 +7,17 @@ import (
 	"time"
 
 	"friday/storage/cache"
+	"friday/storage/cache/memcache"
 )
 
-func TestMappingItem(t *testing.T) {
-	item := &cache.MappingItem{
-		Value: "1",
-	}
-	now := time.Now()
-	if !item.IsAvailable() {
-		t.Errorf("item not available")
-	}
-	if item.GetValue().(string) != "1" {
-		t.Errorf("item value error")
-	}
-
-	t1, _ := time.ParseDuration("10h")
-	item.SetExpireAt(now.Add(t1))
-	if !item.IsAvailable() {
-		t.Errorf("item not available")
-	}
-	if item.IsExpireAt(now) {
-		t.Errorf("item expires error")
-	}
-
-	t2, _ := time.ParseDuration("-10h")
-	item.SetExpireAt(now.Add(t2))
-	if item.IsAvailable() {
-		t.Errorf("item not available")
-	}
-	if !item.IsExpireAt(now) {
-		t.Errorf("item expires error")
-	}
-}
-
-func TestMappingStringItem(t *testing.T) {
-	var item cache.MappingStringItem
-	if item.Length() != 0 {
-		t.Errorf("length error")
-	}
-	if item.GetString() != "" {
-		t.Errorf("value error")
-	}
-	item.SetValue("test")
-	if item.Length() != 4 {
-		t.Errorf("length error")
-	}
-}
-
-func TestMappingListItem(t *testing.T) {
-	var item cache.MappingListItem
-
-	if item.Length() != 0 {
-		t.Errorf("length error")
-	}
-
-	item.Init()
-
-	list := item.GetList()
-	if list == nil {
-		t.Errorf("list init failed")
-	}
-	if item.Length() != 0 {
-		t.Errorf("length error")
-	}
-	if item.GetFirstString() != "" {
-		t.Errorf("first value error")
-	}
-	if item.GetLastString() != "" {
-		t.Errorf("last value error")
-	}
-
-	list.Add("1")
-	if item.Length() != 1 {
-		t.Errorf("length error")
-	}
-	list.Add("2")
-	if item.Length() != 2 {
-		t.Errorf("length error")
-	}
-
-	if item.GetFirstString() != "1" {
-		t.Errorf("first value error")
-	}
-	if item.GetLastString() != "2" {
-		t.Errorf("last value error")
-	}
-}
-
 func TestMemCache1(t *testing.T) {
-	c := cache.NewMemCache()
+	c := memcache.NewMemCache()
 	defer c.Close()
 
 	var err error
-	var item cache.IMappingItem
+	var item memcache.IMappingItem
 
-	c.Set("test", &cache.MappingItem{
+	c.Set("test", &memcache.MappingItem{
 		Value: "1",
 	})
 
@@ -164,10 +80,10 @@ func TestMemCache1(t *testing.T) {
 }
 
 func TestMemCache2(t *testing.T) {
-	c := cache.NewMemCache()
+	c := memcache.NewMemCache()
 	defer c.Close()
 
-	c.Set("test", &cache.MappingItem{
+	c.Set("test", &memcache.MappingItem{
 		Value: "1",
 	})
 
@@ -192,7 +108,7 @@ func TestMemCache2(t *testing.T) {
 }
 
 func TestMemCacheConcurrency(t *testing.T) {
-	c := cache.NewMemCache()
+	c := memcache.NewMemCache()
 	defer c.Close()
 	var (
 		count = 100
@@ -205,7 +121,7 @@ func TestMemCacheConcurrency(t *testing.T) {
 			wg.Add(2)
 			key := fmt.Sprintf("%v", index)
 			go func(k string, i int) {
-				c.Set(k, &cache.MappingItem{
+				c.Set(k, &memcache.MappingItem{
 					Value: i,
 				})
 				wg.Done()
@@ -248,12 +164,12 @@ func TestMemCacheConcurrency(t *testing.T) {
 }
 
 func TestTestMemCache3(t *testing.T) {
-	c := cache.NewMemCache()
+	c := memcache.NewMemCache()
 	defer c.Close()
 
-	c.Set("string", &cache.MappingStringItem{})
-	c.Set("list", &cache.MappingListItem{})
-	c.Set("table", &cache.MappingTableItem{})
+	c.Set("string", &memcache.MappingStringItem{})
+	c.Set("list", &memcache.MappingListItem{})
+	c.Set("table", &memcache.MappingTableItem{})
 
 	var (
 		keys    = []string{"string", "list", "table"}
@@ -344,7 +260,7 @@ func TestTestMemCache3(t *testing.T) {
 }
 
 func TestMemCacheUpdate(t *testing.T) {
-	c := cache.NewMemCache()
+	c := memcache.NewMemCache()
 	defer c.Close()
 
 	var readyWG sync.WaitGroup
@@ -364,7 +280,7 @@ func TestMemCacheUpdate(t *testing.T) {
 	c.SetString("test", "")
 	c.Update("test", func(key string, item interface{}) {
 		readyWG.Done()
-		item.(*cache.MappingStringItem).Value = "lyc"
+		item.(*memcache.MappingStringItem).Value = "lyc"
 	})
 	wg.Wait()
 	value, err := c.GetString("test")
@@ -377,7 +293,7 @@ func TestMemCacheUpdate(t *testing.T) {
 }
 
 func TestMemCacheSetGetString(t *testing.T) {
-	c := cache.NewMemCache()
+	c := memcache.NewMemCache()
 	defer c.Close()
 
 	err := c.SetString("test", "123")
