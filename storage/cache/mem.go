@@ -169,6 +169,9 @@ func (i *MappingListItem) GetLastString() string {
 		return ""
 	}
 	list := i.GetList()
+	if list == nil {
+		return ""
+	}
 	value, ok := list.Get(length - 1)
 	if !ok {
 		return ""
