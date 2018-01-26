@@ -48,12 +48,12 @@ func (c *MemCache) Exists(key string) bool {
 // IterItems :
 func (c *MemCache) IterItems(f ItemVistor) {
 	c.RWLock.RLock()
-	defer c.RWLock.RUnlock()
 	iter := c.Mappings.Iterator()
 
 	for iter.Next() {
 		f(iter.Key().(string), iter.Value())
 	}
+	c.RWLock.RUnlock()
 }
 
 // Clean :
@@ -75,12 +75,12 @@ func (c *MemCache) Clean() int {
 	}
 
 	c.RWLock.Lock()
-	defer c.RWLock.Unlock()
-
 	iter := list.Iterator()
 	for iter.Next() {
 		c.Mappings.Remove(iter.Value())
 	}
+	c.RWLock.Unlock()
+
 	return list.Size()
 }
 
@@ -88,7 +88,7 @@ func (c *MemCache) Clean() int {
 func (c *MemCache) Set(key string, value IMappingItem) error {
 	c.RWLock.Lock()
 	c.Mappings.Put(key, value)
-	defer c.RWLock.Unlock()
+	c.RWLock.Unlock()
 	return nil
 }
 
@@ -123,8 +123,8 @@ func (c *MemCache) Update(key string, f ItemVistor) error {
 	}
 
 	c.RWLock.Lock()
-	defer c.RWLock.Unlock()
 	f(key, item)
+	c.RWLock.Unlock()
 	return nil
 }
 
@@ -149,8 +149,9 @@ func (c *MemCache) Expire(key string, duration time.Duration) error {
 // Size :
 func (c *MemCache) Size() int {
 	c.RWLock.RLock()
-	defer c.RWLock.RUnlock()
-	return c.Mappings.Size()
+	size := c.Mappings.Size()
+	c.RWLock.RUnlock()
+	return size
 }
 
 // TypeOf :
@@ -235,8 +236,9 @@ func (c *MemCache) GetListLength(key string) (int, error) {
 	}
 
 	item.RLock()
-	defer item.RUnlock()
-	return item.Length(), nil
+	length := item.Length()
+	item.RUnlock()
+	return length, nil
 }
 
 // GetTableItem :
