@@ -230,8 +230,8 @@ func (c *MemCache) DeclareListItem(key string) (*MappingListItem, error) {
 
 // GetListLength :
 func (c *MemCache) GetListLength(key string) (int, error) {
-	item, err := c.DeclareListItem(key)
-	if err == nil {
+	item, err := c.GetListItem(key)
+	if err != nil {
 		return 0, err
 	}
 
@@ -243,8 +243,8 @@ func (c *MemCache) GetListLength(key string) (int, error) {
 
 // PopListString :
 func (c *MemCache) PopListString(key string) (string, error) {
-	item, err := c.DeclareListItem(key)
-	if err == nil {
+	item, err := c.GetListItem(key)
+	if err != nil {
 		return "", err
 	}
 	item.RLock()
@@ -256,7 +256,7 @@ func (c *MemCache) PopListString(key string) (string, error) {
 // AppendListString :
 func (c *MemCache) AppendListString(key string, value string) error {
 	item, err := c.DeclareListItem(key)
-	if err == nil {
+	if err != nil {
 		return err
 	}
 	item.RLock()
@@ -267,8 +267,8 @@ func (c *MemCache) AppendListString(key string, value string) error {
 
 // LPopListString :
 func (c *MemCache) LPopListString(key string) (string, error) {
-	item, err := c.DeclareListItem(key)
-	if err == nil {
+	item, err := c.GetListItem(key)
+	if err != nil {
 		return "", err
 	}
 	item.Lock()
@@ -280,7 +280,7 @@ func (c *MemCache) LPopListString(key string) (string, error) {
 // LAppendString :
 func (c *MemCache) LAppendString(key string, value string) error {
 	item, err := c.DeclareListItem(key)
-	if err == nil {
+	if err != nil {
 		return err
 	}
 	item.Lock()
@@ -291,8 +291,8 @@ func (c *MemCache) LAppendString(key string, value string) error {
 
 // GetListString :
 func (c *MemCache) GetListString(key string, index int) (string, error) {
-	item, err := c.DeclareListItem(key)
-	if err == nil {
+	item, err := c.GetListItem(key)
+	if err != nil {
 		return "", err
 	}
 	item.RLock()

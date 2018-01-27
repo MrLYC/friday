@@ -323,7 +323,7 @@ func TestMemCacheListItem1(t *testing.T) {
 	defer c.Close()
 
 	length, err := c.GetListLength("list")
-	if err != nil {
+	if err != cache.ErrItemNotFound {
 		t.Errorf("get length error")
 	}
 	if length != 0 {
@@ -336,7 +336,7 @@ func TestMemCacheListItem2(t *testing.T) {
 	defer c.Close()
 
 	value, err := c.PopListString("list")
-	if err != nil {
+	if err != cache.ErrItemNotFound {
 		t.Errorf("pop error")
 	}
 	if value != "" {
@@ -349,7 +349,7 @@ func TestMemCacheListItem3(t *testing.T) {
 	defer c.Close()
 
 	value, err := c.LPopListString("list")
-	if err != nil {
+	if err != cache.ErrItemNotFound {
 		t.Errorf("lpop error")
 	}
 	if value != "" {
