@@ -102,6 +102,9 @@ func TestMappingListItem2(t *testing.T) {
 		t.Errorf("value error")
 	}
 
+	if item.Delete(1) != nil {
+		t.Errorf("delete error")
+	}
 	if item.PopFirstString() != "1" {
 		t.Errorf("pop first value error")
 	}

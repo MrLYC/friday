@@ -54,6 +54,16 @@ func (i *MappingListItem) GetString(index int) string {
 	return value.(string)
 }
 
+// Delete :
+func (i *MappingListItem) Delete(index int) error {
+	list := i.GetList()
+	if list == nil {
+		return ErrListItemValueError
+	}
+	list.Remove(index)
+	return nil
+}
+
 // GetFirstString :
 func (i *MappingListItem) GetFirstString() string {
 	return i.GetString(0)
