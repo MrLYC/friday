@@ -1,11 +1,18 @@
 package memcache
 
 import (
+	"errors"
+
 	"github.com/emirpasic/gods/lists/doublylinkedlist"
 )
 
 // TypeMappingListItem :
 const TypeMappingListItem = "list"
+
+//
+var (
+	ErrListItemValueError = errors.New("List item value error")
+)
 
 // MappingListItem :
 type MappingListItem struct {
@@ -34,8 +41,26 @@ func (i *MappingListItem) Length() int {
 	return list.Size()
 }
 
+// GetString :
+func (i *MappingListItem) GetString(index int) string {
+	list := i.GetList()
+	if list == nil {
+		return ""
+	}
+	value, ok := list.Get(index)
+	if !ok {
+		return ""
+	}
+	return value.(string)
+}
+
 // GetFirstString :
 func (i *MappingListItem) GetFirstString() string {
+	return i.GetString(0)
+}
+
+// PopFirstString :
+func (i *MappingListItem) PopFirstString() string {
 	list := i.GetList()
 	if list == nil {
 		return ""
@@ -44,7 +69,17 @@ func (i *MappingListItem) GetFirstString() string {
 	if !ok {
 		return ""
 	}
+	list.Remove(0)
 	return value.(string)
+}
+
+// AppendFirstString :
+func (i *MappingListItem) AppendFirstString(value string) {
+	list := i.GetList()
+	if list == nil {
+		panic(ErrListItemValueError)
+	}
+	list.Insert(0, value)
 }
 
 // GetLastString :
@@ -53,13 +88,29 @@ func (i *MappingListItem) GetLastString() string {
 	if length <= 0 {
 		return ""
 	}
+	return i.GetString(length - 1)
+}
+
+// AppendLastString :
+func (i *MappingListItem) AppendLastString(value string) {
 	list := i.GetList()
 	if list == nil {
+		panic(ErrListItemValueError)
+	}
+	list.Add(value)
+}
+
+// PopLastString :
+func (i *MappingListItem) PopLastString() string {
+	length := i.Length()
+	if length <= 0 {
 		return ""
 	}
+	list := i.GetList()
 	value, ok := list.Get(length - 1)
 	if !ok {
 		return ""
 	}
+	list.Remove(length - 1)
 	return value.(string)
 }
