@@ -241,6 +241,66 @@ func (c *MemCache) GetListLength(key string) (int, error) {
 	return length, nil
 }
 
+// PopListString :
+func (c *MemCache) PopListString(key string) (string, error) {
+	item, err := c.DeclareListItem(key)
+	if err == nil {
+		return "", err
+	}
+	item.RLock()
+	value := item.PopLastString()
+	item.RUnlock()
+	return value, nil
+}
+
+// AppendListString :
+func (c *MemCache) AppendListString(key string, value string) error {
+	item, err := c.DeclareListItem(key)
+	if err == nil {
+		return err
+	}
+	item.RLock()
+	item.AppendLastString(value)
+	item.RUnlock()
+	return nil
+}
+
+// LPopListString :
+func (c *MemCache) LPopListString(key string) (string, error) {
+	item, err := c.DeclareListItem(key)
+	if err == nil {
+		return "", err
+	}
+	item.Lock()
+	value := item.PopFirstString()
+	item.Unlock()
+	return value, nil
+}
+
+// LAppendString :
+func (c *MemCache) LAppendString(key string, value string) error {
+	item, err := c.DeclareListItem(key)
+	if err == nil {
+		return err
+	}
+	item.Lock()
+	item.AppendFirstString(value)
+	item.Unlock()
+	return nil
+}
+
+// GetListString :
+func (c *MemCache) GetListString(key string, index int) (string, error) {
+	item, err := c.DeclareListItem(key)
+	if err == nil {
+		return "", err
+	}
+	item.RLock()
+	value := item.GetString(index)
+	item.RUnlock()
+	return value, nil
+}
+
 // GetTableItem :
 func (c *MemCache) GetTableItem(key string) (*MappingTableItem, error) {
 	item, err := c.Get(key)

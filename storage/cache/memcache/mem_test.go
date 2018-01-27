@@ -292,7 +292,7 @@ func TestMemCacheUpdate(t *testing.T) {
 	}
 }
 
-func TestMemCacheSetGetString(t *testing.T) {
+func TestMemCacheStringItem(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
@@ -315,5 +315,44 @@ func TestMemCacheSetGetString(t *testing.T) {
 	}
 	if value != "" {
 		t.Errorf("get value error")
+	}
+}
+
+func TestMemCacheListItem1(t *testing.T) {
+	c := memcache.NewMemCache()
+	defer c.Close()
+
+	length, err := c.GetListLength("list")
+	if err != nil {
+		t.Errorf("get length error")
+	}
+	if length != 0 {
+		t.Errorf("get length error")
+	}
+}
+
+func TestMemCacheListItem2(t *testing.T) {
+	c := memcache.NewMemCache()
+	defer c.Close()
+
+	value, err := c.PopListString("list")
+	if err != nil {
+		t.Errorf("pop error")
+	}
+	if value != "" {
+		t.Errorf("pop error")
+	}
+}
+
+func TestMemCacheListItem3(t *testing.T) {
+	c := memcache.NewMemCache()
+	defer c.Close()
+
+	value, err := c.LPopListString("list")
+	if err != nil {
+		t.Errorf("lpop error")
+	}
+	if value != "" {
+		t.Errorf("lpop error")
 	}
 }
