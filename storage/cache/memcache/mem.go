@@ -220,7 +220,7 @@ func (c *MemCache) GetListItem(key string) (*MappingListItem, error) {
 // DeclareListItem :
 func (c *MemCache) DeclareListItem(key string) (*MappingListItem, error) {
 	item, err := c.GetListItem(key)
-	if err != nil {
+	if err == cache.ErrItemNotFound {
 		item = &MappingListItem{}
 		item.Init()
 		err = c.Set(key, item)
