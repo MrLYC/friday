@@ -112,3 +112,36 @@ func TestMappingListItem2(t *testing.T) {
 		t.Errorf("pop last value error")
 	}
 }
+
+func TestGetStringByRange(t *testing.T) {
+	var item memcache.MappingListItem
+	item.Init()
+
+	if item.PushStringList([]string{
+		"a", "b", "c",
+	}) != nil {
+		t.Errorf("push values error")
+	}
+
+	var values []string
+
+	values = item.GetStringByRange(0, 3)
+	if values[0] != "a" || values[1] != "b" || values[2] != "c" || len(values) != 3 {
+		t.Errorf("get values error: %s", values)
+	}
+
+	values = item.GetStringByRange(1, 2)
+	if values[0] != "b" || values[1] != "c" || len(values) != 2 {
+		t.Errorf("get values error: %s", values)
+	}
+
+	values = item.GetStringByRange(1, 3)
+	if values[0] != "b" || values[1] != "c" || len(values) != 2 {
+		t.Errorf("get values error: %s", values)
+	}
+
+	values = item.GetStringByRange(-1, 10)
+	if len(values) != 0 {
+		t.Errorf("get values error: %s", values)
+	}
+}

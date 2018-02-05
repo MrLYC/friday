@@ -54,6 +54,40 @@ func (i *MappingListItem) GetString(index int) string {
 	return value.(string)
 }
 
+// GetStringByRange :
+func (i *MappingListItem) GetStringByRange(index int, count int) []string {
+	items := make([]string, 0, count)
+	list := i.GetList()
+	if list == nil {
+		return items
+	}
+
+	if index < 0 {
+		return items
+	}
+
+	for idx := 0; idx < count; idx++ {
+		value, ok := list.Get(idx + index)
+		if !ok {
+			break
+		}
+		items = append(items, value.(string))
+	}
+	return items
+}
+
+// PushStringList :
+func (i *MappingListItem) PushStringList(values []string) error {
+	list := i.GetList()
+	if list == nil {
+		return ErrListItemValueError
+	}
+	for _, value := range values {
+		list.Add(value)
+	}
+	return nil
+}
+
 // Delete :
 func (i *MappingListItem) Delete(index int) error {
 	list := i.GetList()
