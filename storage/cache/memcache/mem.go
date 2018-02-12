@@ -170,6 +170,17 @@ func (c *MemCache) GetTableItem(key string) (*MappingTableItem, error) {
 	}
 }
 
+// DeclareTableItem :
+func (c *MemCache) DeclareTableItem(key string) (*MappingTableItem, error) {
+	item, err := c.GetTableItem(key)
+	if err == cache.ErrItemNotFound {
+		item = &MappingTableItem{}
+		item.Init()
+		err = c.SetItem(key, item)
+	}
+	return item, err
+}
+
 // API
 
 // Update :
