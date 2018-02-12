@@ -17,7 +17,7 @@ func TestMemCache1(t *testing.T) {
 	var err error
 	var item memcache.IMappingItem
 
-	c.Set("test", &memcache.MappingItem{
+	c.SetItem("test", &memcache.MappingItem{
 		Value: "1",
 	})
 
@@ -34,7 +34,7 @@ func TestMemCache1(t *testing.T) {
 	if err != nil {
 		t.Errorf("expire error")
 	}
-	item, err = c.Get("test")
+	item, err = c.GetItem("test")
 	if err != nil {
 		t.Errorf("get item error")
 	}
@@ -62,7 +62,7 @@ func TestMemCache1(t *testing.T) {
 		t.Errorf("item error")
 	}
 
-	item, err = c.Get("test")
+	item, err = c.GetItem("test")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("get item error")
 	}
@@ -83,7 +83,7 @@ func TestMemCache2(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
-	c.Set("test", &memcache.MappingItem{
+	c.SetItem("test", &memcache.MappingItem{
 		Value: "1",
 	})
 
@@ -98,7 +98,7 @@ func TestMemCache2(t *testing.T) {
 		t.Errorf("type error")
 	}
 
-	item, err := c.Get("test")
+	item, err := c.GetItem("test")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("get item error")
 	}
@@ -121,7 +121,7 @@ func TestMemCacheConcurrency(t *testing.T) {
 			wg.Add(2)
 			key := fmt.Sprintf("%v", index)
 			go func(k string, i int) {
-				c.Set(k, &memcache.MappingItem{
+				c.SetItem(k, &memcache.MappingItem{
 					Value: i,
 				})
 				wg.Done()
@@ -129,7 +129,7 @@ func TestMemCacheConcurrency(t *testing.T) {
 
 			go func(k string, cnt int) {
 				for cnt > 0 {
-					item, err := c.Get(k)
+					item, err := c.GetItem(k)
 					if err == cache.ErrItemNotFound {
 						continue
 					} else if err != nil {
@@ -167,9 +167,9 @@ func TestTestMemCache3(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
-	c.Set("string", &memcache.MappingStringItem{})
-	c.Set("list", &memcache.MappingListItem{})
-	c.Set("table", &memcache.MappingTableItem{})
+	c.SetItem("string", &memcache.MappingStringItem{})
+	c.SetItem("list", &memcache.MappingListItem{})
+	c.SetItem("table", &memcache.MappingTableItem{})
 
 	var (
 		keys    = []string{"string", "list", "table"}
@@ -270,20 +270,20 @@ func TestMemCacheUpdate(t *testing.T) {
 	readyWG.Add(1)
 	go func() {
 		readyWG.Wait()
-		value, err := c.GetString("test")
+		value, err := c.Get("test")
 		if err != nil {
 			t.Errorf("get string error: %v", err)
 		}
-		c.SetString("test", fmt.Sprintf("readed: %v", value))
+		c.Set("test", fmt.Sprintf("readed: %v", value))
 		wg.Done()
 	}()
-	c.SetString("test", "")
+	c.Set("test", "")
 	c.Update("test", func(key string, item interface{}) {
 		readyWG.Done()
 		item.(*memcache.MappingStringItem).Value = "lyc"
 	})
 	wg.Wait()
-	value, err := c.GetString("test")
+	value, err := c.Get("test")
 	if err != nil {
 		t.Errorf("get string error: %v", err)
 	}
@@ -296,12 +296,12 @@ func TestMemCacheStringItem(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
-	err := c.SetString("test", "123")
+	err := c.Set("test", "123")
 	if err != nil {
 		t.Errorf("set error")
 	}
 
-	value, err := c.GetString("test")
+	value, err := c.Get("test")
 	if err != nil {
 		t.Errorf("get error")
 	}
@@ -309,7 +309,7 @@ func TestMemCacheStringItem(t *testing.T) {
 		t.Errorf("get value error")
 	}
 
-	value, err = c.GetString("nothing")
+	value, err = c.Get("nothing")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("get error")
 	}
@@ -322,7 +322,7 @@ func TestMemCacheListItem1(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
-	length, err := c.GetListLength("list")
+	length, err := c.LLen("list")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("get length error")
 	}
@@ -335,7 +335,7 @@ func TestMemCacheListItem2(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
-	value, err := c.PopListString("list")
+	value, err := c.LPop("list")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("pop error")
 	}
@@ -348,7 +348,7 @@ func TestMemCacheListItem3(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()
 
-	value, err := c.LPopListString("list")
+	value, err := c.RPop("list")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("lpop error")
 	}

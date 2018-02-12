@@ -37,7 +37,7 @@ func (c *MemCache) Remove(key string) {
 // Exists :
 func (c *MemCache) Exists(key string) bool {
 	c.RWLock.RLock()
-	item, err := c.Get(key)
+	item, err := c.GetItem(key)
 	c.RWLock.RUnlock()
 	if err != nil {
 		return false
@@ -84,8 +84,10 @@ func (c *MemCache) Clean() int {
 	return list.Size()
 }
 
-// Set :
-func (c *MemCache) Set(key string, value IMappingItem) error {
+// Base
+
+// SetItem :
+func (c *MemCache) SetItem(key string, value IMappingItem) error {
 	c.RWLock.Lock()
 	c.Mappings.Put(key, value)
 	c.RWLock.Unlock()
@@ -103,8 +105,8 @@ func (c *MemCache) GetRaw(key string) (IMappingItem, error) {
 	return item.(IMappingItem), nil
 }
 
-// Get :
-func (c *MemCache) Get(key string) (IMappingItem, error) {
+// GetItem :
+func (c *MemCache) GetItem(key string) (IMappingItem, error) {
 	item, err := c.GetRaw(key)
 	if err != nil {
 		return nil, err
@@ -115,9 +117,64 @@ func (c *MemCache) Get(key string) (IMappingItem, error) {
 	return nil, cache.ErrItemNotFound
 }
 
+// GetStringItem :
+func (c *MemCache) GetStringItem(key string) (*MappingStringItem, error) {
+	item, err := c.GetItem(key)
+	if err != nil {
+		return nil, err
+	}
+	switch item.(type) {
+	case *MappingStringItem:
+		return item.(*MappingStringItem), nil
+	default:
+		return nil, cache.ErrItemTypeError
+	}
+}
+
+// GetListItem :
+func (c *MemCache) GetListItem(key string) (*MappingListItem, error) {
+	item, err := c.GetItem(key)
+	if err != nil {
+		return nil, err
+	}
+	switch item.(type) {
+	case *MappingListItem:
+		return item.(*MappingListItem), nil
+	default:
+		return nil, cache.ErrItemTypeError
+	}
+}
+
+// DeclareListItem :
+func (c *MemCache) DeclareListItem(key string) (*MappingListItem, error) {
+	item, err := c.GetListItem(key)
+	if err == cache.ErrItemNotFound {
+		item = &MappingListItem{}
+		item.Init()
+		err = c.SetItem(key, item)
+	}
+	return item, err
+}
+
+// GetTableItem :
+func (c *MemCache) GetTableItem(key string) (*MappingTableItem, error) {
+	item, err := c.GetItem(key)
+	if err != nil {
+		return nil, err
+	}
+	switch item.(type) {
+	case *MappingTableItem:
+		return item.(*MappingTableItem), nil
+	default:
+		return nil, cache.ErrItemTypeError
+	}
+}
+
+// API
+
 // Update :
 func (c *MemCache) Update(key string, f ItemVistor) error {
-	item, err := c.Get(key)
+	item, err := c.GetItem(key)
 	if err != nil {
 		return err
 	}
@@ -131,7 +188,7 @@ func (c *MemCache) Update(key string, f ItemVistor) error {
 // Expire :
 func (c *MemCache) Expire(key string, duration time.Duration) error {
 	c.RWLock.RLock()
-	item, err := c.Get(key)
+	item, err := c.GetItem(key)
 	c.RWLock.RUnlock()
 	if err != nil {
 		return err
@@ -156,7 +213,7 @@ func (c *MemCache) Size() int {
 
 // TypeOf :
 func (c *MemCache) TypeOf(key string) string {
-	item, err := c.Get(key)
+	item, err := c.GetItem(key)
 	if err != nil {
 		return ""
 	}
@@ -173,29 +230,15 @@ func (c *MemCache) TypeOf(key string) string {
 	}
 }
 
-// GetStringItem :
-func (c *MemCache) GetStringItem(key string) (*MappingStringItem, error) {
-	item, err := c.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	switch item.(type) {
-	case *MappingStringItem:
-		return item.(*MappingStringItem), nil
-	default:
-		return nil, cache.ErrItemTypeError
-	}
-}
-
-// SetString :
-func (c *MemCache) SetString(key string, value string) error {
+// Set :
+func (c *MemCache) Set(key string, value string) error {
 	item := &MappingStringItem{}
 	item.SetValue(value)
-	return c.Set(key, item)
+	return c.SetItem(key, item)
 }
 
-// GetString :
-func (c *MemCache) GetString(key string) (string, error) {
+// Get :
+func (c *MemCache) Get(key string) (string, error) {
 	item, err := c.GetStringItem(key)
 	if err != nil {
 		return "", err
@@ -203,33 +246,8 @@ func (c *MemCache) GetString(key string) (string, error) {
 	return item.GetString(), nil
 }
 
-// GetListItem :
-func (c *MemCache) GetListItem(key string) (*MappingListItem, error) {
-	item, err := c.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	switch item.(type) {
-	case *MappingListItem:
-		return item.(*MappingListItem), nil
-	default:
-		return nil, cache.ErrItemTypeError
-	}
-}
-
-// DeclareListItem :
-func (c *MemCache) DeclareListItem(key string) (*MappingListItem, error) {
-	item, err := c.GetListItem(key)
-	if err == cache.ErrItemNotFound {
-		item = &MappingListItem{}
-		item.Init()
-		err = c.Set(key, item)
-	}
-	return item, err
-}
-
-// GetListLength :
-func (c *MemCache) GetListLength(key string) (int, error) {
+// LLen :
+func (c *MemCache) LLen(key string) (int, error) {
 	item, err := c.GetListItem(key)
 	if err != nil {
 		return 0, err
@@ -241,8 +259,8 @@ func (c *MemCache) GetListLength(key string) (int, error) {
 	return length, nil
 }
 
-// PopListString :
-func (c *MemCache) PopListString(key string) (string, error) {
+// RPop :
+func (c *MemCache) RPop(key string) (string, error) {
 	item, err := c.GetListItem(key)
 	if err != nil {
 		return "", err
@@ -253,8 +271,8 @@ func (c *MemCache) PopListString(key string) (string, error) {
 	return value, nil
 }
 
-// AppendListString :
-func (c *MemCache) AppendListString(key string, value string) error {
+// RPush :
+func (c *MemCache) RPush(key string, value string) error {
 	item, err := c.DeclareListItem(key)
 	if err != nil {
 		return err
@@ -265,8 +283,8 @@ func (c *MemCache) AppendListString(key string, value string) error {
 	return nil
 }
 
-// LPopListString :
-func (c *MemCache) LPopListString(key string) (string, error) {
+// LPop :
+func (c *MemCache) LPop(key string) (string, error) {
 	item, err := c.GetListItem(key)
 	if err != nil {
 		return "", err
@@ -277,8 +295,8 @@ func (c *MemCache) LPopListString(key string) (string, error) {
 	return value, nil
 }
 
-// LAppendString :
-func (c *MemCache) LAppendString(key string, value string) error {
+// LPush :
+func (c *MemCache) LPush(key string, value string) error {
 	item, err := c.DeclareListItem(key)
 	if err != nil {
 		return err
@@ -289,8 +307,8 @@ func (c *MemCache) LAppendString(key string, value string) error {
 	return nil
 }
 
-// GetListString :
-func (c *MemCache) GetListString(key string, index int) (string, error) {
+// LIndex :
+func (c *MemCache) LIndex(key string, index int) (string, error) {
 	item, err := c.GetListItem(key)
 	if err != nil {
 		return "", err
@@ -299,20 +317,6 @@ func (c *MemCache) GetListString(key string, index int) (string, error) {
 	value := item.GetString(index)
 	item.RUnlock()
 	return value, nil
-}
-
-// GetTableItem :
-func (c *MemCache) GetTableItem(key string) (*MappingTableItem, error) {
-	item, err := c.Get(key)
-	if err != nil {
-		return nil, err
-	}
-	switch item.(type) {
-	case *MappingTableItem:
-		return item.(*MappingTableItem), nil
-	default:
-		return nil, cache.ErrItemTypeError
-	}
 }
 
 // NewMemCache :
