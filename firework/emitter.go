@@ -17,7 +17,7 @@ type ChannelItem struct {
 	Channel      chan IFirework
 	Lock         sync.Mutex
 	Handlers     *treemap.Map
-	HandlersLock sync.Mutex
+	HandlersLock sync.RWMutex
 }
 
 // Emitter :
@@ -28,10 +28,10 @@ type Emitter struct {
 	RunAt      time.Time
 
 	Channels *treemap.Map
-	chanLock sync.Mutex
+	chanLock sync.RWMutex
 
 	Applets    *treemap.Map
-	appletLock sync.Mutex
+	appletLock sync.RWMutex
 }
 
 // Init :
@@ -45,7 +45,9 @@ func (e *Emitter) Init() {
 func (e *Emitter) AddApplet(applet IApplet) bool {
 	name := applet.GetName()
 
+	e.appletLock.RLock()
 	_, ok := e.Applets.Get(name)
+	e.appletLock.RUnlock()
 	if ok {
 		return false
 	}
@@ -94,7 +96,9 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 func (e *Emitter) On(channelName string, name string, handler Handler) (Handler, bool) {
 	channel, _ := e.declareChannelItem(channelName)
 
+	channel.HandlersLock.RLock()
 	items, ok := channel.Handlers.Get(name)
+	channel.HandlersLock.RUnlock()
 
 	var handlers *treeset.Set
 	if !ok {
@@ -122,7 +126,9 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 	channel.Lock.Lock()
 	defer channel.Lock.Unlock()
 
+	channel.HandlersLock.RLock()
 	items, ok := channel.Handlers.Get(name)
+	channel.HandlersLock.RUnlock()
 
 	if !ok {
 		return handler, false
@@ -188,12 +194,15 @@ func (e *Emitter) Run() {
 	e.RunAt = time.Now()
 	logging.Infof("Emitter run at: %s", e.RunAt.String())
 
+	e.appletLock.RLock()
 	iterApplet := e.Applets.Iterator()
 	for iterApplet.Next() {
 		applet := iterApplet.Value().(IApplet)
 		go applet.Run()
 	}
+	e.appletLock.RUnlock()
 
+	e.chanLock.RLock()
 	channels := make([]reflect.SelectCase, e.Channels.Size())
 	iterChannel := e.Channels.Iterator()
 	for i := 0; iterChannel.Next(); i++ {
@@ -203,6 +212,7 @@ func (e *Emitter) Run() {
 			Chan: reflect.ValueOf(item.Channel),
 		}
 	}
+	e.chanLock.RUnlock()
 
 	for e.Status == StatusControllerRuning {
 		chosen, value, ok := reflect.Select(channels)
@@ -215,7 +225,9 @@ func (e *Emitter) Run() {
 		}
 		firework := value.Interface().(IFirework)
 		channel := firework.GetChannel()
+		e.chanLock.RLock()
 		chanItem, ok := e.Channels.Get(channel)
+		e.chanLock.RUnlock()
 		if !ok {
 			logging.Warningf(
 				"Unknown channel %s from %s(%s)",
@@ -226,6 +238,7 @@ func (e *Emitter) Run() {
 			}
 			continue
 		}
+
 		items, ok := chanItem.(*ChannelItem).Handlers.Get(firework.GetName())
 		if !ok {
 			continue
@@ -241,16 +254,19 @@ func (e *Emitter) Run() {
 // Ready :
 func (e *Emitter) Ready() {
 	e.BaseController.Ready()
+	e.appletLock.RLock()
 	iter := e.Applets.Iterator()
 	for iter.Next() {
 		applet := iter.Value().(IApplet)
 		applet.Ready()
 	}
+	e.appletLock.RUnlock()
 }
 
 // Terminate :
 func (e *Emitter) Terminate() {
 	e.SetStatus(StatusControllerTerminating)
+	e.appletLock.Lock()
 	e.Applets.Each(func(key interface{}, value interface{}) {
 		applet := value.(IApplet)
 		status := applet.GetStatus()
@@ -258,9 +274,12 @@ func (e *Emitter) Terminate() {
 			applet.Terminate()
 		}
 	})
+	e.appletLock.Unlock()
+	e.chanLock.Lock()
 	e.Channels.Each(func(key interface{}, value interface{}) {
 		channel := value.(*ChannelItem)
 		close(channel.Channel)
 	})
+	e.chanLock.Unlock()
 	e.BaseController.Terminate()
 }
