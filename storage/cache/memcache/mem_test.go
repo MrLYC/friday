@@ -329,30 +329,64 @@ func TestMemCacheListItem1(t *testing.T) {
 	if length != 0 {
 		t.Errorf("get length error")
 	}
-}
 
-func TestMemCacheListItem2(t *testing.T) {
-	c := memcache.NewMemCache()
-	defer c.Close()
+	c.LPush("list", "1")
+	c.RPush("list", "2")
 
-	value, err := c.LPop("list")
-	if err != cache.ErrItemNotFound {
-		t.Errorf("pop error")
+	val, err := c.LIndex("list", 0)
+	if err != nil {
+		t.Errorf("get index error")
 	}
-	if value != "" {
-		t.Errorf("pop error")
+	if val != "1" {
+		t.Errorf("get index error")
 	}
-}
 
-func TestMemCacheListItem3(t *testing.T) {
-	c := memcache.NewMemCache()
-	defer c.Close()
+	val, err = c.LIndex("list", 1)
+	if err != nil {
+		t.Errorf("get index error")
+	}
+	if val != "2" {
+		t.Errorf("get index error")
+	}
 
-	value, err := c.RPop("list")
-	if err != cache.ErrItemNotFound {
+	length, err = c.LLen("list")
+	if err != nil {
+		t.Errorf("get length error")
+	}
+	if length != 2 {
+		t.Errorf("get length error")
+	}
+
+	val, err = c.LPop("list")
+	if err != nil {
 		t.Errorf("lpop error")
 	}
-	if value != "" {
+	if val != "1" {
 		t.Errorf("lpop error")
+	}
+
+	val, err = c.RPop("list")
+	if err != nil {
+		t.Errorf("rpop error")
+	}
+	if val != "2" {
+		t.Errorf("rpop error")
+	}
+
+	length, err = c.LLen("list")
+	if err != nil {
+		t.Errorf("get length error")
+	}
+	if length != 0 {
+		t.Errorf("get length error")
+	}
+
+	c.Remove("list")
+	length, err = c.LLen("list")
+	if err != cache.ErrItemNotFound {
+		t.Errorf("get length error")
+	}
+	if length != 0 {
+		t.Errorf("get length error")
 	}
 }
