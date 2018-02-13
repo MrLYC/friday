@@ -318,6 +318,37 @@ func TestMemCacheStringItem(t *testing.T) {
 	}
 }
 
+func TestMemCacheStringItemAsNumber(t *testing.T) {
+	c := memcache.NewMemCache()
+	defer c.Close()
+
+	var (
+		value1 float64
+		value2 int64
+		err    error
+	)
+
+	value2, err = c.Incr("n")
+	if value2 != 1 || err != nil {
+		t.Errorf("value Incr error: %v", value2)
+	}
+
+	value1, err = c.IncrBy("n", 2.0)
+	if value1 != 3.0 || err != nil {
+		t.Errorf("value IncrBy error: %v", value1)
+	}
+
+	value2, err = c.Decr("n")
+	if value2 != 2.0 || err != nil {
+		t.Errorf("value Decr error: %v", value2)
+	}
+
+	value1, err = c.DecrBy("n", 2.0)
+	if value1 != 0.0 || err != nil {
+		t.Errorf("value DecrBy error: %v", value1)
+	}
+}
+
 func TestMemCacheListItem1(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()

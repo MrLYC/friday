@@ -129,6 +129,17 @@ func (c *MemCache) GetStringItem(key string) (*MappingStringItem, error) {
 	}
 }
 
+// DeclareStringItem :
+func (c *MemCache) DeclareStringItem(key string) (*MappingStringItem, error) {
+	item, err := c.GetStringItem(key)
+	if err == cache.ErrItemNotFound {
+		item = &MappingStringItem{}
+		item.Init()
+		err = c.SetItem(key, item)
+	}
+	return item, err
+}
+
 // GetListItem :
 func (c *MemCache) GetListItem(key string) (*MappingListItem, error) {
 	item, err := c.GetItem(key)
@@ -239,6 +250,8 @@ func (c *MemCache) TypeOf(key string) string {
 	}
 }
 
+// String API
+
 // Set :
 func (c *MemCache) Set(key string, value string) error {
 	item := &MappingStringItem{}
@@ -271,6 +284,38 @@ func (c *MemCache) StrLen(key string) (int, error) {
 	item.RUnlock()
 	return value, err
 }
+
+// IncrBy :
+func (c *MemCache) IncrBy(key string, num float64) (float64, error) {
+	item, err := c.DeclareStringItem(key)
+	if err != nil {
+		return 0, err
+	}
+
+	item.RLock()
+	value, err := item.Add(num)
+	item.RUnlock()
+	return value, err
+}
+
+// DecrBy :
+func (c *MemCache) DecrBy(key string, num float64) (float64, error) {
+	return c.IncrBy(key, -num)
+}
+
+// Incr :
+func (c *MemCache) Incr(key string) (int64, error) {
+	value, err := c.IncrBy(key, 1)
+	return int64(value), err
+}
+
+// Decr :
+func (c *MemCache) Decr(key string) (int64, error) {
+	value, err := c.IncrBy(key, -1)
+	return int64(value), err
+}
+
+// List API
 
 // LLen :
 func (c *MemCache) LLen(key string) (int, error) {

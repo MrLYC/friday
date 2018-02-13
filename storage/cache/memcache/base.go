@@ -35,6 +35,10 @@ type MappingItem struct {
 	RWLock   sync.RWMutex
 }
 
+// Init :
+func (i *MappingItem) Init() {
+}
+
 // IsAvailable :
 func (i *MappingItem) IsAvailable() bool {
 	if i.ExpireAt == nil {
