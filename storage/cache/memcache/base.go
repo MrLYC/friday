@@ -20,6 +20,7 @@ type IMappingItem interface {
 	SetValue(interface{})
 	GetValue() interface{}
 	SetExpireAt(time.Time)
+	GetExpireAt() *time.Time
 	IsExpireAt(time.Time) bool
 	Length() int
 	Lock()
@@ -60,6 +61,11 @@ func (i *MappingItem) GetValue() interface{} {
 // SetExpireAt :
 func (i *MappingItem) SetExpireAt(expired time.Time) {
 	i.ExpireAt = &expired
+}
+
+// GetExpireAt :
+func (i *MappingItem) GetExpireAt() *time.Time {
+	return i.ExpireAt
 }
 
 // IsExpireAt :

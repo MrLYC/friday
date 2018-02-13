@@ -205,6 +205,25 @@ func (c *MemCache) Update(key string, f ItemVistor) error {
 	return nil
 }
 
+// TimeToLive :
+func (c *MemCache) TimeToLive(key string) time.Duration {
+	item, err := c.GetRaw(key)
+	if err != nil {
+		return time.Duration(0)
+	}
+
+	now := time.Now()
+	if item.IsExpireAt(now) {
+		return time.Duration(0)
+	}
+
+	expireAt := item.GetExpireAt()
+	if expireAt == nil {
+		return time.Hour * 1000
+	}
+	return now.Sub(*expireAt)
+}
+
 // Expire :
 func (c *MemCache) Expire(key string, duration time.Duration) error {
 	c.RWLock.RLock()
