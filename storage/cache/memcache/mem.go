@@ -25,8 +25,8 @@ func (c *MemCache) Close() error {
 	return nil
 }
 
-// Remove :
-func (c *MemCache) Remove(key string) {
+// Delete :
+func (c *MemCache) Delete(key string) {
 	c.RWLock.Lock()
 	c.Mappings.Remove(key)
 	c.RWLock.Unlock()
@@ -234,7 +234,7 @@ func (c *MemCache) Expire(key string, duration time.Duration) error {
 	}
 	now := time.Now()
 	if item.IsExpireAt(now) {
-		c.Remove(key)
+		c.Delete(key)
 		return cache.ErrItemExpired
 	}
 
@@ -407,6 +407,104 @@ func (c *MemCache) LIndex(key string, index int) (string, error) {
 	value := item.GetString(index)
 	item.RUnlock()
 	return value, nil
+}
+
+// Table API
+
+// HGet :
+func (c *MemCache) HGet(key string, field string) (string, error) {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return "", err
+	}
+	item.RLock()
+	value := item.GetString(field)
+	item.RUnlock()
+	return value, nil
+}
+
+// HSet :
+func (c *MemCache) HSet(key string, field string, value string) error {
+	item, err := c.DeclareTableItem(key)
+	if err != nil {
+		return err
+	}
+	item.Lock()
+	item.SetString(field, value)
+	item.Unlock()
+	return nil
+}
+
+// HDel :
+func (c *MemCache) HDel(key string, field string) error {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return err
+	}
+	item.Lock()
+	item.Delete(field)
+	item.Unlock()
+	return nil
+}
+
+// HClear :
+func (c *MemCache) HClear(key string) error {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return err
+	}
+	item.Lock()
+	item.Clear()
+	item.Unlock()
+	return nil
+}
+
+// HExists :
+func (c *MemCache) HExists(key string, field string) bool {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return false
+	}
+	item.Lock()
+	value := item.Exists(field)
+	item.Unlock()
+	return value
+}
+
+// HGetAll :
+func (c *MemCache) HGetAll(key string) (map[string]string, error) {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return nil, err
+	}
+	item.Lock()
+	value := item.GetAllMappings()
+	item.Unlock()
+	return value, nil
+}
+
+// HMGet :
+func (c *MemCache) HMGet(key string, fields []string) (map[string]string, error) {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return nil, err
+	}
+	item.Lock()
+	value := item.GetMappings(fields)
+	item.Unlock()
+	return value, nil
+}
+
+// HMSet :
+func (c *MemCache) HMSet(key string, mappings map[string]string) error {
+	item, err := c.GetTableItem(key)
+	if err != nil {
+		return err
+	}
+	item.Lock()
+	err = item.SetMappings(mappings)
+	item.Unlock()
+	return err
 }
 
 // NewMemCache :

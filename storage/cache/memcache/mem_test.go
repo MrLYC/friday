@@ -90,7 +90,7 @@ func TestMemCache2(t *testing.T) {
 	if c.Size() != 1 {
 		t.Errorf("size error")
 	}
-	c.Remove("test")
+	c.Delete("test")
 	if c.Size() != 0 {
 		t.Errorf("size error")
 	}
@@ -144,7 +144,7 @@ func TestMemCacheConcurrency(t *testing.T) {
 					cnt -= 1
 					flag[index] += 1
 				}
-				c.Remove(k)
+				c.Delete(k)
 				wg.Done()
 			}(key, count)
 		}
@@ -412,12 +412,72 @@ func TestMemCacheListItem1(t *testing.T) {
 		t.Errorf("get length error")
 	}
 
-	c.Remove("list")
+	c.Delete("list")
 	length, err = c.LLen("list")
 	if err != cache.ErrItemNotFound {
 		t.Errorf("get length error")
 	}
 	if length != 0 {
 		t.Errorf("get length error")
+	}
+}
+
+func TestMemCacheTableItem(t *testing.T) {
+	c := memcache.NewMemCache()
+	defer c.Close()
+
+	var (
+		value    string
+		mappings map[string]string
+		err      error
+	)
+
+	err = c.HSet("table", "a", "1")
+	if err != nil {
+		t.Errorf("table HSet value error")
+	}
+
+	value, err = c.HGet("table", "a")
+	if err != nil {
+		t.Errorf("table HGet value error")
+	}
+	if value != "1" {
+		t.Errorf("table HGet value error")
+	}
+
+	err = c.HMSet("table", map[string]string{
+		"b": "2",
+		"c": "3",
+	})
+	if err != nil {
+		t.Errorf("table HMSet value error")
+	}
+
+	mappings, err = c.HMGet("table", []string{"a", "b"})
+	if err != nil || len(mappings) != 2 || mappings["a"] != "1" || mappings["b"] != "2" {
+		t.Errorf("table HMGet value error: %v", mappings)
+	}
+
+	if !c.HExists("table", "c") {
+		t.Errorf("HExists error")
+	}
+	err = c.HDel("table", "c")
+	if err != nil {
+		t.Errorf("HDel error")
+	}
+	if c.HExists("table", "c") {
+		t.Errorf("HExists error")
+	}
+
+	c.HClear("table")
+	if c.HExists("table", "a") {
+		t.Errorf("HClear error")
+	}
+	if c.HExists("table", "b") {
+		t.Errorf("HClear error")
+	}
+
+	if !c.Exists("table") {
+		t.Errorf("HClear error")
 	}
 }
