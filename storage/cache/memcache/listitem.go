@@ -48,25 +48,34 @@ func (i *MappingListItem) GetString(index int) string {
 }
 
 // GetStringByRange :
-func (i *MappingListItem) GetStringByRange(index int, count int) []string {
-	items := make([]string, 0, count)
+func (i *MappingListItem) GetStringByRange(start int, stop int) []string {
 	list := i.GetList()
-	if list == nil {
-		return items
+	size := list.Size()
+
+	if stop < 0 {
+		stop += size + 1
 	}
 
-	if index < 0 {
-		return items
+	if start < 0 {
+		start += size + 1
 	}
 
-	for idx := 0; idx < count; idx++ {
-		value, ok := list.Get(idx + index)
-		if !ok {
-			break
+	values := make([]string, 0, stop-start)
+
+	if size > start && stop > start {
+		iter := list.Iterator()
+		for iter.Next() {
+			index := iter.Index()
+			if index >= stop {
+				break
+			}
+			if index >= start {
+				values = append(values, iter.Value().(string))
+			}
 		}
-		items = append(items, value.(string))
 	}
-	return items
+
+	return values
 }
 
 // PushStringList :
@@ -150,4 +159,11 @@ func (i *MappingListItem) PopLastString() string {
 	}
 	list.Remove(length - 1)
 	return value.(string)
+}
+
+// SetAt :
+func (i *MappingListItem) SetAt(index int, value string) error {
+	list := i.GetList()
+	list.Insert(index, value)
+	return nil
 }

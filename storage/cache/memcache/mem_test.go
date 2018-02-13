@@ -422,6 +422,34 @@ func TestMemCacheListItem1(t *testing.T) {
 	}
 }
 
+func TestMemCacheListItem2(t *testing.T) {
+	c := memcache.NewMemCache()
+	defer c.Close()
+
+	err := c.LSet("list", 0, "0")
+	if err != nil {
+		t.Errorf("LSet error")
+	}
+	err = c.LSet("list", 2, "2")
+	if err != nil {
+		t.Errorf("LSet error")
+	}
+	values, err := c.LRange("list", 0, -1)
+	if err != nil || len(values) != 1 || values[0] != "0" {
+		t.Errorf("LSet error： %v", values)
+	}
+
+	err = c.LSet("list", 1, "1")
+	if err != nil {
+		t.Errorf("LSet error")
+	}
+
+	values, err = c.LRange("list", 0, -1)
+	if err != nil || len(values) != 2 || values[0] != "0" || values[1] != "1" {
+		t.Errorf("LSet error： %v", values)
+	}
+}
+
 func TestMemCacheTableItem(t *testing.T) {
 	c := memcache.NewMemCache()
 	defer c.Close()

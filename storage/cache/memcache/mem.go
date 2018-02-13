@@ -355,9 +355,9 @@ func (c *MemCache) RPop(key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	item.RLock()
+	item.Lock()
 	value := item.PopLastString()
-	item.RUnlock()
+	item.Unlock()
 	return value, nil
 }
 
@@ -367,9 +367,9 @@ func (c *MemCache) RPush(key string, value string) error {
 	if err != nil {
 		return err
 	}
-	item.RLock()
+	item.Lock()
 	item.AppendLastString(value)
-	item.RUnlock()
+	item.Unlock()
 	return nil
 }
 
@@ -407,6 +407,42 @@ func (c *MemCache) LIndex(key string, index int) (string, error) {
 	value := item.GetString(index)
 	item.RUnlock()
 	return value, nil
+}
+
+// LSet :
+func (c *MemCache) LSet(key string, index int, value string) error {
+	item, err := c.DeclareListItem(key)
+	if err != nil {
+		return err
+	}
+	item.Lock()
+	err = item.SetAt(index, value)
+	item.Unlock()
+	return err
+}
+
+// LRange :
+func (c *MemCache) LRange(key string, start int, stop int) ([]string, error) {
+	item, err := c.GetListItem(key)
+	if err != nil {
+		return nil, err
+	}
+	item.RLock()
+	value := item.GetStringByRange(start, stop)
+	item.RUnlock()
+	return value, nil
+}
+
+// LDel :
+func (c *MemCache) LDel(key string, index int) error {
+	item, err := c.GetListItem(key)
+	if err != nil {
+		return err
+	}
+	item.Lock()
+	err = item.Delete(index)
+	item.Unlock()
+	return err
 }
 
 // Table API

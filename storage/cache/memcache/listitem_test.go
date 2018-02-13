@@ -131,7 +131,7 @@ func TestGetStringByRange(t *testing.T) {
 	}
 
 	values = item.GetStringByRange(1, 2)
-	if values[0] != "b" || values[1] != "c" || len(values) != 2 {
+	if values[0] != "b" || len(values) != 1 {
 		t.Errorf("get values error: %s", values)
 	}
 
@@ -140,8 +140,23 @@ func TestGetStringByRange(t *testing.T) {
 		t.Errorf("get values error: %s", values)
 	}
 
-	values = item.GetStringByRange(-1, 10)
+	values = item.GetStringByRange(-2, 10)
+	if len(values) != 1 {
+		t.Errorf("get values error: %s", values)
+	}
+
+	values = item.GetStringByRange(10, 20)
 	if len(values) != 0 {
+		t.Errorf("get values error: %s", values)
+	}
+
+	values = item.GetStringByRange(0, -1)
+	if values[0] != "a" || values[1] != "b" || values[2] != "c" || len(values) != 3 {
+		t.Errorf("get values error: %s", values)
+	}
+
+	values = item.GetStringByRange(-2, -1)
+	if values[0] != "c" || len(values) != 1 {
 		t.Errorf("get values error: %s", values)
 	}
 }
