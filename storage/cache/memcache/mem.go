@@ -43,8 +43,8 @@ func (c *MemCache) Exists(key string) bool {
 	return item.IsAvailable()
 }
 
-// IterItems :
-func (c *MemCache) IterItems(f ItemVistor) {
+// Scan :
+func (c *MemCache) Scan(f ItemVistor) {
 	c.RWLock.RLock()
 	iter := c.Mappings.Iterator()
 
@@ -61,7 +61,7 @@ func (c *MemCache) Clean() int {
 		list = singlylinkedlist.New()
 	)
 
-	c.IterItems(func(key string, value interface{}) {
+	c.Scan(func(key string, value interface{}) {
 		item := value.(IMappingItem)
 		if item.IsExpireAt(now) {
 			list.Add(key)
