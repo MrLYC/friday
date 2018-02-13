@@ -1,22 +1,15 @@
 package memcache
 
 import (
-	"errors"
-
 	"github.com/emirpasic/gods/maps/hashmap"
 )
 
 // TypeMappingTableItem :
 const TypeMappingTableItem = "table"
 
-//
-var (
-	ErrTableFieldValueError = errors.New("Table field value error")
-)
-
 // MappingTableItem :
 type MappingTableItem struct {
-	ComplexMappingItem
+	MappingItem
 }
 
 // Init :
@@ -58,7 +51,7 @@ func (i *MappingTableItem) GetString(field string) string {
 func (i *MappingTableItem) SetString(field string, value string) error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrTableFieldValueError
+		return ErrItemValueError
 	}
 	table.Put(field, value)
 	return nil
@@ -68,7 +61,7 @@ func (i *MappingTableItem) SetString(field string, value string) error {
 func (i *MappingTableItem) Delete(field string) error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrTableFieldValueError
+		return ErrItemValueError
 	}
 	table.Remove(field)
 	return nil
@@ -78,7 +71,7 @@ func (i *MappingTableItem) Delete(field string) error {
 func (i *MappingTableItem) Clear() error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrTableFieldValueError
+		return ErrItemValueError
 	}
 	table.Clear()
 	return nil
@@ -113,7 +106,7 @@ func (i *MappingTableItem) GetMappings() map[string]string {
 func (i *MappingTableItem) SetMappings(mappings map[string]string) error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrTableFieldValueError
+		return ErrItemValueError
 	}
 	for field, value := range mappings {
 		table.Put(field, value)

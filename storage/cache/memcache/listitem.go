@@ -1,22 +1,15 @@
 package memcache
 
 import (
-	"errors"
-
 	"github.com/emirpasic/gods/lists/doublylinkedlist"
 )
 
 // TypeMappingListItem :
 const TypeMappingListItem = "list"
 
-//
-var (
-	ErrListItemValueError = errors.New("List item value error")
-)
-
 // MappingListItem :
 type MappingListItem struct {
-	ComplexMappingItem
+	MappingItem
 }
 
 // GetList :
@@ -80,7 +73,7 @@ func (i *MappingListItem) GetStringByRange(index int, count int) []string {
 func (i *MappingListItem) PushStringList(values []string) error {
 	list := i.GetList()
 	if list == nil {
-		return ErrListItemValueError
+		return ErrItemValueError
 	}
 	for _, value := range values {
 		list.Add(value)
@@ -92,7 +85,7 @@ func (i *MappingListItem) PushStringList(values []string) error {
 func (i *MappingListItem) Delete(index int) error {
 	list := i.GetList()
 	if list == nil {
-		return ErrListItemValueError
+		return ErrItemValueError
 	}
 	list.Remove(index)
 	return nil
@@ -121,7 +114,7 @@ func (i *MappingListItem) PopFirstString() string {
 func (i *MappingListItem) AppendFirstString(value string) {
 	list := i.GetList()
 	if list == nil {
-		panic(ErrListItemValueError)
+		panic(ErrItemValueError)
 	}
 	list.Insert(0, value)
 }
@@ -139,7 +132,7 @@ func (i *MappingListItem) GetLastString() string {
 func (i *MappingListItem) AppendLastString(value string) {
 	list := i.GetList()
 	if list == nil {
-		panic(ErrListItemValueError)
+		panic(ErrItemValueError)
 	}
 	list.Add(value)
 }

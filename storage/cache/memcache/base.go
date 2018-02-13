@@ -1,8 +1,14 @@
 package memcache
 
 import (
+	"errors"
 	"sync"
 	"time"
+)
+
+//
+var (
+	ErrItemValueError = errors.New("Item value error")
 )
 
 // ItemVistor :
@@ -16,11 +22,6 @@ type IMappingItem interface {
 	SetExpireAt(time.Time)
 	IsExpireAt(time.Time) bool
 	Length() int
-}
-
-// IComplexMappingItem :
-type IComplexMappingItem interface {
-	IMappingItem
 	Lock()
 	Unlock()
 	RLock()
@@ -31,6 +32,7 @@ type IComplexMappingItem interface {
 type MappingItem struct {
 	ExpireAt *time.Time
 	Value    interface{}
+	RWLock   sync.RWMutex
 }
 
 // IsAvailable :
@@ -69,28 +71,22 @@ func (i *MappingItem) Length() int {
 	return 0
 }
 
-// ComplexMappingItem :
-type ComplexMappingItem struct {
-	MappingItem
-	RWLock sync.RWMutex
-}
-
 // Lock :
-func (i *ComplexMappingItem) Lock() {
+func (i *MappingItem) Lock() {
 	i.RWLock.Lock()
 }
 
 // Unlock :
-func (i *ComplexMappingItem) Unlock() {
+func (i *MappingItem) Unlock() {
 	i.RWLock.Unlock()
 }
 
 // RLock :
-func (i *ComplexMappingItem) RLock() {
+func (i *MappingItem) RLock() {
 	i.RWLock.RLock()
 }
 
 // RUnlock :
-func (i *ComplexMappingItem) RUnlock() {
+func (i *MappingItem) RUnlock() {
 	i.RWLock.RUnlock()
 }

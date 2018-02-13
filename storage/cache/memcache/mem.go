@@ -1,14 +1,12 @@
 package memcache
 
 import (
+	"friday/storage/cache"
+	"github.com/emirpasic/gods/lists/singlylinkedlist"
+	"github.com/emirpasic/gods/maps/treemap"
 	"reflect"
 	"sync"
 	"time"
-
-	"friday/storage/cache"
-
-	"github.com/emirpasic/gods/lists/singlylinkedlist"
-	"github.com/emirpasic/gods/maps/treemap"
 )
 
 // MemCache :
@@ -254,7 +252,24 @@ func (c *MemCache) Get(key string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return item.GetString(), nil
+
+	item.RLock()
+	value := item.GetString()
+	item.RUnlock()
+	return value, err
+}
+
+// StrLen :
+func (c *MemCache) StrLen(key string) (int, error) {
+	item, err := c.GetStringItem(key)
+	if err != nil {
+		return 0, err
+	}
+
+	item.RLock()
+	value := item.Length()
+	item.RUnlock()
+	return value, err
 }
 
 // LLen :
