@@ -65,7 +65,7 @@ func TestMappingTableItem2(t *testing.T) {
 		t.Errorf("set mappings failed")
 	}
 
-	values := item.GetMappings()
+	values := item.GetAllMappings()
 	if item.Length() != len(values) {
 		t.Errorf("mapping length error")
 	}
@@ -79,11 +79,20 @@ func TestMappingTableItem2(t *testing.T) {
 	}) != nil {
 		t.Errorf("set mappings failed")
 	}
-	values = item.GetMappings()
+
+	values = item.GetAllMappings()
 	if item.Length() != len(values) {
 		t.Errorf("mapping length error")
 	}
 	if values["a"] != "1" || values["b"] != "0" || values["c"] != "3" {
+		t.Errorf("get mappings error")
+	}
+
+	values = item.GetMappings([]string{"a", "b", "x"})
+	if len(values) != 3 {
+		t.Errorf("mapping length error")
+	}
+	if values["a"] != "1" || values["b"] != "0" || values["x"] != "" {
 		t.Errorf("get mappings error")
 	}
 }

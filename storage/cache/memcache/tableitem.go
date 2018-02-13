@@ -87,8 +87,8 @@ func (i *MappingTableItem) Exists(field string) bool {
 	return ok
 }
 
-// GetMappings :
-func (i *MappingTableItem) GetMappings() map[string]string {
+// GetAllMappings :
+func (i *MappingTableItem) GetAllMappings() map[string]string {
 	result := make(map[string]string, i.Length())
 	table := i.GetTable()
 	if table != nil {
@@ -96,6 +96,23 @@ func (i *MappingTableItem) GetMappings() map[string]string {
 			value, ok := table.Get(field)
 			if ok {
 				result[field.(string)] = value.(string)
+			}
+		}
+	}
+	return result
+}
+
+// GetMappings :
+func (i *MappingTableItem) GetMappings(fields []string) map[string]string {
+	result := make(map[string]string, len(fields))
+	table := i.GetTable()
+	if table != nil {
+		for _, field := range fields {
+			value, ok := table.Get(field)
+			if ok {
+				result[field] = value.(string)
+			} else {
+				result[field] = ""
 			}
 		}
 	}
