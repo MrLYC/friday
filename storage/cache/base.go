@@ -7,8 +7,9 @@ import (
 
 //
 var (
-	ErrItemNotFound  error
-	ErrItemTypeError error
+	ErrItemNotFound  = errors.New("Item not found")
+	ErrItemTypeError = errors.New("Item type error")
+	ErrItemExpired   = errors.New("Item expired")
 )
 
 // ICache :
@@ -21,17 +22,17 @@ type ICache interface {
 	TableExpire(string, time.Duration)
 
 	SetKey(string, string) error
-	GetKey(string) (error, string)
+	GetKey(string) (string, error)
 	DelKey(string) (error, bool)
 
 	ListPush(string, string) error
-	ListPopString(string) (error, string)
+	ListPop(string) (string, error)
 	ListLen(string) (error, int)
-	ListGet(string, int) (error, string)
+	ListGet(string, int) (string, error)
 	DelList(string) (error, bool)
 
 	TableAdd(string, string) error
-	TableGet(string, string) (error, string)
+	TableGet(string, string) (string, error)
 	TableGetAll(string) (error, map[string]string)
 	DelTable(string) (error, bool)
 }
