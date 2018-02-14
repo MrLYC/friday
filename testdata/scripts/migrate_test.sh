@@ -1,7 +1,7 @@
 #!/bin/sh
+conf_file=/tmp/migrate_test.yaml
 
 function migrate() {
-  conf_file="$1"
   ${TARGET} confinfo -c ${conf_file}
   ${TARGET} migrate -c ${conf_file} -action rollback || exit $?
   ${TARGET} migrate -c ${conf_file} || exit $?
@@ -22,7 +22,27 @@ EOF
   migrate "${conf_file}"
 
   rm -rf "${dbname}"
-  rm -rf "${conf_file}"
+}
+
+function mysql(){
+  which mysql
+  if [ "$?" != 0 ]
+  then
+    return
+  fi
+
+  cat > ${conf_file} << EOF 
+database:
+  type: mysql
+  name: friday
+  host: 127.0.0.1
+  port: 3306
+  user: root
+  password: ""
+EOF
+
+  migrate "${conf_file}"
 }
 
 sqlite3
+mysql

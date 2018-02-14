@@ -1,17 +1,26 @@
 language: go
+
 env:
     - FRIDAY_TIMER_CHECKDURATION=1s
+
+services:
+  - mysql
+
 go:
     - 1.7
     - 1.8
     - 1.9
+
 before_script:
     - make init
+    - mysql -e 'create database friday;'
+
 script:
     - make build
     - make release
     - make test
     - make test-scripts
+
 branches:
     only:
         - master
