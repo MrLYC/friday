@@ -1,7 +1,7 @@
 #!/bin/sh
 conf_file=/tmp/migrate_test.yaml
 
-function migrate() {
+migrate() {
   ${TARGET} confinfo -c ${conf_file}
   ${TARGET} migrate -c ${conf_file} -action rollback || exit $?
   ${TARGET} migrate -c ${conf_file} || exit $?
@@ -10,7 +10,7 @@ function migrate() {
   ${TARGET} migrate -c ${conf_file} -action list || exit $?
 }
 
-function sqlite3() {
+sqlite3() {
   conf_file=/tmp/migrate_test.yaml
   dbname=/tmp/migrate_test.db
   cat > ${conf_file} << EOF 
@@ -24,7 +24,7 @@ EOF
   rm -rf "${dbname}"
 }
 
-function mysql(){
+mysql() {
   which mysql
   if [ "$?" != 0 ]
   then
