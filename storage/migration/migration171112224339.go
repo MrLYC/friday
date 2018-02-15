@@ -26,7 +26,7 @@ type Item struct {
 
 	Tags   []*ItemTag           `gorm:"many2many:item_tag_x_refs;column:tag"`
 	Key    string               `gorm:"type:varchar(255)" sql:"index"`
-	Value  string               `gorm:"type:varchar(65535)"`
+	Value  string               `gorm:"type:text"`
 	Type   string               `gorm:"type:varchar(64)" sql:"index"`
 	Status storage.TModelStatus `sql:"index"`
 }
