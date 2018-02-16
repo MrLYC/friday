@@ -46,7 +46,7 @@ database:
   host: 127.0.0.1
   port: 5432
   user: postgres
-  password: my_postgres_password
+  password: ""
 EOF
 
   migrate "${conf_file}"
