@@ -235,7 +235,6 @@ func (c *MemCache) Expire(key string, duration time.Duration) error {
 	}
 	now := time.Now()
 	if item.IsExpireAt(now) {
-		c.Delete(key)
 		return cache.ErrItemExpired
 	}
 
@@ -274,9 +273,15 @@ func (c *MemCache) TypeOf(key string) string {
 
 // Set :
 func (c *MemCache) Set(key string, value string) error {
-	item := &MappingStringItem{}
+	item, err := c.DeclareStringItem(key)
+	if err != nil {
+		return err
+	}
+
+	item.Lock()
 	item.SetValue(value)
-	return c.SetItem(key, item)
+	item.Unlock()
+	return nil
 }
 
 // Get :
@@ -312,9 +317,9 @@ func (c *MemCache) IncrBy(key string, num float64) (float64, error) {
 		return 0, err
 	}
 
-	item.RLock()
+	item.Lock()
 	value, err := item.Add(num)
-	item.RUnlock()
+	item.Unlock()
 	return value, err
 }
 
