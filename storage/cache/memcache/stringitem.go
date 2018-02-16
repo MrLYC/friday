@@ -1,6 +1,7 @@
 package memcache
 
 import (
+	"friday/storage/cache"
 	"strconv"
 )
 
@@ -39,7 +40,7 @@ func (i *MappingStringItem) Add(num float64) (float64, error) {
 	)
 	value, err = strconv.ParseFloat(i.GetString(), 64)
 	if err != nil && i.Length() > 1 {
-		return value, ErrItemValueError
+		return value, cache.ErrItemValueError
 	}
 
 	value += num

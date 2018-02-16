@@ -1,6 +1,8 @@
 package memcache
 
 import (
+	"friday/storage/cache"
+
 	"github.com/emirpasic/gods/maps/hashmap"
 )
 
@@ -51,7 +53,7 @@ func (i *MappingTableItem) GetString(field string) string {
 func (i *MappingTableItem) SetString(field string, value string) error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrItemValueError
+		return cache.ErrItemValueError
 	}
 	table.Put(field, value)
 	return nil
@@ -61,7 +63,7 @@ func (i *MappingTableItem) SetString(field string, value string) error {
 func (i *MappingTableItem) Delete(field string) error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrItemValueError
+		return cache.ErrItemValueError
 	}
 	table.Remove(field)
 	return nil
@@ -71,7 +73,7 @@ func (i *MappingTableItem) Delete(field string) error {
 func (i *MappingTableItem) Clear() error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrItemValueError
+		return cache.ErrItemValueError
 	}
 	table.Clear()
 	return nil
@@ -123,7 +125,7 @@ func (i *MappingTableItem) GetMappings(fields []string) map[string]string {
 func (i *MappingTableItem) SetMappings(mappings map[string]string) error {
 	table := i.GetTable()
 	if table == nil {
-		return ErrItemValueError
+		return cache.ErrItemValueError
 	}
 	for field, value := range mappings {
 		table.Put(field, value)

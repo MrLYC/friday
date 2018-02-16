@@ -1,6 +1,7 @@
 package memcache_test
 
 import (
+	"friday/storage/cache"
 	"friday/storage/cache/memcache"
 	"testing"
 )
@@ -38,7 +39,7 @@ func TestMappingStringItem1(t *testing.T) {
 
 	item.SetValue("test")
 	value, err = item.Add(3.0)
-	if err != memcache.ErrItemValueError {
+	if err != cache.ErrItemValueError {
 		t.Errorf("value not a number")
 	}
 }

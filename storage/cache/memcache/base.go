@@ -1,14 +1,8 @@
 package memcache
 
 import (
-	"errors"
 	"sync"
 	"time"
-)
-
-//
-var (
-	ErrItemValueError = errors.New("Item value error")
 )
 
 // ItemVistor :

@@ -7,9 +7,10 @@ import (
 
 //
 var (
-	ErrItemNotFound  = errors.New("Item not found")
-	ErrItemTypeError = errors.New("Item type error")
-	ErrItemExpired   = errors.New("Item expired")
+	ErrItemNotFound   = errors.New("Item not found")
+	ErrItemTypeError  = errors.New("Item type error")
+	ErrItemValueError = errors.New("Item value error")
+	ErrItemExpired    = errors.New("Item expired")
 )
 
 // ICache :
@@ -35,9 +36,4 @@ type ICache interface {
 	TableGet(string, string) (string, error)
 	TableGetAll(string) (error, map[string]string)
 	DelTable(string) (error, bool)
-}
-
-func init() {
-	ErrItemNotFound = errors.New("Item not found")
-	ErrItemTypeError = errors.New("Item type error")
 }
