@@ -1,12 +1,13 @@
 package memcache
 
 import (
-	"friday/storage/cache"
-	"github.com/emirpasic/gods/lists/singlylinkedlist"
-	"github.com/emirpasic/gods/maps/treemap"
+	"friday/cache"
 	"reflect"
 	"sync"
 	"time"
+
+	"github.com/emirpasic/gods/lists/singlylinkedlist"
+	"github.com/emirpasic/gods/maps/treemap"
 )
 
 // MemCache :

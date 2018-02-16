@@ -1,8 +1,8 @@
 package memcache_test
 
 import (
-	"friday/storage/cache"
-	"friday/storage/cache/memcache"
+	"friday/cache"
+	"friday/cache/memcache"
 	"testing"
 )
 

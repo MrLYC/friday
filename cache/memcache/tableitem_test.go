@@ -3,7 +3,7 @@ package memcache_test
 import (
 	"testing"
 
-	"friday/storage/cache/memcache"
+	"friday/cache/memcache"
 )
 
 func TestMappingTableItem1(t *testing.T) {

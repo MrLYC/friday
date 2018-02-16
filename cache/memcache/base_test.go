@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"friday/storage/cache/memcache"
+	"friday/cache/memcache"
 )
 
 func TestMappingItem(t *testing.T) {

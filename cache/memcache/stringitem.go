@@ -1,7 +1,7 @@
 package memcache
 
 import (
-	"friday/storage/cache"
+	"friday/cache"
 	"strconv"
 )
 

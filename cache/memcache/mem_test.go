@@ -6,8 +6,8 @@ import (
 	"testing"
 	"time"
 
-	"friday/storage/cache"
-	"friday/storage/cache/memcache"
+	"friday/cache"
+	"friday/cache/memcache"
 )
 
 func TestMemCache1(t *testing.T) {
