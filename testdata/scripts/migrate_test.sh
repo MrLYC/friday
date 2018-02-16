@@ -44,7 +44,7 @@ database:
   type: postgres
   name: friday
   host: 127.0.0.1
-  port: 32768
+  port: 5432
   user: postgres
   password: my_postgres_password
 EOF
