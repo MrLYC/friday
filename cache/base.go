@@ -19,6 +19,7 @@ type ICache interface {
 	Close() error
 
 	Expire(key string, duration time.Duration)
+	Exists(key string) bool
 	Delete(key string)
 
 	StringSet(key string, value string) error

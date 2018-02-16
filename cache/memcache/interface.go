@@ -19,16 +19,6 @@ func (i *Cache) Close() error {
 	return i.MemCache.Close()
 }
 
-// StringSet :
-func (i *Cache) StringSet(key string, value string) error {
-	return i.Set(key, value)
-}
-
-// StringGet :
-func (i *Cache) StringGet(key string) (string, error) {
-	return i.Get(key)
-}
-
 // Delete :
 func (i *Cache) Delete(key string) {
 	i.MemCache.Delete(key)
@@ -37,6 +27,21 @@ func (i *Cache) Delete(key string) {
 // Expire :
 func (i *Cache) Expire(key string, duration time.Duration) {
 	i.MemCache.Expire(key, duration)
+}
+
+// Exists :
+func (i *Cache) Exists(key string) bool {
+	return i.MemCache.Exists(key)
+}
+
+// StringSet :
+func (i *Cache) StringSet(key string, value string) error {
+	return i.Set(key, value)
+}
+
+// StringGet :
+func (i *Cache) StringGet(key string) (string, error) {
+	return i.Get(key)
 }
 
 // ListPush :
