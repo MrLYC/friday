@@ -18,19 +18,20 @@ type ICache interface {
 	Init()
 	Close() error
 
-	Expire(string, time.Duration)
-	Delete(string)
+	Expire(key string, duration time.Duration)
+	Delete(key string)
 
-	StringSet(string, string) error
-	StringGet(string) (string, error)
+	StringSet(key string, value string) error
+	StringGet(key string) (string, error)
 
-	ListPush(string, string) error
-	ListPop(string) (string, error)
-	ListRPush(string, string) error
-	ListRPop(string) (string, error)
-	ListLen(string) (int, error)
+	ListPush(key string, value string) error
+	ListPop(key string) (string, error)
+	ListRPush(key string, value string) error
+	ListRPop(key string) (string, error)
+	ListLen(key string) (int, error)
 
-	TableSet(string, string, string) error
-	TableGet(string, string) (string, error)
-	TableGetAll(string) (map[string]string, error)
+	TableSet(key string, field string, value string) error
+	TableGet(key string, field string) (string, error)
+	TableSetMappings(key string, mappings map[string]string) error
+	TableGetAll(key string) (map[string]string, error)
 }

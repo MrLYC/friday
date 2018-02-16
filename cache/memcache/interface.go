@@ -74,6 +74,11 @@ func (i *Cache) TableGet(key string, field string) (string, error) {
 	return i.HGet(key, field)
 }
 
+// TableSetMappings :
+func (i *Cache) TableSetMappings(key string, mappings map[string]string) error {
+	return i.HMSet(key, mappings)
+}
+
 // TableGetAll :
 func (i *Cache) TableGetAll(key string) (map[string]string, error) {
 	return i.HGetAll(key)
