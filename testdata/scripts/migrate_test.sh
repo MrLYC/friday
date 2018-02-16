@@ -25,12 +25,6 @@ EOF
 }
 
 mysql() {
-  which mysql
-  if [ "$?" != 0 ]
-  then
-    return
-  fi
-
   cat > ${conf_file} << EOF 
 database:
   type: mysql
@@ -44,5 +38,20 @@ EOF
   migrate "${conf_file}"
 }
 
+postgresql() {
+  cat > ${conf_file} << EOF 
+database:
+  type: postgres
+  name: friday
+  host: 127.0.0.1
+  port: 32768
+  user: postgres
+  password: my_postgres_password
+EOF
+
+  migrate "${conf_file}"
+}
+
 sqlite3
 mysql
+postgresql

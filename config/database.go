@@ -7,7 +7,7 @@ import (
 
 // Database : Database meta configuration
 type Database struct {
-	Type string `yaml:"type" validate:"regexp=^(sqlite3|mysql|mssql|postgresql)$"`
+	Type string `yaml:"type" validate:"regexp=^(sqlite3|mysql|mssql|postgres)$"`
 	Name string `yaml:"name"`
 
 	Connection *string `yaml:"connection,omitempty"`
@@ -32,7 +32,7 @@ func (d *Database) GetConnectionString() string {
 			"%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local",
 			*(d.User), *(d.Password), *(d.Host), *(d.Port), d.Name,
 		)
-	case "postgresql":
+	case "postgres":
 		return fmt.Sprintf(
 			"host=%s port=%d user=%s dbname=%s sslmode=disable password=%s",
 			*(d.Host), *(d.Port), *(d.User), d.Name, *(d.Password),
@@ -56,7 +56,7 @@ func (d *Database) Init() {
 		case "dbmysql":
 			d.initMySQL()
 			return
-		case "dbpostgresql":
+		case "postgres":
 			d.initPostgreSQL()
 			return
 		case "dbmssql":
@@ -85,11 +85,11 @@ func (d *Database) initMySQL() {
 	*(d.User) = "root"
 
 	d.Password = new(string)
-	*(d.Password) = "mrlyc"
+	*(d.Password) = ""
 }
 
 func (d *Database) initPostgreSQL() {
-	d.Type = "postgresql"
+	d.Type = "postgres"
 	d.Name = "friday"
 
 	d.Host = new(string)
@@ -99,10 +99,10 @@ func (d *Database) initPostgreSQL() {
 	*(d.Port) = 5432
 
 	d.User = new(string)
-	*(d.User) = "root"
+	*(d.User) = "postgres"
 
 	d.Password = new(string)
-	*(d.Password) = "mrlyc"
+	*(d.Password) = ""
 }
 
 func (d *Database) initSQLServer() {
@@ -116,7 +116,7 @@ func (d *Database) initSQLServer() {
 	*(d.Port) = 1433
 
 	d.User = new(string)
-	*(d.User) = "root"
+	*(d.User) = "sa"
 
 	d.Password = new(string)
 	*(d.Password) = "mrlyc"

@@ -5,6 +5,7 @@ env:
 
 services:
   - mysql
+  - postgresql
 
 go:
     - 1.7
@@ -14,6 +15,7 @@ go:
 before_script:
     - make init
     - mysql -e 'create database friday;'
+    - psql -c 'create database friday;' -U postgres
 
 script:
     - make build
