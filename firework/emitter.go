@@ -13,11 +13,10 @@ import (
 
 // ChannelItem :
 type ChannelItem struct {
-	Name         string
-	Channel      chan IFirework
-	Lock         sync.Mutex
-	Handlers     *treemap.Map
-	handlersLock sync.RWMutex
+	Name     string
+	Channel  chan IFirework
+	lock     sync.RWMutex
+	Handlers *treemap.Map
 }
 
 // Emitter :
@@ -28,7 +27,7 @@ type Emitter struct {
 	RunAt      time.Time
 
 	Channels *treemap.Map
-	chanLock sync.RWMutex
+	lock     sync.RWMutex
 
 	Applets    *treemap.Map
 	appletLock sync.RWMutex
@@ -86,9 +85,9 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 		Channel:  make(chan IFirework, config.Configuration.Firework.ChannelBuffer),
 		Handlers: treemap.NewWithStringComparator(),
 	}
-	e.chanLock.Lock()
+	e.lock.Lock()
 	e.Channels.Put(name, chanItem)
-	e.chanLock.Unlock()
+	e.lock.Unlock()
 	return chanItem, true
 }
 
@@ -96,9 +95,9 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 func (e *Emitter) On(channelName string, name string, handler Handler) (Handler, bool) {
 	channel, _ := e.declareChannelItem(channelName)
 
-	channel.handlersLock.RLock()
+	channel.lock.RLock()
 	items, ok := channel.Handlers.Get(name)
-	channel.handlersLock.RUnlock()
+	channel.lock.RUnlock()
 
 	var handlers *treeset.Set
 	if !ok {
@@ -107,15 +106,15 @@ func (e *Emitter) On(channelName string, name string, handler Handler) (Handler,
 			vb := reflect.ValueOf(b)
 			return int(va.Pointer() - vb.Pointer())
 		})
-		channel.Lock.Lock()
+		channel.lock.Lock()
 		channel.Handlers.Put(name, handlers)
-		channel.Lock.Unlock()
+		channel.lock.Unlock()
 	} else {
 		handlers = items.(*treeset.Set)
 	}
-	channel.handlersLock.Lock()
+	channel.lock.Lock()
 	handlers.Add(handler)
-	channel.handlersLock.Unlock()
+	channel.lock.Unlock()
 	return handler, true
 }
 
@@ -123,12 +122,9 @@ func (e *Emitter) On(channelName string, name string, handler Handler) (Handler,
 func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler, bool) {
 	channel, _ := e.declareChannelItem(channelName)
 
-	channel.Lock.Lock()
-	defer channel.Lock.Unlock()
-
-	channel.handlersLock.RLock()
+	channel.lock.RLock()
 	items, ok := channel.Handlers.Get(name)
-	channel.handlersLock.RUnlock()
+	channel.lock.RUnlock()
 
 	if !ok {
 		return handler, false
@@ -202,7 +198,7 @@ func (e *Emitter) Run() {
 	}
 	e.appletLock.RUnlock()
 
-	e.chanLock.RLock()
+	e.lock.RLock()
 	channels := make([]reflect.SelectCase, e.Channels.Size())
 	iterChannel := e.Channels.Iterator()
 	for i := 0; iterChannel.Next(); i++ {
@@ -212,7 +208,7 @@ func (e *Emitter) Run() {
 			Chan: reflect.ValueOf(item.Channel),
 		}
 	}
-	e.chanLock.RUnlock()
+	e.lock.RUnlock()
 
 	for e.Status == StatusControllerRuning {
 		chosen, value, ok := reflect.Select(channels)
@@ -225,9 +221,9 @@ func (e *Emitter) Run() {
 		}
 		firework := value.Interface().(IFirework)
 		channel := firework.GetChannel()
-		e.chanLock.RLock()
+		e.lock.RLock()
 		chanItem, ok := e.Channels.Get(channel)
-		e.chanLock.RUnlock()
+		e.lock.RUnlock()
 		if !ok {
 			logging.Warningf(
 				"Unknown channel %s from %s(%s)",
@@ -275,11 +271,11 @@ func (e *Emitter) Terminate() {
 		}
 	})
 	e.appletLock.Unlock()
-	e.chanLock.Lock()
+	e.lock.Lock()
 	e.Channels.Each(func(key interface{}, value interface{}) {
 		channel := value.(*ChannelItem)
 		close(channel.Channel)
 	})
-	e.chanLock.Unlock()
+	e.lock.Unlock()
 	e.BaseController.Terminate()
 }
