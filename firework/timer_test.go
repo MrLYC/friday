@@ -5,8 +5,6 @@ import (
 	"os"
 	"testing"
 	"time"
-
-	"github.com/emirpasic/gods/sets/treeset"
 )
 
 func TestTimerInit(t *testing.T) {
@@ -56,7 +54,7 @@ func TestTimerFlow(t *testing.T) {
 		t.Errorf("handler error")
 	}
 
-	if handlers.(*treeset.Set).Size() != 1 {
+	if handlers.(*firework.HandlerItem).Size() != 1 {
 		t.Errorf("listen error")
 	}
 
