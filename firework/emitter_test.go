@@ -47,14 +47,19 @@ func TestEmitterFlow(t *testing.T) {
 		t.Errorf("not default channels found")
 	}
 
-	_, ok = emitter.Channels.Get(firework.ChanBroadcast)
+	_, ok = emitter.Channels.Get(firework.ChanNameBroadcast)
 	if !ok {
-		t.Errorf("default channel[%s] not found", firework.ChanBroadcast)
+		t.Errorf("default channel[%s] not found", firework.ChanNameBroadcast)
 	}
 
-	_, ok = emitter.Channels.Get(firework.ChanInternal)
+	_, ok = emitter.Channels.Get(firework.ChanNameInternal)
 	if !ok {
-		t.Errorf("default channel[%s] not found", firework.ChanInternal)
+		t.Errorf("default channel[%s] not found", firework.ChanNameInternal)
+	}
+
+	_, ok = emitter.Channels.Get(firework.ChanNameTimer)
+	if !ok {
+		t.Errorf("default channel[%s] not found", firework.ChanNameTimer)
 	}
 
 	emitter.Run()

@@ -23,7 +23,6 @@ const (
 
 // Timer constants :
 const (
-	TimerChannelName     = "TIMER"
 	TimerFireworkDelay   = "Delay"
 	TimerFireworkTimesUp = "TimesUp"
 	TimerFireworkAbort   = "TimerAbort"
@@ -189,7 +188,7 @@ func (t *Timer) Peek() IDelayFirework {
 
 // Ready :
 func (t *Timer) Ready() {
-	t.Emitter.On(TimerChannelName, TimerFireworkDelay, func(firework IFirework) {
+	t.Emitter.On(ChanNameTimer, TimerFireworkDelay, func(firework IFirework) {
 		f := firework.GetPayload().(DelayFirework)
 		t.Add(&f)
 	})

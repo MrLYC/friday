@@ -6,9 +6,10 @@ import (
 )
 
 //
-var (
-	ChanBroadcast = "*"
-	ChanInternal  = "!"
+const (
+	ChanNameBroadcast = "*"
+	ChanNameInternal  = "!"
+	ChanNameTimer     = "@"
 )
 
 // IFirework :

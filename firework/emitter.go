@@ -190,7 +190,7 @@ func (e *Emitter) Fire(firework IFirework) {
 // FireAt :
 func (e *Emitter) FireAt(at time.Time, firework IFirework) {
 	e.Fire(NewDelayFirework(at, &Firework{
-		Channel: TimerChannelName,
+		Channel: ChanNameTimer,
 		Sender:  firework.GetSender(),
 		Name:    TimerFireworkDelay,
 		Payload: firework,
@@ -205,7 +205,7 @@ func (e *Emitter) FireDelay(duration time.Duration, firework IFirework) {
 // FireDelayN :
 func (e *Emitter) FireDelayN(duration time.Duration, times uint, firework IFirework) {
 	e.Fire(NewDurationFirework(duration, times, &Firework{
-		Channel: TimerChannelName,
+		Channel: ChanNameTimer,
 		Sender:  firework.GetSender(),
 		Name:    TimerFireworkDelay,
 		Payload: firework,
@@ -215,7 +215,7 @@ func (e *Emitter) FireDelayN(duration time.Duration, times uint, firework IFirew
 // FireCron :
 func (e *Emitter) FireCron(rule string, firework IFirework) {
 	e.Fire(NewCronFirework(rule, time.Now(), &Firework{
-		Channel: TimerChannelName,
+		Channel: ChanNameTimer,
 		Sender:  firework.GetSender(),
 		Name:    TimerFireworkDelay,
 		Payload: firework,
@@ -304,8 +304,13 @@ func (e *Emitter) Run() {
 }
 
 func (e *Emitter) setDefaultChannels() {
-	e.DeclareChannel(ChanBroadcast)
-	e.DeclareChannel(ChanInternal)
+	e.DeclareChannel(ChanNameBroadcast)
+	e.DeclareChannel(ChanNameInternal)
+	e.DeclareChannel(ChanNameTimer)
+}
+
+func (e *Emitter) setDefaultApplets() {
+	e.AddApplet(NewTimer())
 }
 
 // Ready :
@@ -313,6 +318,7 @@ func (e *Emitter) Ready() {
 	e.BaseController.Ready()
 
 	e.setDefaultChannels()
+	e.setDefaultApplets()
 
 	e.appletLock.RLock()
 	iter := e.Applets.Iterator()

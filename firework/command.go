@@ -45,7 +45,6 @@ func (c *Command) Run() error {
 				c.Emitter.Terminate()
 			}
 		}
-
 	}(signalCh)
 
 	c.Emitter.Run()

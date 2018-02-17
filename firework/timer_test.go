@@ -43,7 +43,7 @@ func TestTimerFlow(t *testing.T) {
 	emitter.AddApplet(timer)
 	emitter.Ready()
 
-	item, ok := emitter.Channels.Get(firework.TimerChannelName)
+	item, ok := emitter.Channels.Get(firework.ChanNameTimer)
 	if !ok {
 		t.Errorf("channel error")
 	}
