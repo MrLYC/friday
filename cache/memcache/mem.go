@@ -2,6 +2,7 @@ package memcache
 
 import (
 	"friday/cache"
+	"math"
 	"reflect"
 	"sync"
 	"time"
@@ -220,7 +221,7 @@ func (c *MemCache) TimeToLive(key string) time.Duration {
 
 	expireAt := item.GetExpireAt()
 	if expireAt == nil {
-		return time.Hour * 1000
+		return time.Duration(math.MaxInt64)
 	}
 	return now.Sub(*expireAt)
 }
