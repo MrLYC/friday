@@ -29,6 +29,7 @@ func TestEmitterFlow(t *testing.T) {
 		emitter = &TestingEmitter{
 			WillRun: false,
 		}
+		ok bool
 	)
 	emitter.Init()
 	if emitter.GetName() != emitter.Name {
@@ -41,6 +42,19 @@ func TestEmitterFlow(t *testing.T) {
 	emitter.Ready()
 	if emitter.GetStatus() != firework.StatusControllerReady {
 		t.Errorf("status error")
+	}
+	if emitter.Channels.Size() == 0 {
+		t.Errorf("not default channels found")
+	}
+
+	_, ok = emitter.Channels.Get(firework.ChanBroadcast)
+	if !ok {
+		t.Errorf("default channel[%s] not found", firework.ChanBroadcast)
+	}
+
+	_, ok = emitter.Channels.Get(firework.ChanInternal)
+	if !ok {
+		t.Errorf("default channel[%s] not found", firework.ChanInternal)
 	}
 
 	emitter.Run()

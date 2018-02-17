@@ -8,6 +8,7 @@ import (
 //
 var (
 	ChanBroadcast = "*"
+	ChanInternal  = "!"
 )
 
 // IFirework :

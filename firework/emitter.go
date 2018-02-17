@@ -303,10 +303,17 @@ func (e *Emitter) Run() {
 	}
 }
 
+func (e *Emitter) setDefaultChannels() {
+	e.DeclareChannel(ChanBroadcast)
+	e.DeclareChannel(ChanInternal)
+}
+
 // Ready :
 func (e *Emitter) Ready() {
 	e.BaseController.Ready()
-	e.DeclareChannel(ChanBroadcast)
+
+	e.setDefaultChannels()
+
 	e.appletLock.RLock()
 	iter := e.Applets.Iterator()
 	for iter.Next() {
