@@ -13,7 +13,7 @@ import (
 // MemCache :
 type MemCache struct {
 	Mappings *treemap.Map
-	RWLock   sync.RWMutex
+	lock     sync.RWMutex
 }
 
 // Init :
@@ -28,16 +28,16 @@ func (c *MemCache) Close() error {
 
 // Delete :
 func (c *MemCache) Delete(key string) {
-	c.RWLock.Lock()
+	c.lock.Lock()
 	c.Mappings.Remove(key)
-	c.RWLock.Unlock()
+	c.lock.Unlock()
 }
 
 // Exists :
 func (c *MemCache) Exists(key string) bool {
-	c.RWLock.RLock()
+	c.lock.RLock()
 	item, err := c.GetItem(key)
-	c.RWLock.RUnlock()
+	c.lock.RUnlock()
 	if err != nil {
 		return false
 	}
@@ -46,13 +46,13 @@ func (c *MemCache) Exists(key string) bool {
 
 // Scan :
 func (c *MemCache) Scan(f ItemVistor) {
-	c.RWLock.RLock()
+	c.lock.RLock()
 	iter := c.Mappings.Iterator()
 
 	for iter.Next() {
 		f(iter.Key().(string), iter.Value())
 	}
-	c.RWLock.RUnlock()
+	c.lock.RUnlock()
 }
 
 // Clean :
@@ -73,12 +73,12 @@ func (c *MemCache) Clean() int {
 		return 0
 	}
 
-	c.RWLock.Lock()
+	c.lock.Lock()
 	iter := list.Iterator()
 	for iter.Next() {
 		c.Mappings.Remove(iter.Value())
 	}
-	c.RWLock.Unlock()
+	c.lock.Unlock()
 
 	return list.Size()
 }
@@ -87,17 +87,17 @@ func (c *MemCache) Clean() int {
 
 // SetItem :
 func (c *MemCache) SetItem(key string, value IMappingItem) error {
-	c.RWLock.Lock()
+	c.lock.Lock()
 	c.Mappings.Put(key, value)
-	c.RWLock.Unlock()
+	c.lock.Unlock()
 	return nil
 }
 
 // GetRaw :
 func (c *MemCache) GetRaw(key string) (IMappingItem, error) {
-	c.RWLock.RLock()
+	c.lock.RLock()
 	item, ok := c.Mappings.Get(key)
-	c.RWLock.RUnlock()
+	c.lock.RUnlock()
 	if !ok {
 		return nil, cache.ErrItemNotFound
 	}
@@ -200,9 +200,9 @@ func (c *MemCache) Update(key string, f ItemVistor) error {
 		return err
 	}
 
-	c.RWLock.Lock()
+	c.lock.Lock()
 	f(key, item)
-	c.RWLock.Unlock()
+	c.lock.Unlock()
 	return nil
 }
 
@@ -227,9 +227,9 @@ func (c *MemCache) TimeToLive(key string) time.Duration {
 
 // Expire :
 func (c *MemCache) Expire(key string, duration time.Duration) error {
-	c.RWLock.RLock()
+	c.lock.RLock()
 	item, err := c.GetItem(key)
-	c.RWLock.RUnlock()
+	c.lock.RUnlock()
 	if err != nil {
 		return err
 	}
@@ -244,9 +244,9 @@ func (c *MemCache) Expire(key string, duration time.Duration) error {
 
 // Size :
 func (c *MemCache) Size() int {
-	c.RWLock.RLock()
+	c.lock.RLock()
 	size := c.Mappings.Size()
-	c.RWLock.RUnlock()
+	c.lock.RUnlock()
 	return size
 }
 

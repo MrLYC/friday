@@ -27,7 +27,7 @@ type IMappingItem interface {
 type MappingItem struct {
 	ExpireAt *time.Time
 	Value    interface{}
-	RWLock   sync.RWMutex
+	lock     sync.RWMutex
 }
 
 // Init :
@@ -77,20 +77,20 @@ func (i *MappingItem) Length() int {
 
 // Lock :
 func (i *MappingItem) Lock() {
-	i.RWLock.Lock()
+	i.lock.Lock()
 }
 
 // Unlock :
 func (i *MappingItem) Unlock() {
-	i.RWLock.Unlock()
+	i.lock.Unlock()
 }
 
 // RLock :
 func (i *MappingItem) RLock() {
-	i.RWLock.RLock()
+	i.lock.RLock()
 }
 
 // RUnlock :
 func (i *MappingItem) RUnlock() {
-	i.RWLock.RUnlock()
+	i.lock.RUnlock()
 }
