@@ -273,7 +273,12 @@ func (e *Emitter) Run() {
 			continue
 		}
 
-		firework := selectcase.Interface().(IFirework)
+		ifirework := selectcase.Interface()
+		if ifirework == nil {
+			continue
+		}
+
+		firework := ifirework.(IFirework)
 		chName := firework.GetChannel()
 
 		e.channelLock.RLock()
@@ -301,6 +306,7 @@ func (e *Emitter) Run() {
 // Ready :
 func (e *Emitter) Ready() {
 	e.BaseController.Ready()
+	e.DeclareChannel(ChanBroadcast)
 	e.appletLock.RLock()
 	iter := e.Applets.Iterator()
 	for iter.Next() {
@@ -308,6 +314,28 @@ func (e *Emitter) Ready() {
 		applet.Ready()
 	}
 	e.appletLock.RUnlock()
+}
+
+// Kill :
+func (e *Emitter) Kill() {
+	e.SetStatus(StatusControllerTerminating)
+	e.appletLock.Lock()
+	e.Applets.Each(func(key interface{}, value interface{}) {
+		applet := value.(IApplet)
+		status := applet.GetStatus()
+		if status != StatusControllerTerminated {
+			applet.Kill()
+		}
+	})
+	e.appletLock.Unlock()
+
+	e.channelLock.Lock()
+	e.Channels.Each(func(key interface{}, value interface{}) {
+		channel := value.(*ChannelItem)
+		close(channel.Channel)
+	})
+	e.channelLock.Unlock()
+	e.BaseController.Kill()
 }
 
 // Terminate :
@@ -322,10 +350,11 @@ func (e *Emitter) Terminate() {
 		}
 	})
 	e.appletLock.Unlock()
+
 	e.channelLock.Lock()
 	e.Channels.Each(func(key interface{}, value interface{}) {
 		channel := value.(*ChannelItem)
-		close(channel.Channel)
+		channel.Channel <- nil
 	})
 	e.channelLock.Unlock()
 	e.BaseController.Terminate()

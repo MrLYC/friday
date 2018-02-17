@@ -5,6 +5,11 @@ import (
 	"friday/config"
 )
 
+//
+var (
+	ChanBroadcast = "*"
+)
+
 // IFirework :
 type IFirework interface {
 	RefreshID()

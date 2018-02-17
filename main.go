@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"friday/command"
 	"friday/config"
+	"friday/firework"
 	"friday/logging"
 	"friday/storage/migration"
 	"friday/vm"
@@ -20,6 +21,7 @@ func parseCommand() *command.CommandInfo {
 			"confinfo": &config.ConfigurationCommand{},
 			"vm":       &vm.Command{},
 			"migrate":  &migration.Command{},
+			"run":      &firework.Command{},
 		},
 	}
 	factory.Init()
