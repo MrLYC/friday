@@ -143,7 +143,7 @@ type Timer struct {
 	CheckDuration time.Duration
 	ticker        *time.Ticker
 	heap          *binaryheap.Heap
-	queueMux      sync.Mutex
+	lock          sync.RWMutex
 }
 
 // Init :
@@ -158,17 +158,17 @@ func (t *Timer) Init() {
 
 // Add :
 func (t *Timer) Add(firework IDelayFirework) {
-	t.queueMux.Lock()
-	defer t.queueMux.Unlock()
-	firework.SetStatus(StatusDelayFireworkReady)
+	t.lock.Lock()
 	t.heap.Push(firework)
+	t.lock.Unlock()
+	firework.SetStatus(StatusDelayFireworkReady)
 }
 
 // Pop :
 func (t *Timer) Pop() IDelayFirework {
-	t.queueMux.Lock()
-	defer t.queueMux.Unlock()
+	t.lock.Lock()
 	f, ok := t.heap.Pop()
+	t.lock.Unlock()
 	if !ok {
 		return nil
 	}
@@ -177,9 +177,9 @@ func (t *Timer) Pop() IDelayFirework {
 
 // Peek :
 func (t *Timer) Peek() IDelayFirework {
-	t.queueMux.Lock()
-	defer t.queueMux.Unlock()
+	t.lock.RLock()
 	f, ok := t.heap.Peek()
+	t.lock.RUnlock()
 	if !ok {
 		return nil
 	}
