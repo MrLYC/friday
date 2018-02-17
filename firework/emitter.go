@@ -17,7 +17,7 @@ type ChannelItem struct {
 	Channel      chan IFirework
 	Lock         sync.Mutex
 	Handlers     *treemap.Map
-	HandlersLock sync.RWMutex
+	handlersLock sync.RWMutex
 }
 
 // Emitter :
@@ -96,9 +96,9 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 func (e *Emitter) On(channelName string, name string, handler Handler) (Handler, bool) {
 	channel, _ := e.declareChannelItem(channelName)
 
-	channel.HandlersLock.RLock()
+	channel.handlersLock.RLock()
 	items, ok := channel.Handlers.Get(name)
-	channel.HandlersLock.RUnlock()
+	channel.handlersLock.RUnlock()
 
 	var handlers *treeset.Set
 	if !ok {
@@ -113,9 +113,9 @@ func (e *Emitter) On(channelName string, name string, handler Handler) (Handler,
 	} else {
 		handlers = items.(*treeset.Set)
 	}
-	channel.HandlersLock.Lock()
+	channel.handlersLock.Lock()
 	handlers.Add(handler)
-	channel.HandlersLock.Unlock()
+	channel.handlersLock.Unlock()
 	return handler, true
 }
 
@@ -126,9 +126,9 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 	channel.Lock.Lock()
 	defer channel.Lock.Unlock()
 
-	channel.HandlersLock.RLock()
+	channel.handlersLock.RLock()
 	items, ok := channel.Handlers.Get(name)
-	channel.HandlersLock.RUnlock()
+	channel.handlersLock.RUnlock()
 
 	if !ok {
 		return handler, false
