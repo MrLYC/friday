@@ -11,12 +11,46 @@ import (
 	"github.com/emirpasic/gods/sets/treeset"
 )
 
+// HandlerItem :
+type HandlerItem struct {
+	*treeset.Set
+	lock sync.RWMutex
+}
+
+// SafeEach :
+func (i *HandlerItem) SafeEach(f func(index int, value interface{})) {
+	i.lock.RLock()
+	items := make([]interface{}, i.Size())
+	iter := i.Iterator()
+	for iter.Next() {
+		items[iter.Index()] = iter.Value()
+	}
+	i.lock.RUnlock()
+
+	for index, value := range items {
+		f(index, value)
+	}
+}
+
 // ChannelItem :
 type ChannelItem struct {
 	Name     string
 	Channel  chan IFirework
 	lock     sync.RWMutex
 	Handlers *treemap.Map
+}
+
+// SafeEachHandlers :
+func (i *ChannelItem) SafeEachHandlers(name string, f func(index int, value interface{})) {
+	i.lock.RLock()
+	items, ok := i.Handlers.Get(name)
+	i.lock.RUnlock()
+	if !ok {
+		return
+	}
+
+	handlers := items.(*HandlerItem)
+	handlers.SafeEach(f)
 }
 
 // Emitter :
@@ -99,22 +133,26 @@ func (e *Emitter) On(channelName string, name string, handler Handler) (Handler,
 	items, ok := channel.Handlers.Get(name)
 	channel.lock.RUnlock()
 
-	var handlers *treeset.Set
+	var handlers *HandlerItem
 	if !ok {
-		handlers = treeset.NewWith(func(a interface{}, b interface{}) int {
-			va := reflect.ValueOf(a)
-			vb := reflect.ValueOf(b)
-			return int(va.Pointer() - vb.Pointer())
-		})
+		handlers = &HandlerItem{
+			Set: treeset.NewWith(func(a interface{}, b interface{}) int {
+				va := reflect.ValueOf(a)
+				vb := reflect.ValueOf(b)
+				return int(va.Pointer() - vb.Pointer())
+			}),
+		}
 		channel.lock.Lock()
 		channel.Handlers.Put(name, handlers)
 		channel.lock.Unlock()
 	} else {
-		handlers = items.(*treeset.Set)
+		handlers = items.(*HandlerItem)
 	}
-	channel.lock.Lock()
+
+	handlers.lock.Lock()
 	handlers.Add(handler)
-	channel.lock.Unlock()
+	handlers.lock.Unlock()
+
 	return handler, true
 }
 
@@ -129,9 +167,11 @@ func (e *Emitter) Off(channelName string, name string, handler Handler) (Handler
 	if !ok {
 		return handler, false
 	}
-	handlers := items.(*treeset.Set)
+	handlers := items.(*HandlerItem)
 
+	handlers.lock.Lock()
 	handlers.Remove(handler)
+	handlers.lock.Unlock()
 
 	return handler, true
 }
@@ -180,16 +220,8 @@ func (e *Emitter) FireCron(rule string, firework IFirework) {
 	}))
 }
 
-// Run :
-func (e *Emitter) Run() {
-	if e.Status != StatusControllerReady {
-		panic(ErrEmitterNotReady)
-	}
-	e.BaseController.Run()
-
-	e.RunAt = time.Now()
-	logging.Infof("Emitter run at: %s", e.RunAt.String())
-
+// runApplets :
+func (e *Emitter) runApplets() {
 	e.appletLock.RLock()
 	iterApplet := e.Applets.Iterator()
 	for iterApplet.Next() {
@@ -197,7 +229,10 @@ func (e *Emitter) Run() {
 		go applet.Run()
 	}
 	e.appletLock.RUnlock()
+}
 
+// getChanSelectCases :
+func (e *Emitter) getChanSelectCases() []reflect.SelectCase {
 	e.lock.RLock()
 	channels := make([]reflect.SelectCase, e.Channels.Size())
 	iterChannel := e.Channels.Iterator()
@@ -209,9 +244,25 @@ func (e *Emitter) Run() {
 		}
 	}
 	e.lock.RUnlock()
+	return channels
+}
+
+// Run :
+func (e *Emitter) Run() {
+	if e.Status != StatusControllerReady {
+		panic(ErrEmitterNotReady)
+	}
+	e.BaseController.Run()
+
+	e.RunAt = time.Now()
+	logging.Infof("Emitter run at: %s", e.RunAt.String())
+
+	e.runApplets()
+
+	channels := e.getChanSelectCases()
 
 	for e.Status == StatusControllerRuning {
-		chosen, value, ok := reflect.Select(channels)
+		chosen, selectcase, ok := reflect.Select(channels)
 		if !ok {
 			logging.Warningf("Channel[%v] error", chosen)
 			if e.StrictMode {
@@ -219,15 +270,17 @@ func (e *Emitter) Run() {
 			}
 			continue
 		}
-		firework := value.Interface().(IFirework)
-		channel := firework.GetChannel()
+
+		firework := selectcase.Interface().(IFirework)
+		chName := firework.GetChannel()
+
 		e.lock.RLock()
-		chanItem, ok := e.Channels.Get(channel)
+		ichanItem, ok := e.Channels.Get(chName)
 		e.lock.RUnlock()
 		if !ok {
 			logging.Warningf(
 				"Unknown channel %s from %s(%s)",
-				channel, firework.GetSender(), firework.GetName(),
+				chName, firework.GetSender(), firework.GetName(),
 			)
 			if e.StrictMode {
 				break
@@ -235,12 +288,8 @@ func (e *Emitter) Run() {
 			continue
 		}
 
-		items, ok := chanItem.(*ChannelItem).Handlers.Get(firework.GetName())
-		if !ok {
-			continue
-		}
-		handlers := items.(*treeset.Set)
-		handlers.Each(func(index int, value interface{}) {
+		chanItem := ichanItem.(*ChannelItem)
+		chanItem.SafeEachHandlers(firework.GetName(), func(index int, value interface{}) {
 			f := firework.Copy()
 			go value.(Handler)(f)
 		})
