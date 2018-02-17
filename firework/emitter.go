@@ -60,8 +60,8 @@ type Emitter struct {
 	StrictMode bool
 	RunAt      time.Time
 
-	Channels *treemap.Map
-	lock     sync.RWMutex
+	Channels    *treemap.Map
+	channelLock sync.RWMutex
 
 	Applets    *treemap.Map
 	appletLock sync.RWMutex
@@ -84,9 +84,11 @@ func (e *Emitter) AddApplet(applet IApplet) bool {
 	if ok {
 		return false
 	}
+
 	e.appletLock.Lock()
 	e.Applets.Put(name, applet)
 	e.appletLock.Unlock()
+
 	applet.SetEmitter(e)
 	return true
 }
@@ -119,9 +121,9 @@ func (e *Emitter) declareChannelItem(name string) (*ChannelItem, bool) {
 		Channel:  make(chan IFirework, config.Configuration.Firework.ChannelBuffer),
 		Handlers: treemap.NewWithStringComparator(),
 	}
-	e.lock.Lock()
+	e.channelLock.Lock()
 	e.Channels.Put(name, chanItem)
-	e.lock.Unlock()
+	e.channelLock.Unlock()
 	return chanItem, true
 }
 
@@ -233,7 +235,7 @@ func (e *Emitter) runApplets() {
 
 // getChanSelectCases :
 func (e *Emitter) getChanSelectCases() []reflect.SelectCase {
-	e.lock.RLock()
+	e.channelLock.RLock()
 	channels := make([]reflect.SelectCase, e.Channels.Size())
 	iterChannel := e.Channels.Iterator()
 	for i := 0; iterChannel.Next(); i++ {
@@ -243,7 +245,7 @@ func (e *Emitter) getChanSelectCases() []reflect.SelectCase {
 			Chan: reflect.ValueOf(item.Channel),
 		}
 	}
-	e.lock.RUnlock()
+	e.channelLock.RUnlock()
 	return channels
 }
 
@@ -274,9 +276,9 @@ func (e *Emitter) Run() {
 		firework := selectcase.Interface().(IFirework)
 		chName := firework.GetChannel()
 
-		e.lock.RLock()
+		e.channelLock.RLock()
 		ichanItem, ok := e.Channels.Get(chName)
-		e.lock.RUnlock()
+		e.channelLock.RUnlock()
 		if !ok {
 			logging.Warningf(
 				"Unknown channel %s from %s(%s)",
@@ -320,11 +322,11 @@ func (e *Emitter) Terminate() {
 		}
 	})
 	e.appletLock.Unlock()
-	e.lock.Lock()
+	e.channelLock.Lock()
 	e.Channels.Each(func(key interface{}, value interface{}) {
 		channel := value.(*ChannelItem)
 		close(channel.Channel)
 	})
-	e.lock.Unlock()
+	e.channelLock.Unlock()
 	e.BaseController.Terminate()
 }
